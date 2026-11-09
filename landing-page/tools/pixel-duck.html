@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Squeak · bancada pixel</title>
+    <!-- Ferramenta de desenvolvimento: renderiza poses do Squeak pixel (não entra no build). -->
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <style>
+      html, body { margin: 0; }
+      body { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; background: var(--bg); font: 12px monospace; color: #9aa3b5; }
+      figure { margin: 0; }
+      canvas { image-rendering: pixelated; display: block; }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import { render, W, H, PAL_KEYS } from '/src/mascot/pixel/render.ts'
+      const q = new URLSearchParams(location.search)
+      if (q.get('theme')) document.documentElement.dataset.theme = q.get('theme')
+      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+      const hex = (v) => { const n = parseInt(v.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
+      const pal = {}
+      for (const k of PAL_KEYS) pal[k] = hex(k === 'white' ? css('--catchlight') : k === 'black' ? css('--px-ink') : css('--sq-' + k))
+      const base = { t: 1.3, bob: 0, squashX: 1, squashY: 1, jump: 0, lean: 0, headX: 0, headY: 0, tail: 0, beakOpen: 0, glassLift: 0, brow: 'none', laptop: 0, typing: 0, glint: 0, flip: false, ripples: [], splash: [], glow: 0, pond: q.get('pond') !== '0' }
+      const poses = {
+        idle: {},
+        quack: { beakOpen: 1, brow: 'up', squashY: 1.06, headY: -2 },
+        deal: { glassLift: 1, brow: 'up' },
+        smug: { brow: 'smug', lean: 0.05, headX: 1 },
+        type: { laptop: 1, typing: 1, glow: 0.9, headY: 1, headX: 1 },
+        jump: { jump: 12, beakOpen: 0.6, brow: 'up' },
+        angry: { brow: 'angry', beakOpen: 0.5 },
+        flip: { flip: true },
+        mid: { laptop: 0.45 },
+        glint: { glint: 0.4 },
+        walk0: { pond: false, legs: 1, stride: 0, jump: 9, wet: 1 },
+        walk1: { pond: false, legs: 1, stride: 0.25, jump: 10, lean: 0.025, wet: 1 },
+        walk2: { pond: false, legs: 1, stride: 0.5, jump: 9, wet: 1 },
+        walk3: { pond: false, legs: 1, stride: 0.75, jump: 10, lean: -0.025, wet: 1 },
+        sit: { pond: false, view: 'front', lid: 0, wet: 0.6 },
+        code: { pond: false, view: 'front', lid: 1, typing: 1, glow: 0.9, wet: 0.6 },
+        codesmug: { pond: false, view: 'front', lid: 1, typing: 1, glow: 0.9, brow: 'smug', glint: 0.5 },
+        frontquack: { pond: false, view: 'front', lid: 1, beakOpen: 1, brow: 'up' },
+        frontdeal: { pond: false, view: 'front', lid: 1, glassLift: 1, brow: 'up' },
+      }
+      const scale = Number(q.get('s') || 4)
+      for (const name of (q.get('p') || Object.keys(poses).join(',')).split(',')) {
+        const c = document.createElement('canvas')
+        c.width = W; c.height = H
+        c.style.width = W * scale + 'px'; c.style.height = H * scale + 'px'
+        const ctx = c.getContext('2d')
+        const img = ctx.createImageData(W, H)
+        render({ ...base, ...poses[name] }, pal, img)
+        ctx.putImageData(img, 0, 0)
+        const f = document.createElement('figure')
+        f.append(c)
+        if (q.get('label') !== '0') { const cap = document.createElement('figcaption'); cap.textContent = name; f.append(cap) }
+        document.body.append(f)
+      }
+      document.body.dataset.ready = '1'
+    </script>
+  </body>
+</html>

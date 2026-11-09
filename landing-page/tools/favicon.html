@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Squeak · favicon</title>
+    <!-- Ferramenta de desenvolvimento: recorta a cabeça do Squeak pixel para o favicon (64x64). -->
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <style>html, body { margin: 0; background: transparent; } canvas { display: block; }</style>
+  </head>
+  <body>
+    <canvas id="fav" width="64" height="64"></canvas>
+    <script type="module">
+      import { render, W, H, PAL_KEYS } from '/src/mascot/pixel/render.ts'
+      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+      const hex = (v) => { const n = parseInt(v.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
+      const pal = {}
+      for (const k of PAL_KEYS) pal[k] = hex(k === 'white' ? css('--catchlight') : k === 'black' ? css('--px-ink') : css('--sq-' + k))
+      const src = document.createElement('canvas'); src.width = W; src.height = H
+      const sctx = src.getContext('2d'); const img = sctx.createImageData(W, H)
+      render({ t: 1, bob: 0, squashX: 1, squashY: 1, jump: 0, lean: 0, headX: 0, headY: 0, tail: 0, beakOpen: 0, glassLift: 0, brow: 'smug', laptop: 0, typing: 0, glint: 0, flip: false, ripples: [], splash: [], glow: 0, pond: false }, pal, img)
+      sctx.putImageData(img, 0, 0)
+      const ctx = document.getElementById('fav').getContext('2d')
+      ctx.imageSmoothingEnabled = false
+      ctx.fillStyle = css('--bg'); ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill()
+      // cabeça + óculos + bico: região 52..110 x 12..60 (58x48) -> 1:1, centralizada
+      ctx.drawImage(src, 52, 13, 60, 42, 2, 11, 60, 42)
+      document.body.dataset.ready = '1'
+    </script>
+  </body>
+</html>
