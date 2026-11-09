@@ -230,8 +230,4 @@ img/                 screenshots used in this README
 
 ---
 
-**Samuel**
-
-Technical portfolio and study project, focused on real-time communication architecture with Rust, Tauri and LiveKit. The screen capture module comes from the author's PartilharTela project.
-
 [🇧🇷 Português](README.md) | 🇺🇸 English
