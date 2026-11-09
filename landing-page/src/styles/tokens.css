@@ -1,0 +1,220 @@
+/*
+ * Squeak — design tokens
+ * Fonte única de cor, tipo, espaço e movimento. Nenhum componente usa hex solto:
+ * tudo passa por estas variáveis. Decisões documentadas em docs/brand.md.
+ */
+
+:root {
+  /* ── Marca (idêntica nos dois temas) ───────────────────────────── */
+  --duck-yellow: #ffc83d;   /* primária, CTA, recompensa */
+  --beak-orange: #ff8a3d;   /* progressão: XP, level up, streak */
+  --pond-blue: #4da3ff;     /* links, informação */
+
+  /* Mascote */
+  --duck-body: #ffc83d;
+  --duck-beak: #ff8a3d;
+  --duck-eye: #1a1f2b;
+  --catchlight: #ffffff;   /* ponto de brilho do olho */
+
+  /* Semânticas */
+  --success: #3ddc97;
+  --danger: #ff5c6c;
+  --warning: #ff8a3d;
+
+  /* Tiers de insígnia */
+  --tier-bronze: #cd7f32;
+  --tier-silver: #c0c7d1;
+  --tier-gold: #ffc83d;
+  --tier-diamond: #7de3ff;
+
+  /* ── Paleta pixel (escritório virtual) ─────────────────────────
+   * Cena noturna sempre escura nos dois temas: é uma "tela" de jogo.
+   * Derivada da marca; 30 cores no total, como num console de 16 bits. */
+  --px-ink: #0b0e16;
+  --px-night: #121729;
+  --px-sky: #1b2140;
+  --px-star: #f2f4f8;
+  --px-wall: #1f2638;
+  --px-wall-hi: #2c3448;
+  --px-trim: #39435c;
+  --px-wood: #5b4636;
+  --px-wood-dk: #47372b;
+  --px-wood-hi: #6d5543;
+  --px-carpet: #253157;
+  --px-carpet-dk: #1e284a;
+  --px-tile: #2b3a42;
+  --px-tile-dk: #23303a;
+  --px-desk: #9a7552;
+  --px-desk-dk: #6e5139;
+  --px-metal: #9aa3b5;
+  --px-metal-dk: #5d6678;
+  --px-screen: #0f1420;
+  --px-duck: #ffc83d;
+  --px-duck-dk: #d99a1a;
+  --px-duck-hi: #ffe08a;
+  --px-beak: #ff8a3d;
+  --px-beak-dk: #c45f1c;
+  --px-eye: #1a1f2b;
+  --px-white: #f2f4f8;
+  --px-blue: #4da3ff;
+  --px-green: #3ddc97;
+  --px-red: #ff5c6c;
+  --px-purple: #c792ff;
+  --px-pink: #ff7ab6;
+  --px-leaf: #3c8f5a;
+  --px-leaf-dk: #2a6642;
+  --px-pot: #b5653a;
+
+  /* ── Squeak em pixel art: rampas de material (hero e fechamento) ──
+   * Cada material tem uma rampa do mais escuro ao mais claro; o renderizador
+   * só usa estas cores (mais o dither entre tons vizinhos). */
+  --sq-y0: #5c330b;
+  --sq-y1: #a8620f;
+  --sq-y2: #e09a16;
+  --sq-y3: #ffc83d;
+  --sq-y4: #ffe08a;
+  --sq-y5: #fff7dc;
+  --sq-o0: #6a260b;
+  --sq-o1: #b44d15;
+  --sq-o2: #ff8a3d;
+  --sq-o3: #ffb878;
+  --sq-m0: #1c2130;
+  --sq-m1: #474f63;
+  --sq-m2: #7b8497;
+  --sq-m3: #b2bbca;
+  --sq-m4: #e3e8ef;
+  --sq-ink: #1a1006;
+  --sq-mouth: #6e1f1f;
+  --sq-tongue: #ff6f7d;
+  --sq-glow: #7de3ff;
+  --sq-rim: #8fc2ff;
+  --sq-w0: #0b1020;
+  --sq-w1: #121a33;
+  --sq-w2: #1c2a52;
+  --sq-w3: #33508c;
+  --sq-w4: #6f9ad3;
+  --sq-shadow: #080b14;     /* sombra no chão */
+  --sq-wet: #22365f;        /* pegadas e poças molhadas */
+
+  /* ── Tipografia ────────────────────────────────────────────────── */
+  --font-display: 'Bricolage Grotesque', 'Geist', system-ui, sans-serif;
+  --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-pixel: 'Pixelify Sans', 'JetBrains Mono', monospace;
+
+  /* Escala fluida (min @360px → max @1440px) */
+  --step--1: clamp(0.78rem, 0.76rem + 0.1vw, 0.84rem);   /* labels mono */
+  --step-0: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);     /* corpo */
+  --step-1: clamp(1.2rem, 1.1rem + 0.45vw, 1.5rem);      /* lead */
+  --step-2: clamp(1.6rem, 1.3rem + 1.3vw, 2.5rem);       /* h3 */
+  --step-3: clamp(2.2rem, 1.6rem + 2.8vw, 4.25rem);      /* h2 */
+  --step-4: clamp(3rem, 1.9rem + 5.2vw, 7.5rem);         /* hero */
+  --step-5: clamp(3.4rem, 1.6rem + 8.4vw, 10rem);        /* fechamento */
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  --page-max: 1440px;
+  --spine-x: 22px;          /* posição da linha do git, relativa à página */
+  --gutter: 52px;           /* início da coluna de conteúdo */
+  --edge: 16px;             /* margem direita */
+  --statusbar-h: 28px;
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+
+  /* ── Movimento ─────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 160ms;
+  --dur-med: 320ms;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --spine-x: 44px;
+    --gutter: 112px;
+    --edge: clamp(24px, 5vw, 80px);
+  }
+}
+
+/* ── Tema escuro (padrão) ────────────────────────────────────────── */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1420;
+  --surface: #171d2b;
+  --surface-elevated: #212839;
+  --border: #2c3448;
+  --text: #f2f4f8;
+  --text-secondary: #9aa3b5;
+
+  /* Texto/ícone em cor de marca: no escuro, a cor pura passa AA */
+  --yellow-text: #ffc83d;
+  --orange-text: #ff8a3d;
+  --link: #4da3ff;
+  --success-text: #3ddc97;
+  --danger-text: #ff5c6c;
+  --on-yellow: #1a1f2b;     /* texto sobre botão amarelo */
+  --hl: #ffc83d;            /* destaque em texto corrido */
+  --office-bg: #15162a;     /* fundo da ilustração do escritório (casa com o asset) */
+
+  /* Mascote no escuro: sem contorno, brilho e sombra quentes */
+  --duck-outline: transparent;
+  --duck-highlight: #ffe08a;
+  --duck-shadow: #d99a1a;
+
+  /* Atmosfera */
+  --grain-opacity: 0.05;
+  --glow-yellow: rgba(255, 200, 61, 0.18);
+  --shadow-window: 0 30px 80px -20px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border);
+  --code-comment: #8b95ad;
+  --code-keyword: #c792ff;
+  --code-string: #3ddc97;
+  --badge-face: #121826;
+  --badge-face-hi: #2a3348;
+}
+
+/* ── Tema claro ──────────────────────────────────────────────────── */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #faf8f2;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --border: #e4dfd0;
+  --text: #1a1f2b;
+  --text-secondary: #545c6e;
+
+  /* Nunca amarelo puro sobre claro: tons escurecidos para contraste AA */
+  --yellow-text: #c99400;   /* ícones e texto grande (3:1) */
+  --hl: #8a6400;            /* amarelo para texto pequeno: AA 5,1:1 sobre --bg */
+  --orange-text: #b8530f;
+  --link: #1f6fd1;
+  --success-text: #138a5a;
+  --danger-text: #d0283a;
+  --on-yellow: #1a1f2b;
+  --office-bg: #15162a;
+
+  /* Mascote no claro: contorno marrom, sombra âmbar */
+  --duck-outline: #3d2a00;
+  --duck-highlight: #ffe08a;
+  --duck-shadow: #e6a817;
+
+  --grain-opacity: 0.035;
+  --glow-yellow: rgba(255, 200, 61, 0.28);
+  --shadow-window: 0 30px 70px -28px rgba(61, 42, 0, 0.28), 0 0 0 1px var(--border);
+  --code-comment: #6b7080;
+  --code-keyword: #7a3fd1;
+  --code-string: #138a5a;
+  /* a face da insígnia continua esmaltada escura: o tier brilha melhor */
+  --badge-face: #1f2535;
+  --badge-face-hi: #3a4560;
+  /* Squeak pixel no claro: contorno marrom da spec e água clara */
+  --sq-ink: #3d2a00;
+  --sq-rim: #ffe08a;
+  --sq-w0: #eef3fa;
+  --sq-w1: #dce7f4;
+  --sq-w2: #c3d6ee;
+  --sq-w3: #9dbde4;
+  --sq-w4: #5f8fcf;
+  --sq-shadow: #e3dccb;
+  --sq-wet: #b7cbe6;
+}

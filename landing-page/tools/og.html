@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Squeak · og-image</title>
+    <!-- Ferramenta de desenvolvimento: compõe a imagem de compartilhamento (1200x630). -->
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <style>
+
+      html, body { margin: 0; }
+      .og { position: relative; width: 1200px; height: 630px; overflow: hidden; background: var(--bg); color: var(--text); }
+      .spine { position: absolute; left: 64px; top: 0; bottom: 0; width: 3px; background: var(--border); }
+      .dot { position: absolute; left: 57px; width: 17px; height: 17px; border-radius: 50%; background: var(--bg); border: 3px solid var(--border); box-sizing: border-box; }
+      .dot.on { background: var(--duck-yellow); border-color: var(--duck-yellow); box-shadow: 0 0 0 7px var(--glow-yellow); }
+      .copy { position: absolute; left: 132px; top: 50%; transform: translateY(-50%); }
+      .hash { font: 500 22px 'JetBrains Mono'; color: var(--text-secondary); margin: 0 0 18px; }
+      .hash b { color: var(--duck-yellow); font-weight: 500; }
+      h1 { margin: 0; font: 800 172px/0.82 'Bricolage Grotesque'; font-variation-settings: 'opsz' 96; letter-spacing: -0.05em; }
+      p { margin: 26px 0 0; font: 500 30px 'JetBrains Mono'; color: var(--text-secondary); }
+      canvas { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 512px; height: 448px; image-rendering: pixelated; }
+      .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--duck-yellow); }
+    </style>
+  </head>
+  <body>
+    <div class="og">
+      <div class="spine"></div>
+      <span class="dot" style="top: 150px"></span>
+      <span class="dot" style="top: 300px"></span>
+      <span class="dot on" style="top: 450px"></span>
+      <canvas id="duck" width="128" height="112"></canvas>
+      <div class="copy">
+        <p class="hash"><b>e1f0a2c</b> init: seu time num lugar só</p>
+        <h1>squeak</h1>
+        <p>entregou? contou.</p>
+      </div>
+      <div class="bar"></div>
+    </div>
+    <script type="module">
+      import { render, W, H, PAL_KEYS } from '/src/mascot/pixel/render.ts'
+      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+      const hex = (v) => { const n = parseInt(v.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
+      const pal = {}
+      for (const k of PAL_KEYS) pal[k] = hex(k === 'white' ? css('--catchlight') : k === 'black' ? css('--px-ink') : css('--sq-' + k))
+      const c = document.getElementById('duck')
+      const ctx = c.getContext('2d')
+      const img = ctx.createImageData(W, H)
+      render({ t: 1.3, bob: 0, squashX: 1, squashY: 1, jump: 0, lean: 0.03, headX: 1, headY: 0, tail: 0, beakOpen: 0, glassLift: 0, brow: 'smug', laptop: 0, typing: 0, glint: 0.45, flip: false, ripples: [{ age: 0.35, strength: 1 }], splash: [], glow: 0, pond: true }, pal, img)
+      ctx.putImageData(img, 0, 0)
+      document.body.dataset.ready = '1'
+    </script>
+  </body>
+</html>
