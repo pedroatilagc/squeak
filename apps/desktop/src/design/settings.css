@@ -1,0 +1,12 @@
+.settings-back { background: rgba(5, 6, 8, .74); }
+.settings { display: grid; grid-template-columns: 230px minmax(0, 1fr); width: min(1100px, 96vw); height: min(780px, 94vh); background: var(--s1); border-radius: var(--r-3); box-shadow: var(--shadow-pop); overflow: hidden; }
+.settings nav { background: var(--s0); padding: 20px 12px; display: flex; flex-direction: column; gap: 2px; } .settings nav h3 { margin: 0 8px 10px; color: var(--fg-3); font: 600 var(--t-xs) var(--font); text-transform: uppercase; letter-spacing: .07em; }
+.settings nav button { text-align: left; background: none; border: 0; padding: 7px 10px; } .settings nav button.on { background: var(--s3); }
+.set-body { position: relative; overflow-y: auto; padding: 28px clamp(24px, 4vw, 64px); display: flex; flex-direction: column; gap: 14px; } .set-body h2 { margin: 0; } .set-body h4 { margin: 14px 0 0; }
+.set-body .close { position: absolute; right: 16px; top: 14px; background: none; border: 0; font-size: 18px; }
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px 28px; } .set-grid label, .set-slider { display: flex; flex-direction: column; gap: 6px; font-weight: 600; } .set-grid select { width: 100%; padding: 9px 10px; }
+.mic-test { display: flex; align-items: center; gap: 16px; } .meter { position: relative; flex: 1; display: flex; gap: 3px; height: 26px; align-items: stretch; }
+.meter span { flex: 1; background: var(--s3); border-radius: 2px; } .meter span.lit { background: var(--ok); } .meter .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--warn); }
+.radio { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; } .radio input { width: auto; margin-top: 4px; accent-color: var(--accent); } .radio span, .set-row div { display: flex; flex-direction: column; }
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--hairline); } .set-row .link { text-align: left; padding: 0; }
+.switch { width: 44px; height: 24px; border-radius: 12px; padding: 2px; background: #4a5059; position: relative; flex: none; } .switch i { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform var(--dur-2) var(--ease); } .switch.on { background: var(--ok); } .switch.on i { transform: translateX(20px); }
