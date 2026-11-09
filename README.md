@@ -243,10 +243,3 @@ img/                 capturas usadas neste README
 - A API libera CORS para qualquer origem (a autenticação é por Bearer, sem cookies). Revise antes de expor na rede.
 - Medições de desempenho (memória, CPU, latência) **não feitas**.
 
----
-
-**Samuel**
-
-Projeto de portfólio técnico e de estudo, focado em arquitetura de comunicação em tempo real com Rust, Tauri e LiveKit. O módulo de captura de tela vem do projeto PartilharTela do mesmo autor.
-
-🇧🇷 Português | [🇺🇸 English](README_EN.md)
