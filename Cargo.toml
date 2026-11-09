@@ -1,0 +1,11 @@
+[workspace]
+members = ["services/api", "apps/desktop/src-tauri"]
+resolver = "2"
+
+# Perfil herdado do PartilharTela: build rápido, sem LTO. O gargalo de desempenho está no encoder do Windows e no libwebrtc.
+[profile.release]
+codegen-units = 16
+incremental = true
+lto = false
+opt-level = "s"
+strip = true
