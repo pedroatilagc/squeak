@@ -1,0 +1,36 @@
+/* Design tokens do Squak. Camadas de superfície por luminosidade (não por borda), um único acento ("brasa"),
+   escala 4px, tipografia de ferramenta de desenvolvedor. Tudo que é cor, espaço, raio, sombra e movimento sai daqui. */
+:root {
+  /* Superfícies: chão (barra lateral) → folha (conteúdo) → elevado → hover → pressionado */
+  --s0: #0b0d0f; --s1: #101317; --s2: #161a1f; --s3: #1d2227; --s4: #262c33;
+  --hairline: rgba(255, 255, 255, .07); --hairline-2: rgba(255, 255, 255, .13);
+  --fg: #e9ebee; --fg-2: #a5acb5; --fg-3: #6e7681; --fg-inv: #160d05;
+
+  /* Acento e semânticas (matizes bem separados: brasa, verde, amarelo, vermelho-rosa, azul) */
+  --accent: #ff8a3d; --accent-hi: #ffa563; --accent-soft: rgba(255, 138, 61, .14); --accent-line: rgba(255, 138, 61, .4);
+  --ok: #4fd18b; --ok-soft: rgba(79, 209, 139, .14);
+  --warn: #e8c547; --warn-soft: rgba(232, 197, 71, .14);
+  --bad: #ff5d6c; --bad-soft: rgba(255, 93, 108, .14);
+  --info: #5aa9ff; --info-soft: rgba(90, 169, 255, .14);
+
+  /* Tipografia */
+  --font: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Cascadia Code', 'Cascadia Mono', Consolas, monospace;
+  --t-xs: 11.5px; --t-sm: 12.5px; --t-md: 13.5px; --t-lg: 15px; --t-xl: 20px; --t-2xl: 28px;
+
+  /* Espaço (grade de 4px), raios, elevação, movimento */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --r-1: 4px; --r-2: 6px; --r-3: 10px; --r-pill: 999px;
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, .55), 0 0 0 1px var(--hairline-2);
+  --ease: cubic-bezier(.2, .7, .2, 1); --dur-1: 110ms; --dur-2: 180ms;
+
+  /* Medidas de layout */
+  --sidebar-w: 248px; --panel-w: 280px; --topbar-h: 44px;
+  --gutter: clamp(1rem, 2.6vw, 3rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; }
+  *, *::before, *::after { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+}
