@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ADR 002 · Prévia visual</title>
+<!--
+  Prévia visual do ADR 002 (docs/decisoes/002-design-system.md). Abra localmente no navegador.
+
+  Nenhum valor de cor, fonte ou espaço é escrito aqui: tudo vem dos dois arquivos de tokens abaixo.
+  · apps/desktop/src/design/tokens.css entra PRIMEIRO, só pelo que o ADR mantém do app
+    (escala --t-*, grade --sp-*, --r-pill e medidas de layout) e pelos tokens antigos usados no "antes".
+  · landing-page/src/styles/tokens.css entra DEPOIS e vence nos nomes repetidos (--font-display, --gutter).
+  Hex e contrastes exibidos na página são lidos do CSS em tempo de execução.
+-->
+<link rel="stylesheet" href="../../apps/desktop/src/design/tokens.css" />
+<link rel="stylesheet" href="../../landing-page/src/styles/tokens.css" />
+<!-- Os mesmos arquivos de fonte que a landing carrega (landing-page/index.html) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  /* ═══ Página de revisão ═══════════════════════════════════════════ */
+  * { box-sizing: border-box; }
+  html { background: var(--bg); color-scheme: dark; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 400 var(--t-md)/1.45 var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  code, .mono { font-family: var(--font-mono); }
+  .page { max-width: calc(1280px + 2 * var(--sp-6)); margin: 0 auto; padding: var(--sp-6); }
+  .sec { padding: var(--sp-6) 0 var(--sp-7); border-top: 1px solid var(--border); }
+  .sec-head { display: flex; align-items: baseline; gap: var(--sp-4); margin-bottom: var(--sp-5); flex-wrap: wrap; }
+  .sec-ref { font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); }
+  .sec-head h2 { font: 750 var(--t-2xl)/1.1 var(--font-display); letter-spacing: -0.032em; }
+  .sec-head p { color: var(--text-secondary); flex-basis: 100%; max-width: 72ch; }
+  .group-title { font: 600 var(--t-lg) var(--font-body); margin: var(--sp-5) 0 var(--sp-3); display: flex; gap: var(--sp-2); align-items: baseline; }
+  .group-title small { font: 400 var(--t-sm) var(--font-body); color: var(--text-secondary); }
+  .label { font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); }
+
+  /* Cabeçalho do documento */
+  .doc-head { display: flex; align-items: center; gap: var(--sp-4); padding-bottom: var(--sp-5); flex-wrap: wrap; }
+  .doc-head img { width: calc(var(--sp-6) + var(--sp-3)); height: auto; }
+  .wm { font: 800 var(--t-2xl) var(--font-display); letter-spacing: -0.032em; }
+  .wm .br { font: 500 calc(var(--t-2xl) * .75) var(--font-mono); color: var(--yellow-text); letter-spacing: 0; }
+  .doc-title { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .doc-title b { font: 600 var(--t-lg) var(--font-body); }
+  .doc-meta { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+  .pill { display: inline-flex; align-items: center; gap: var(--sp-1); font: 500 var(--t-xs) var(--font-mono); padding: var(--sp-1) var(--sp-2); border-radius: var(--r-pill); background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
+
+  /* ═══ a. Paleta ═══════════════════════════════════════════════════ */
+  .brand-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+  .brand-sw { border-radius: var(--radius-m); overflow: hidden; background: var(--surface); }
+  .brand-sw .chip { height: calc(var(--sp-7) * 2.5); padding: var(--sp-4); display: flex; flex-direction: column; justify-content: flex-end; color: var(--on-yellow); }
+  .brand-sw .chip b { font: 750 var(--t-xl) var(--font-display); letter-spacing: -0.02em; }
+  .brand-sw .meta { padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-1); }
+  .brand-sw .meta code { font-size: var(--t-sm); }
+  .brand-sw .meta span { color: var(--text-secondary); font-size: var(--t-sm); }
+
+  .surf-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--sp-4); align-items: stretch; }
+  .nest { background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-m); padding: var(--sp-4); }
+  .nest .lv { border-radius: var(--radius-m); padding: var(--sp-4); }
+  .nest .lv-1 { background: var(--surface); }
+  .nest .lv-2 { background: var(--surface-elevated); margin-top: var(--sp-3); }
+  .nest .lv-3 { border-top: 1px solid var(--border); margin-top: var(--sp-3); padding-top: var(--sp-3); }
+  .lv-tag { display: flex; justify-content: space-between; gap: var(--sp-3); }
+  .lv-tag b { font-weight: 600; }
+  .lv-tag code { color: var(--text-secondary); font-size: var(--t-sm); }
+
+  .tok-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius-m); overflow: hidden; }
+  .tok-table th { text-align: left; font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); }
+  .tok-table td { padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .tok-table tr:last-child td { border-bottom: 0; }
+  .tok-table code { font-size: var(--t-sm); }
+  .tok-table .hex { color: var(--text-secondary); }
+  .dot { display: inline-block; width: var(--sp-4); height: var(--sp-4); border-radius: var(--radius-s); vertical-align: middle; margin-right: var(--sp-2); box-shadow: inset 0 0 0 1px var(--border); }
+  .cr { font: 500 var(--t-xs) var(--font-mono); white-space: nowrap; }
+  .cr.ok::after { content: ' AA'; color: var(--success-text); }
+  .cr.big::after { content: ' só grande'; color: var(--orange-text); }
+  .cr.no::after { content: ' não-texto'; color: var(--text-secondary); }
+
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
+  .sem-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+  .sem { background: var(--surface); border-radius: var(--radius-m); padding: var(--sp-3); display: grid; gap: var(--sp-2); }
+  .sem .bar { height: var(--sp-6); border-radius: var(--radius-s); }
+  .sem b { font-weight: 600; }
+  .sem small { color: var(--text-secondary); font-size: var(--t-sm); }
+  .tier-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+  .tier { background: var(--surface); border-radius: var(--radius-m); padding: var(--sp-3); display: grid; justify-items: center; gap: var(--sp-1); text-align: center; }
+  .tier b { font-weight: 600; }
+  .tier code { font-size: var(--t-xs); color: var(--text-secondary); }
+
+  /* ═══ b. Tipografia ═══════════════════════════════════════════════ */
+  .fam-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--sp-4); }
+  .fam { background: var(--surface); border-radius: var(--radius-m); padding: var(--sp-4) var(--sp-5) var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
+  .fam-top { display: flex; justify-content: space-between; gap: var(--sp-3); align-items: baseline; }
+  .fam-top b { font-weight: 600; }
+  .spec-display { font: 800 calc(var(--t-2xl) * 2) / 0.98 var(--font-display); letter-spacing: -0.038em; }
+  .spec-display em { font-style: normal; color: var(--yellow-text); }
+  .spec-body { font: 400 var(--t-md)/1.45 var(--font-body); color: var(--text); max-width: 60ch; }
+  .spec-weights { display: flex; gap: var(--sp-4); font-family: var(--font-body); font-size: var(--t-lg); }
+  .spec-mono { font: 400 var(--t-sm)/1.7 var(--font-mono); background: var(--bg); border-radius: var(--radius-s); padding: var(--sp-3) var(--sp-4); }
+  .spec-mono .c { color: var(--code-comment); }
+  .spec-mono .k { color: var(--code-keyword); }
+  .spec-mono .s { color: var(--code-string); }
+  .spec-mono .y { color: var(--yellow-text); }
+  .spec-mono .b { color: var(--link); }
+  .spec-mono .o { color: var(--orange-text); }
+  .spec-pixel { background: var(--office-bg); border-radius: var(--radius-s); padding: var(--sp-4); display: flex; gap: var(--sp-3); align-items: flex-start; }
+  .px-bubble { font: 500 var(--t-lg)/1.2 var(--font-pixel); background: var(--px-white); color: var(--px-ink); padding: var(--sp-2) var(--sp-3); box-shadow: 0 0 0 2px var(--px-ink), 4px 4px 0 0 var(--px-ink); }
+  .px-hud { font: 700 var(--t-md) var(--font-pixel); color: var(--px-duck); margin-left: auto; }
+  .fam-note { color: var(--text-secondary); font-size: var(--t-sm); }
+
+  .scale { margin-top: var(--sp-5); background: var(--surface); border-radius: var(--radius-m); overflow: hidden; }
+  .scale-row { display: grid; grid-template-columns: 160px minmax(0, 1fr) 260px; gap: var(--sp-4); align-items: center; padding: var(--sp-3) var(--sp-5); border-bottom: 1px solid var(--border); }
+  .scale-row:last-child { border-bottom: 0; }
+  .scale-row.is-body { background: var(--surface-elevated); }
+  .scale-row .who { display: grid; gap: 2px; }
+  .scale-row .who code { font-size: var(--t-sm); }
+  .scale-row .use { color: var(--text-secondary); font-size: var(--t-sm); }
+  .scale-row .tag-body { color: var(--yellow-text); font: 500 var(--t-xs) var(--font-mono); }
+
+  /* ═══ c. Componentes ══════════════════════════════════════════════ */
+  .comp-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+  .comp { background: var(--surface); border-radius: var(--radius-m); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+  .comp.wide { grid-column: span 2; }
+  .comp-head { display: flex; justify-content: space-between; gap: var(--sp-2); }
+  .comp-head b { font-weight: 600; }
+  .comp-body { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); flex: 1; }
+  .comp-rule { color: var(--text-secondary); font-size: var(--t-sm); }
+
+  /* ═══ Componentes do app (compartilhados pela prévia e pelo mock) ══
+     Usam aliases --ui-* para que o "antes" e o "depois" sejam a MESMA marcação com tokens diferentes. */
+  .theme-new {
+    --ui-bg: var(--bg); --ui-surface: var(--surface); --ui-elevated: var(--surface-elevated);
+    --ui-active: var(--surface-elevated); --ui-border: var(--border);
+    --ui-text: var(--text); --ui-text-2: var(--text-secondary); --ui-text-3: var(--text-secondary);
+    --ui-primary: var(--duck-yellow); --ui-on-primary: var(--on-yellow); --ui-primary-text: var(--yellow-text);
+    --ui-progress: var(--beak-orange); --ui-progress-text: var(--orange-text);
+    --ui-link: var(--link); --ui-success: var(--success-text); --ui-danger: var(--danger-text);
+    --ui-main: var(--yellow-text);
+    --ui-font: var(--font-body); --ui-display: var(--font-display); --ui-mono: var(--font-mono);
+    --ui-head-weight: 700; --ui-r-ctl: var(--radius-s); --ui-r-card: var(--radius-m);
+    --ui-ease: var(--ease-out); --ui-dur: var(--dur-fast);
+  }
+  .theme-old {
+    --ui-bg: var(--s0); --ui-surface: var(--s1); --ui-elevated: var(--s2);
+    --ui-active: var(--s3); --ui-border: var(--hairline);
+    --ui-text: var(--fg); --ui-text-2: var(--fg-2); --ui-text-3: var(--fg-3);
+    --ui-primary: var(--accent); --ui-on-primary: var(--fg-inv); --ui-primary-text: var(--accent);
+    --ui-progress: var(--accent); --ui-progress-text: var(--accent);
+    --ui-link: var(--info); --ui-success: var(--ok); --ui-danger: var(--bad);
+    --ui-main: var(--fg-2);
+    /* o --font-display antigo é sobrescrito pela landing nesta página; Segoe Text é o mais próximo */
+    --ui-font: var(--font); --ui-display: var(--font); --ui-mono: var(--mono);
+    --ui-head-weight: 650; --ui-r-ctl: var(--r-2); --ui-r-card: var(--r-3);
+    --ui-ease: var(--ease); --ui-dur: var(--dur-1);
+  }
+  [class*='theme-'] { font-family: var(--ui-font); color: var(--ui-text); font-size: var(--t-md); line-height: 1.45; }
+
+  .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .ic.s { width: 14px; height: 14px; }
+  .ic.xs { width: 12px; height: 12px; }
+
+  .btn { font: 600 var(--t-md) var(--ui-font); display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-3); min-height: calc(var(--sp-6) - var(--sp-1)); border-radius: var(--ui-r-ctl); border: 1px solid transparent; cursor: pointer; transition: background var(--ui-dur) var(--ui-ease); color: var(--ui-text); background: var(--ui-active); }
+  .btn.primary { background: var(--ui-primary); color: var(--ui-on-primary); }
+  .btn.ghost { background: transparent; color: var(--ui-text-2); }
+  .btn.secondary { background: var(--ui-elevated); border-color: var(--ui-border); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.focus, .btn:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 1px; }
+  .kbd { font: 500 var(--t-xs) var(--ui-mono); color: var(--ui-text-2); border: 1px solid var(--ui-border); border-radius: var(--ui-r-ctl); padding: 0 var(--sp-1); }
+
+  .field { display: grid; gap: var(--sp-1); width: 100%; }
+  .field label { font-size: var(--t-sm); color: var(--ui-text-2); }
+  .field .input { font: 400 var(--t-md) var(--ui-font); color: var(--ui-text); background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: var(--ui-r-ctl); padding: var(--sp-2) var(--sp-3); }
+  .field .input.ph { color: var(--ui-text-3); }
+  .field .input.focus { outline: 2px solid var(--ui-primary); outline-offset: 1px; }
+  .field small { font-size: var(--t-xs); color: var(--ui-text-3); }
+
+  .branch { display: inline-flex; align-items: center; gap: var(--sp-1); font: 500 var(--t-sm) var(--ui-mono); color: var(--ui-link); }
+  .branch.is-main { color: var(--ui-main); }
+  .hash { font: 500 var(--t-sm) var(--ui-mono); color: var(--ui-text-2); }
+  .link { color: var(--ui-link); text-decoration: none; font-weight: 500; }
+  .link:hover { text-decoration: underline; }
+  .xp { font: 700 var(--t-xs) var(--ui-mono); color: var(--ui-progress-text); white-space: nowrap; }
+
+  .xpbar { width: 100%; display: grid; gap: var(--sp-1); }
+  .xpbar-top { display: flex; justify-content: space-between; font-size: var(--t-sm); color: var(--ui-text-2); gap: var(--sp-2); }
+  .xpbar-top b { color: var(--ui-text); font-weight: 600; }
+  .xpbar-top .xp { font-size: var(--t-xs); }
+  .track { height: var(--sp-2); border-radius: var(--r-pill); background: var(--ui-bg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--ui-border); }
+  .track > i { display: block; height: 100%; border-radius: inherit; background: var(--ui-progress); }
+
+  .toast { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-m); background: var(--surface-elevated); border: 1px solid var(--border); border-left: 3px solid var(--beak-orange); box-shadow: var(--shadow-window); max-width: 380px; }
+  .toast-mark { color: var(--orange-text); font: 700 var(--t-sm) var(--font-mono); }
+  .toast b { font-weight: 600; }
+  .toast div span { display: block; color: var(--text-secondary); font-size: var(--t-sm); }
+
+  .ava { position: relative; display: inline-block; flex: none; overflow: hidden; border-radius: 50%; width: 24px; height: 24px;
+    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--duck-yellow) 30%, var(--surface-elevated)), var(--surface-elevated) 75%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent); }
+  .ava img { display: block; width: 100%; height: 100%; object-fit: cover; transform: translateY(5%) scale(1.06); }
+  .ava.l { width: 32px; height: 32px; }
+  .ava.s { width: 20px; height: 20px; }
+  .stack { display: inline-flex; }
+  .stack .ava { box-shadow: 0 0 0 2px var(--ui-surface); }
+  .stack .ava + .ava { margin-left: calc(var(--sp-2) * -1); }
+
+  .status { display: inline-flex; align-items: center; gap: var(--sp-1); font: 600 var(--t-xs) var(--ui-font); padding: 0 var(--sp-2); border-radius: var(--r-pill); border: 1px solid currentColor; color: var(--ui-success); line-height: 1.6; }
+  .count { font: 700 var(--t-xs) var(--ui-mono); color: var(--ui-text); background: var(--ui-elevated); border-radius: var(--r-pill); padding: 0 var(--sp-2); min-width: var(--sp-5); text-align: center; }
+  .theme-old .count { background: var(--ui-primary); color: var(--ui-on-primary); }
+
+  /* ═══ d. Mock da tela principal ═══════════════════════════════════ */
+  .window { border-radius: var(--radius-l); overflow: hidden; box-shadow: var(--shadow-window); }
+  .app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); background: var(--ui-bg); height: 700px; }
+  .sidebar { display: flex; flex-direction: column; padding: var(--sp-2); gap: 2px; min-height: 0; }
+  .sb-top { display: flex; align-items: center; gap: var(--sp-1); padding-bottom: var(--sp-2); }
+  .switcher { flex: 1; display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); border-radius: var(--ui-r-ctl); min-width: 0; }
+  .switcher b { font-weight: 650; }
+  .switcher .ic { color: var(--ui-text-3); margin-left: auto; }
+  .ws-mark { width: 24px; height: 24px; border-radius: var(--ui-r-ctl); display: grid; place-items: center; background: var(--ui-elevated); overflow: hidden; flex: none; }
+  .ws-mark img { width: 120%; height: auto; }
+  .theme-old .ws-mark { background: var(--ui-primary); color: var(--ui-on-primary); font-weight: 800; }
+  .icon-btn { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--ui-r-ctl); color: var(--ui-text-2); }
+  .nav { display: flex; flex-direction: column; gap: 1px; }
+  .nav-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); min-height: 30px; border-radius: var(--ui-r-ctl); color: var(--ui-text-2); font-weight: 500; }
+  .nav-item.on { background: var(--ui-active); color: var(--ui-text); }
+  .nav-item.on .ic { color: var(--ui-primary-text); }
+  .nav-item .count { margin-left: auto; }
+  .sb-scroll { flex: 1; min-height: 0; margin-top: var(--sp-2); padding-top: var(--sp-1); border-top: 1px solid var(--ui-border); }
+  .cat { font: 650 var(--t-xs) var(--ui-font); text-transform: uppercase; letter-spacing: .07em; color: var(--ui-text-3); padding: var(--sp-2) var(--sp-2) 3px; display: flex; align-items: center; gap: var(--sp-1); }
+  .chan { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); border-radius: var(--ui-r-ctl); color: var(--ui-text-2); }
+  .chan .ic { color: var(--ui-text-3); }
+  .chan.unread { color: var(--ui-text); font-weight: 650; }
+  .chan.live { color: var(--ui-success); }
+  .chan.live .ic { color: var(--ui-success); }
+  .vmember { display: flex; align-items: center; gap: var(--sp-2); padding: 2px var(--sp-2) 2px calc(var(--sp-6) - var(--sp-1)); color: var(--ui-text-2); font-size: var(--t-sm); }
+  .sb-personal { border-top: 1px solid var(--ui-border); padding-top: var(--sp-1); }
+  .userbar { display: flex; align-items: center; gap: 2px; padding-top: var(--sp-2); border-top: 1px solid var(--ui-border); margin-top: var(--sp-1); }
+  .me { flex: 1; display: flex; gap: var(--sp-2); align-items: center; min-width: 0; padding: var(--sp-1); }
+  .me span { display: flex; flex-direction: column; line-height: 1.25; }
+  .me b { font-weight: 600; }
+  .me small { color: var(--ui-text-3); font-size: var(--t-xs); }
+  .me .xp { margin-left: auto; }
+
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .topbar { height: var(--topbar-h); display: flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3) 0 var(--sp-1); flex: none; }
+  .crumbs { display: flex; align-items: center; gap: var(--sp-1); color: var(--ui-text-3); font-size: var(--t-sm); white-space: nowrap; }
+  .crumbs .cur { color: var(--ui-text); font-weight: 600; }
+  .palette { margin-left: auto; display: flex; align-items: center; gap: var(--sp-2); width: 320px; padding: var(--sp-1) var(--sp-2); border-radius: var(--ui-r-ctl); background: var(--ui-elevated); color: var(--ui-text-3); font-size: var(--t-sm); }
+  .palette .kbd { margin-left: auto; }
+  .sheet-row { flex: 1; min-height: 0; display: flex; padding: 0 var(--sp-2) var(--sp-2) 0; }
+  .sheet { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--ui-surface); border-radius: var(--ui-r-card); box-shadow: 0 0 0 1px var(--ui-border); overflow: hidden; }
+  .area-head { height: 48px; display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-5); border-bottom: 1px solid var(--ui-border); flex: none; }
+  .area-head h2 { font: var(--ui-head-weight) var(--t-xl) var(--ui-display); letter-spacing: -0.02em; }
+  .seg { display: inline-flex; background: var(--ui-bg); border-radius: var(--ui-r-ctl); padding: 2px; margin-left: auto; }
+  .seg span { padding: 2px var(--sp-3); border-radius: var(--ui-r-ctl); color: var(--ui-text-2); font-size: var(--t-sm); font-weight: 500; }
+  .seg span.on { background: var(--ui-elevated); color: var(--ui-text); }
+  .area-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); overflow: hidden; }
+  .col { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+  .panel { background: var(--ui-elevated); border-radius: var(--ui-r-card); padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+  .panel-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+  .panel-head h3 { font: 600 var(--t-lg) var(--ui-font); }
+  .panel-head .label { margin-left: auto; font-family: var(--ui-mono); color: var(--ui-text-3); }
+  .panel-head a { margin-left: auto; font-size: var(--t-sm); }
+
+  /* Feed: linha do tempo com nós, como a espinha do git da landing */
+  .feed { list-style: none; margin: 0; padding: 0; position: relative; }
+  .feed::before { content: ''; position: absolute; left: 11px; top: var(--sp-2); bottom: var(--sp-2); width: 1px; background: var(--ui-border); }
+  .feed-day { font: 650 var(--t-xs) var(--ui-font); text-transform: uppercase; letter-spacing: .07em; color: var(--ui-text-3); padding: var(--sp-2) 0 var(--sp-1) calc(var(--sp-6) + var(--sp-1)); }
+  .ev { position: relative; display: grid; grid-template-columns: 24px 24px minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; padding: var(--sp-2) 0; }
+  .node { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--ui-elevated); box-shadow: 0 0 0 1px var(--ui-border); color: var(--ui-text-2); position: relative; z-index: 1; }
+  .node.ok { color: var(--ui-success); } .node.pr { color: var(--ui-link); } .node.xp { color: var(--ui-progress-text); } .node.gold { color: var(--tier-gold); }
+  .theme-old .node.gold { color: var(--ui-primary); }
+  .ev-text { min-width: 0; padding-top: 2px; }
+  .ev-text b { font-weight: 600; }
+  .ev-sub { display: flex; gap: var(--sp-2); align-items: center; margin-top: 2px; flex-wrap: wrap; color: var(--ui-text-2); font-size: var(--t-sm); }
+  .ev-time { font: 500 var(--t-xs) var(--ui-mono); color: var(--ui-text-3); padding-top: var(--sp-1); white-space: nowrap; }
+  .ev .ava { margin-top: 0; }
+
+  /* Card de PR */
+  .pr-title { display: flex; gap: var(--sp-2); align-items: flex-start; }
+  .pr-title .ic { color: var(--ui-success); margin-top: 3px; }
+  .pr-title h4 { font: 600 var(--t-lg)/1.3 var(--ui-font); }
+  .pr-title h4 .num { color: var(--ui-text-2); font-weight: 400; }
+  .pr-refs { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-2) 0 var(--sp-3); flex-wrap: wrap; color: var(--ui-text-2); font-size: var(--t-sm); }
+  .pr-refs .ic { color: var(--ui-text-3); }
+  .rows { display: grid; gap: var(--sp-2); padding: var(--sp-3) 0; border-top: 1px solid var(--ui-border); }
+  .rowi { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--t-sm); }
+  .rowi .ic { color: var(--ui-success); }
+  .rowi .k { color: var(--ui-text-2); }
+  .rowi .r { margin-left: auto; }
+  .add { color: var(--ui-success); font: 600 var(--t-sm) var(--ui-mono); }
+  .del { color: var(--ui-danger); font: 600 var(--t-sm) var(--ui-mono); }
+  .pending { color: var(--ui-text-3); }
+  .pr-actions { display: flex; align-items: center; gap: var(--sp-2); padding-top: var(--sp-3); border-top: 1px solid var(--ui-border); }
+  .pr-actions .xp { margin-left: auto; }
+  .call { display: flex; align-items: center; gap: var(--sp-3); }
+  .call-txt { display: flex; flex-direction: column; line-height: 1.3; }
+  .call-txt b { color: var(--ui-success); font-weight: 600; }
+  .call-txt small { color: var(--ui-text-2); font-size: var(--t-sm); }
+  .call .btn { margin-left: auto; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ui-success); flex: none; }
+
+  .note-row { display: flex; gap: var(--sp-5); flex-wrap: wrap; margin-top: var(--sp-4); color: var(--text-secondary); font-size: var(--t-sm); }
+  .note-row b { color: var(--text); font-weight: 600; }
+
+  /* ═══ e. Antes e depois ═══════════════════════════════════════════ */
+  .ba { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); }
+  .ba-col { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .ba-label { display: flex; align-items: baseline; gap: var(--sp-2); }
+  .ba-label b { font: 600 var(--t-lg) var(--font-body); }
+  .ba-label code { color: var(--text-secondary); font-size: var(--t-xs); }
+  .mini { border-radius: var(--radius-m); overflow: hidden; box-shadow: 0 0 0 1px var(--border); }
+  .mini .app { height: 330px; grid-template-columns: 184px minmax(0, 1fr); }
+  .mini .area-body { grid-template-columns: minmax(0, 1fr); padding: var(--sp-3) var(--sp-4); gap: var(--sp-3); }
+  .mini .area-head { padding: 0 var(--sp-4); height: 44px; }
+  .mini .area-head h2 { font-size: var(--t-lg); }
+  .mini .palette { width: 180px; }
+  .ba-list { margin: 0; padding-left: var(--sp-4); color: var(--text-secondary); font-size: var(--t-sm); display: grid; gap: var(--sp-1); }
+  .ba-list b { color: var(--text); font-weight: 600; }
+  .mini .area-body { align-content: start; }
+
+  /* ═══ Telas estreitas: as grades viram uma coluna; o mock rola na horizontal ═══ */
+  @media (max-width: 900px) {
+    .page { padding: var(--sp-4); }
+    .brand-row, .surf-row, .sem-row, .tier-row, .fam-grid, .comp-grid, .ba { grid-template-columns: minmax(0, 1fr); }
+    .comp.wide { grid-column: auto; }
+    .scale-row { grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
+    .doc-meta { margin-left: 0; align-items: flex-start; }
+    .window, .mini { overflow-x: auto; }
+    .window .app { min-width: 1100px; }
+    .mini .app { min-width: 560px; }
+    .tok-table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<!-- Ícones: mesmos traços de apps/desktop/src/design/Icon.tsx -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-pr" viewBox="0 0 24 24"><path d="M6 8.5v7M18 15.5V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2"/></symbol>
+  <symbol id="i-merge" viewBox="0 0 24 24"><path d="M6 9v12M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 9a9 9 0 0 0 9 9"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0V8zM12 18v4"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9M15 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM9 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></symbol>
+  <symbol id="i-commit" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 12h5.5M15.5 12H21"/></symbol>
+  <symbol id="i-issue" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16v.01"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM15 4v16"/></symbol>
+</svg>
+
+<main class="page">
+  <header class="doc-head">
+    <img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" />
+    <span class="wm"><span class="br">&lt;</span>squeak<span class="br">/&gt;</span></span>
+    <div class="doc-title">
+      <b>ADR 002 · Design system unificado</b>
+      <span class="label">prévia visual para a revisão da issue #3</span>
+    </div>
+    <div class="doc-meta">
+      <span class="pill">tema escuro · oficial do app</span>
+      <span class="label">tokens: landing-page/src/styles/tokens.css</span>
+    </div>
+  </header>
+
+  <!-- ═══ a. Paleta ═══ -->
+  <section class="sec" id="paleta" data-shot="01-paleta">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §3.1–3.4</span>
+      <h2>Paleta</h2>
+      <p>Base escura, superfícies e texto ocupam quase tudo. Amarelo e laranja ficam com ~10%: amarelo para ação principal e recompensa, laranja só para progressão.</p>
+    </div>
+
+    <h3 class="group-title">Marca <small>iguais nos dois temas</small></h3>
+    <div class="brand-row">
+      <div class="brand-sw"><div class="chip" style="background:var(--duck-yellow)"><b>Primária e recompensa</b></div>
+        <div class="meta"><code>--duck-yellow · <span data-hex="--duck-yellow"></span></code><span>CTA, ação principal, <code>main</code>, foco, insígnia de ouro.</span></div></div>
+      <div class="brand-sw"><div class="chip" style="background:var(--beak-orange)"><b>Progressão e XP</b></div>
+        <div class="meta"><code>--beak-orange · <span data-hex="--beak-orange"></span></code><span>XP, level up, streak, barras de progresso. Nunca botão ou link.</span></div></div>
+      <div class="brand-sw"><div class="chip" style="background:var(--pond-blue)"><b>Links e branches</b></div>
+        <div class="meta"><code>--pond-blue · <span data-hex="--pond-blue"></span></code><span>Links, informação e branches de trabalho.</span></div></div>
+    </div>
+
+    <div class="surf-row">
+      <div>
+        <h3 class="group-title">Superfícies <small>hierarquia por luminosidade, não por borda</small></h3>
+        <div class="nest">
+          <div class="lv-tag"><b>chão · barra lateral</b><code>--bg · <span data-hex="--bg"></span></code></div>
+          <div class="lv lv-1" style="margin-top:var(--sp-3)">
+            <div class="lv-tag"><b>folha · conteúdo</b><code>--surface · <span data-hex="--surface"></span></code></div>
+            <div class="lv lv-2">
+              <div class="lv-tag"><b>painel · popover</b><code>--surface-elevated · <span data-hex="--surface-elevated"></span></code></div>
+              <div class="lv-3 lv-tag"><b>divisória de região</b><code>--border · <span data-hex="--border"></span></code></div>
+            </div>
+          </div>
+        </div>
+        <h3 class="group-title">Semânticas</h3>
+        <div class="sem-row">
+          <div class="sem"><div class="bar" style="background:var(--success)"></div><b>Sucesso</b><small><code>--success · <span data-hex="--success"></span></code></small></div>
+          <div class="sem"><div class="bar" style="background:var(--danger)"></div><b>Erro</b><small><code>--danger · <span data-hex="--danger"></span></code></small></div>
+          <div class="sem"><div class="bar" style="background:var(--warning)"></div><b>Alerta</b><small><code>--warning · <span data-hex="--warning"></span></code><br />igual ao laranja (ponto 7)</small></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="group-title">Texto <small>contraste calculado sobre cada superfície</small></h3>
+        <table class="tok-table" id="text-table">
+          <thead><tr><th>token</th><th>hex</th><th>bg</th><th>surface</th><th>elevated</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div>
+        <h3 class="group-title">Tiers de insígnia <small>medalhões de Badge.tsx, com os pips de tier embaixo</small></h3>
+        <div class="tier-row">
+          <div class="tier"><span data-badge="bronze:eye"></span><b>Bronze</b><code>--tier-bronze · <span data-hex="--tier-bronze"></span></code></div>
+          <div class="tier"><span data-badge="silver:flame"></span><b>Prata</b><code>--tier-silver · <span data-hex="--tier-silver"></span></code></div>
+          <div class="tier"><span data-badge="gold:merge"></span><b>Ouro</b><code>--tier-gold · <span data-hex="--tier-gold"></span></code></div>
+          <div class="tier"><span data-badge="diamond:rocket"></span><b>Diamante</b><code>--tier-diamond · <span data-hex="--tier-diamond"></span></code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ b. Tipografia ═══ -->
+  <section class="sec" id="tipografia" data-shot="02-tipografia">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §3.5 e §5.1</span>
+      <h2>Tipografia</h2>
+      <p>As mesmas quatro famílias da landing. No app, a escala é fixa e densa: os tamanhos atuais do app, com o corpo em 13,5 px.</p>
+    </div>
+
+    <div class="fam-grid">
+      <div class="fam">
+        <div class="fam-top"><b>Display · Bricolage Grotesque</b><code class="label">--font-display · 700–800</code></div>
+        <div class="spec-display">Entregou?<br /><em>Contou.</em></div>
+        <p class="fam-note">Títulos. No app, só a partir de <code>--t-xl</code> (20 px); abaixo disso entra a Geist 600.</p>
+      </div>
+      <div class="fam">
+        <div class="fam-top"><b>Texto · Geist</b><code class="label">--font-body · 400–700</code></div>
+        <p class="spec-body">A ana aprovou o PR #42 e o card foi para Done sozinho. Chat, calls, kanban e GitHub no mesmo lugar, e cada contribuição vira reputação.</p>
+        <div class="spec-weights"><span style="font-weight:400">Regular 400</span><span style="font-weight:500">Médio 500</span><span style="font-weight:600">Semi 600</span><span style="font-weight:700">Negrito 700</span></div>
+      </div>
+      <div class="fam">
+        <div class="fam-top"><b>Mono · JetBrains Mono</b><code class="label">--font-mono · 400 / 500 / 700</code></div>
+        <div class="spec-mono">
+          <div><span class="c">$</span> squeak fix <span class="y">58</span></div>
+          <div><span class="c">a1f3c9e</span> <span class="k">feat</span>(auth): login com GitHub</div>
+          <div><span class="b">feat/login</span> → <span class="y">main</span> · <span class="s">✓ 128 testes</span> · <span class="o">+120 XP</span></div>
+        </div>
+        <p class="fam-note">Só informação de máquina: hash, branch, XP, contadores, comandos, atalhos.</p>
+      </div>
+      <div class="fam">
+        <div class="fam-top"><b>Pixel · Pixelify Sans</b><code class="label">--font-pixel · 500 / 700</code></div>
+        <div class="spec-pixel">
+          <span class="px-bubble">npm run quack</span>
+          <span class="px-hud">+120 XP</span>
+        </div>
+        <p class="fam-note">Só nos balões e no HUD do escritório virtual, sobre <code>--office-bg</code>.</p>
+      </div>
+    </div>
+
+    <h3 class="group-title">Escala do app <small>proposta do ADR, seção 5.1</small></h3>
+    <div class="scale">
+      <div class="scale-row"><div class="who"><code>--t-2xl</code><span class="label" data-size="--t-2xl"></span></div>
+        <div style="font:750 var(--t-2xl)/1.15 var(--font-display);letter-spacing:-0.032em">Pull requests do workspace</div><div class="use">Título de página, tela de boot · display 750</div></div>
+      <div class="scale-row"><div class="who"><code>--t-xl</code><span class="label" data-size="--t-xl"></span></div>
+        <div style="font:700 var(--t-xl)/1.2 var(--font-display);letter-spacing:-0.02em">Atividade da equipe</div><div class="use">Título de tela · display 700</div></div>
+      <div class="scale-row"><div class="who"><code>--t-lg</code><span class="label" data-size="--t-lg"></span></div>
+        <div style="font:600 var(--t-lg)/1.3 var(--font-body)">feat(auth): login com GitHub</div><div class="use">Título de painel e de seção · texto 600</div></div>
+      <div class="scale-row is-body"><div class="who"><code>--t-md</code><span class="label" data-size="--t-md"></span><span class="tag-body">corpo da interface</span></div>
+        <div style="font:400 var(--t-md)/1.45 var(--font-body)">ana revisou o #42 e pediu 2 mudanças no fluxo de sessão. pedro aplicou as mudanças em 3 commits.</div><div class="use">Corpo (<code>body</code>) · texto 400 · altura de linha 1,45</div></div>
+      <div class="scale-row"><div class="who"><code>--t-sm</code><span class="label" data-size="--t-sm"></span></div>
+        <div style="font:400 var(--t-sm)/1.45 var(--font-body);color:var(--text-secondary)">há 9 min · 3 commits · 9 arquivos alterados</div><div class="use">Metadados, horários, texto auxiliar · texto 400</div></div>
+      <div class="scale-row"><div class="who"><code>--t-xs</code><span class="label" data-size="--t-xs"></span></div>
+        <div style="font:500 var(--t-xs)/1.45 var(--font-mono)">main · 0 conflitos · Ln 42, Col 7</div><div class="use">Labels mono, contadores, status bar · mono 500</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ c. Componentes ═══ -->
+  <section class="sec theme-new" id="componentes" data-shot="03-componentes">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §4 e §5.3</span>
+      <h2>Componentes básicos</h2>
+      <p>Na densidade do app: controles de 28 px, raio <code>--radius-s</code>, foco de 2 px em amarelo.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp">
+        <div class="comp-head"><b>Botão primário</b><span class="label">--duck-yellow · --on-yellow</span></div>
+        <div class="comp-body">
+          <button class="btn primary"><svg class="ic s"><use href="#i-merge"/></svg> Mergear pull request</button>
+          <button class="btn primary" disabled>Mergear</button>
+        </div>
+        <p class="comp-rule">Uma ação principal por tela. Desabilitado: opacidade 0,45.</p>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Botão secundário</b><span class="label">--surface-elevated · --border</span></div>
+        <div class="comp-body">
+          <button class="btn secondary">Ver diff</button>
+          <button class="btn secondary focus">Pedir mudanças</button>
+          <button class="btn ghost">Cancelar</button>
+        </div>
+        <p class="comp-rule">O segundo botão mostra o foco por teclado: 2 px em <code>--duck-yellow</code>, deslocamento de 1 px.</p>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Campo de texto</b><span class="label">--bg dentro de --surface</span></div>
+        <div class="comp-body" style="flex-direction:column;align-items:stretch">
+          <div class="field"><label>Título do pull request</label><div class="input focus">feat(auth): login com GitHub</div></div>
+          <div class="field"><label>Branch de destino</label><div class="input ph">main</div><small>O campo se separa pelo contraste de superfície (ponto 11).</small></div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Insígnias por tier</b><span class="label">Badge.tsx</span></div>
+        <div class="comp-body" style="justify-content:space-between">
+          <span data-badge="bronze:book" data-size="52"></span>
+          <span data-badge="silver:pair" data-size="52"></span>
+          <span data-badge="gold:merge" data-size="52"></span>
+          <span data-badge="diamond:shield" data-size="52"></span>
+          <span data-badge="gold:moon" data-size="52" data-secret="1"></span>
+        </div>
+        <p class="comp-rule">Medalhão hexagonal, face esmaltada escura e pips de tier. A última é secreta.</p>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Barra de XP</b><span class="label">--beak-orange</span></div>
+        <div class="comp-body">
+          <div class="xpbar"><div class="xpbar-top"><span><b>Nível 7</b> · temporada 3</span><span class="xp">2.340 / 3.000 XP</span></div><div class="track"><i style="width:78%"></i></div></div>
+          <div class="xpbar"><div class="xpbar-top"><span>Merge Machine <b>III</b></span><span class="xp">8 / 10 merges</span></div><div class="track"><i style="width:80%"></i></div></div>
+        </div>
+        <p class="comp-rule">Tudo que sobe ou enche é laranja.</p>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Link e branch</b><span class="label">--link · --yellow-text</span></div>
+        <div class="comp-body">
+          <a class="link" href="#componentes">Abrir no GitHub <svg class="ic xs" style="vertical-align:-1px"><use href="#i-external"/></svg></a>
+          <span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span>
+          <span class="pending">→</span>
+          <span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span>
+          <span class="hash">a1f3c9e</span>
+        </div>
+        <p class="comp-rule">Branch de trabalho em azul; <code>main</code> é a única em amarelo.</p>
+      </div>
+      <div class="comp wide">
+        <div class="comp-head"><b>Toast de XP</b><span class="label">borda --beak-orange · entra com --ease-spring</span></div>
+        <div class="comp-body" style="gap:var(--sp-5)">
+          <div class="toast"><span class="toast-mark">+120 XP</span><div><b>PR #42 mergeado</b><span>feat(auth): login com GitHub · card foi para Done</span></div></div>
+          <div class="toast"><span class="toast-mark">+50 XP</span><div><b>Você destravou o caio no #51</b><span>Ajuda conta. Mensagem não conta.</span></div></div>
+        </div>
+      </div>
+      <div class="comp">
+        <div class="comp-head"><b>Status e contagem</b><span class="label">--success-text · neutro</span></div>
+        <div class="comp-body">
+          <span class="status"><svg class="ic xs"><use href="#i-pr"/></svg>Aberto</span>
+          <span class="status" style="color:var(--link)"><svg class="ic xs"><use href="#i-merge"/></svg>Mergeado</span>
+          <span class="count">3</span>
+          <span class="kbd">Ctrl K</span>
+        </div>
+        <p class="comp-rule">A contagem de não lidas é neutra: amarelo fica para ação e recompensa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ d. Mock da tela principal ═══ -->
+  <section class="sec" id="app" data-shot="04-app">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §5.2 · navegação de docs/REDESIGN.md</span>
+      <h2>Tela principal do app</h2>
+      <p>A casca atual do app (barra lateral contextual, topbar com localização e paleta de comandos, folha de conteúdo) com os tokens novos. Dados fictícios.</p>
+    </div>
+
+    <div class="window theme-new">
+      <div class="app">
+        <aside class="sidebar">
+          <div class="sb-top">
+            <div class="switcher"><span class="ws-mark"><img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" /></span><b>patos-dev</b><svg class="ic s"><use href="#i-chev-down"/></svg></div>
+            <span class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></span>
+          </div>
+          <nav class="nav">
+            <div class="nav-item on"><svg class="ic"><use href="#i-home"/></svg>Início</div>
+            <div class="nav-item"><svg class="ic"><use href="#i-message"/></svg>Mensagens<span class="count">3</span></div>
+            <div class="nav-item"><svg class="ic"><use href="#i-volume"/></svg>Chamadas</div>
+            <div class="nav-item"><svg class="ic"><use href="#i-activity"/></svg>Atividade</div>
+            <div class="nav-item"><svg class="ic"><use href="#i-pr"/></svg>Pull requests<span class="count">2</span></div>
+          </nav>
+          <div class="sb-scroll">
+            <div class="cat"><svg class="ic xs"><use href="#i-chev-down"/></svg>Texto</div>
+            <div class="chan"><svg class="ic s"><use href="#i-hash"/></svg>geral</div>
+            <div class="chan unread"><svg class="ic s"><use href="#i-hash"/></svg>auth</div>
+            <div class="chan"><svg class="ic s"><use href="#i-hash"/></svg>deploys</div>
+            <div class="chan"><svg class="ic s"><use href="#i-hash"/></svg>code-review</div>
+            <div class="cat"><svg class="ic xs"><use href="#i-chev-down"/></svg>Voz</div>
+            <div class="chan live"><svg class="ic s"><use href="#i-volume"/></svg>daily</div>
+            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>ana</div>
+            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>caio</div>
+            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span>lu</div>
+            <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
+          </div>
+          <div class="sb-personal nav">
+            <div class="nav-item"><svg class="ic"><use href="#i-branch"/></svg>GitHub</div>
+            <div class="nav-item"><svg class="ic"><use href="#i-plug"/></svg>Integrações</div>
+          </div>
+          <div class="userbar">
+            <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+            <span class="icon-btn"><svg class="ic"><use href="#i-sliders"/></svg></span>
+            <span class="icon-btn"><svg class="ic"><use href="#i-logout"/></svg></span>
+          </div>
+        </aside>
+
+        <div class="main">
+          <header class="topbar">
+            <nav class="crumbs"><span>patos-dev</span><svg class="ic xs"><use href="#i-chev-right"/></svg><span class="cur">Início</span></nav>
+            <div class="palette"><svg class="ic s"><use href="#i-search"/></svg>Buscar ou executar<span class="kbd">Ctrl K</span></div>
+          </header>
+          <div class="sheet-row">
+            <div class="sheet">
+              <div class="area-head">
+                <h2>Início</h2>
+                <span class="label">qui, 12 nov · sprint 4</span>
+                <div class="seg"><span class="on">Tudo</span><span>Código</span><span>Conversas</span><span>Kanban</span></div>
+              </div>
+              <div class="area-body">
+                <div class="col">
+                  <div class="panel" style="flex:1">
+                    <div class="panel-head"><h3>Atividade da equipe</h3><a class="link" href="#app">Ver tudo</a></div>
+                    <ol class="feed">
+                      <li class="feed-day">Hoje</li>
+                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-check"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>
+                        <div class="ev-text"><b>ana</b> aprovou <a class="link" href="#app">#42</a> feat(auth): login com GitHub<div class="ev-sub"><span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span></div></div><span class="ev-time">há 2 min</span></li>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-commit"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span>
+                        <div class="ev-text"><b>pedro</b> enviou 3 commits para <span class="branch">feat/login</span><div class="ev-sub"><span class="hash">a1f3c9e</span> fix(auth): renova o token antes de expirar</div></div><span class="ev-time">há 9 min</span></li>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-activity"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>
+                        <div class="ev-text"><b>caio</b> moveu <a class="link" href="#app">#51</a> para <b>Em andamento</b><div class="ev-sub">kanban · sprint 4 · ligado a <a class="link" href="#app">#auth</a></div></div><span class="ev-time">há 14 min</span></li>
+                      <li class="ev"><span class="node pr"><svg class="ic xs"><use href="#i-pr"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>
+                        <div class="ev-text"><b>ana</b> pediu 2 mudanças em <a class="link" href="#app">#42</a><div class="ev-sub">“a sessão precisa expirar junto com o token do GitHub”</div></div><span class="ev-time">há 26 min</span></li>
+                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-volume"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span>
+                        <div class="ev-text"><b>lu</b> iniciou uma call em <b>daily</b><div class="ev-sub">3 pessoas · 12 min</div></div><span class="ev-time">há 41 min</span></li>
+                      <li class="ev"><span class="node xp"><svg class="ic xs"><use href="#i-merge"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/bia.webp" alt="" /></span>
+                        <div class="ev-text"><b>bia</b> mergeou <a class="link" href="#app">#39</a> fix(chat): rolagem trava no fim<div class="ev-sub"><span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span class="xp">+120 XP</span></div></div><span class="ev-time">há 1 h</span></li>
+                      <li class="ev"><span class="node gold"><svg class="ic xs"><use href="#i-star"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/bia.webp" alt="" /></span>
+                        <div class="ev-text"><b>bia</b> desbloqueou <b>Merge Machine II</b><div class="ev-sub">insígnia ouro · 10 merges revisados</div></div><span class="ev-time">há 1 h</span></li>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-issue"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/mari.webp" alt="" /></span>
+                        <div class="ev-text"><b>mari</b> abriu a issue <a class="link" href="#app">#57</a> Notificação duplicada no desktop</div><span class="ev-time">há 2 h</span></li>
+                    </ol>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="panel">
+                    <div class="panel-head"><span class="status"><svg class="ic xs"><use href="#i-pr"/></svg>Aberto</span><span class="label">patos-dev/app</span></div>
+                    <div class="pr-title"><h4>feat(auth): login com GitHub <span class="num">#42</span></h4></div>
+                    <div class="pr-refs"><span class="ava s"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span>pedro · 7 commits<span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span>←</span><span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span></div>
+                    <div class="rows">
+                      <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>build<span class="r hash">1m 12s</span></div>
+                      <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>testes<span class="r hash">128 passaram</span></div>
+                      <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>lint<span class="r hash">0 avisos</span></div>
+                    </div>
+                    <div class="rows">
+                      <div class="rowi"><span class="ava s"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>ana<span class="r" style="color:var(--ui-success)">aprovou</span></div>
+                      <div class="rowi"><span class="ava s"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>caio<span class="r pending">revisão pendente</span></div>
+                      <div class="rowi"><span class="k">9 arquivos</span><span class="r"><span class="add">+248</span> <span class="del">−31</span></span></div>
+                    </div>
+                    <div class="pr-actions">
+                      <button class="btn primary"><svg class="ic s"><use href="#i-merge"/></svg>Mergear</button>
+                      <button class="btn secondary">Ver diff</button>
+                      <span class="xp">mergear: +120 XP</span>
+                    </div>
+                  </div>
+
+                  <div class="panel">
+                    <div class="panel-head"><h3>Sua temporada</h3><span class="label">temporada 3 · #4</span></div>
+                    <div class="xpbar"><div class="xpbar-top"><span><b>Nível 7</b></span><span class="xp">2.340 / 3.000 XP</span></div><div class="track"><i style="width:78%"></i></div></div>
+                  </div>
+
+                  <div class="panel">
+                    <div class="call"><span class="live-dot"></span><div class="call-txt"><b>daily · em call</b><small>ana, caio e lu · 12 min</small></div>
+                      <span class="stack"><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><span class="ava"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><span class="ava"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span></span>
+                      <button class="btn secondary">Entrar</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-row">
+      <span><b>Amarelo:</b> logo, item ativo, <code>main</code>, botão Mergear.</span>
+      <span><b>Laranja:</b> XP e nível.</span>
+      <span><b>Azul:</b> links e branches.</span>
+      <span><b>Provisório:</b> item ativo em <code>--surface-elevated</code> e texto terciário em <code>--text-secondary</code> (pontos 4 e 5).</span>
+    </div>
+  </section>
+
+  <!-- ═══ e. Antes e depois ═══ -->
+  <section class="sec" id="antes-depois" data-shot="05-antes-depois">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §6.1–6.2</span>
+      <h2>Antes e depois</h2>
+      <p>A mesma marcação e o mesmo CSS. Só muda o mapa de tokens: à esquerda, <code>apps/desktop/src/design/tokens.css</code>; à direita, os tokens da landing.</p>
+    </div>
+    <div class="ba">
+      <div class="ba-col">
+        <div class="ba-label"><b>Antes</b><code>tokens atuais do app · brasa, Segoe UI, Cascadia</code></div>
+        <div class="mini theme-old" data-mini></div>
+        <ul class="ba-list">
+          <li><b>Um laranja para tudo:</b> botão, item ativo, contagem e XP têm a mesma cor.</li>
+          <li>Superfícies em cinza neutro e hairlines translúcidas.</li>
+        </ul>
+      </div>
+      <div class="ba-col">
+        <div class="ba-label"><b>Depois</b><code>design system unificado · amarelo, Geist, JetBrains Mono</code></div>
+        <div class="mini theme-new" data-mini></div>
+        <ul class="ba-list">
+          <li><b>Cada cor com um papel:</b> amarelo na ação, laranja no XP, azul nos links.</li>
+          <li>Superfícies azul-noite da marca; títulos em Bricolage.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<template id="mini-tpl">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sb-top"><div class="switcher"><span class="ws-mark">p</span><b>patos-dev</b></div></div>
+      <nav class="nav">
+        <div class="nav-item"><svg class="ic"><use href="#i-home"/></svg>Início</div>
+        <div class="nav-item"><svg class="ic"><use href="#i-message"/></svg>Mensagens<span class="count">3</span></div>
+        <div class="nav-item on"><svg class="ic"><use href="#i-pr"/></svg>Pull requests</div>
+      </nav>
+      <div class="sb-scroll">
+        <div class="cat">Texto</div>
+        <div class="chan unread"><svg class="ic s"><use href="#i-hash"/></svg>auth</div>
+        <div class="chan"><svg class="ic s"><use href="#i-hash"/></svg>deploys</div>
+        <div class="chan live"><svg class="ic s"><use href="#i-volume"/></svg>daily</div>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar"><nav class="crumbs"><span>patos-dev</span><svg class="ic xs"><use href="#i-chev-right"/></svg><span class="cur">Pull requests</span></nav><div class="palette"><svg class="ic s"><use href="#i-search"/></svg>Buscar<span class="kbd">Ctrl K</span></div></header>
+      <div class="sheet-row"><div class="sheet">
+        <div class="area-head"><h2>Pull requests</h2></div>
+        <div class="area-body">
+          <div class="panel">
+            <div class="pr-title"><h4>feat(auth): login com GitHub <span class="num">#42</span></h4></div>
+            <div class="pr-refs"><span class="branch is-main">main</span><span>←</span><span class="branch">feat/login</span><span class="hash">a1f3c9e</span></div>
+            <div class="pr-actions"><button class="btn primary">Mergear</button><button class="btn secondary">Ver diff</button><span class="xp">+120 XP</span></div>
+          </div>
+          <div class="xpbar"><div class="xpbar-top"><span><b>Nível 7</b> · <a class="link" href="#antes-depois">ver perfil</a></span><span class="xp">2.340 / 3.000 XP</span></div><div class="track"><i style="width:78%"></i></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  const root = getComputedStyle(document.documentElement)
+  const tok = (name) => root.getPropertyValue(name).trim()
+
+  // hex lidos do CSS (nunca escritos aqui)
+  document.querySelectorAll('[data-hex]').forEach((el) => { el.textContent = tok(el.dataset.hex).toUpperCase() })
+  document.querySelectorAll('[data-size]').forEach((el) => { if (el.tagName === 'SPAN' && !el.dataset.badge) el.textContent = tok(el.dataset.size) })
+
+  // contraste WCAG 2 calculado a partir dos tokens
+  const lum = (hex) => {
+    const h = hex.replace('#', '')
+    const c = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4))
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+  }
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+  const TEXT = [
+    ['--text', 'Texto principal'], ['--text-secondary', 'Texto secundário'], ['--yellow-text', 'Amarelo'],
+    ['--orange-text', 'Progressão'], ['--link', 'Link e branch'], ['--success-text', 'Sucesso'], ['--danger-text', 'Erro'],
+  ]
+  const tbody = document.querySelector('#text-table tbody')
+  for (const [t, label] of TEXT) {
+    const v = tok(t)
+    const cells = ['--bg', '--surface', '--surface-elevated'].map((s) => {
+      const r = ratio(v, tok(s))
+      const cls = r >= 4.5 ? 'ok' : r >= 3 ? 'big' : 'no'
+      return `<td><span class="cr ${cls}">${r.toFixed(1).replace('.', ',')}:1</span></td>`
+    }).join('')
+    tbody.insertAdjacentHTML('beforeend', `<tr><td><span class="dot" style="background:var(${t})"></span><span style="color:var(${t});font-weight:600">${label}</span><br><code class="hex">${t}</code></td><td><code class="hex">${v.toUpperCase()}</code></td>${cells}</tr>`)
+  }
+  {
+    const r = ratio(tok('--on-yellow'), tok('--duck-yellow'))
+    tbody.insertAdjacentHTML('beforeend', `<tr><td><span class="dot" style="background:var(--duck-yellow)"></span><span style="background:var(--duck-yellow);color:var(--on-yellow);font-weight:600;padding:0 var(--sp-1);border-radius:var(--radius-s)">Sobre amarelo</span><br><code class="hex">--on-yellow</code></td><td><code class="hex">${tok('--on-yellow').toUpperCase()}</code></td><td colspan="3"><span class="cr ok">${r.toFixed(1).replace('.', ',')}:1</span> <span class="label">sobre --duck-yellow</span></td></tr>`)
+  }
+
+  // insígnias: mesma geometria de landing-page/src/components/Badge.tsx
+  const GLYPHS = {
+    merge: 'M7 4.5a2 2 0 1 0 0 .01M7 19.5a2 2 0 1 0 0 .01M17 12a2 2 0 1 0 0 .01M7 6.5v11M7 8c0 3.5 3 4 8 4',
+    eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6',
+    flame: 'M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-6.5.3 2 1.2 3 2.3 3.2C11 8 10.5 5.5 12 3z',
+    pair: 'M9 5.5a3 3 0 1 0 0 6 3 3 0 1 0 0-6M16.5 6.5a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 1 0 0-5.2M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5M14 15c.8-.4 1.6-.6 2.5-.6 2.6 0 4.5 1.8 4.5 4.6',
+    moon: 'M19.5 14.5A8 8 0 1 1 9.5 4.5a6.2 6.2 0 0 0 10 10z',
+    shield: 'M12 3l7.5 3v5.5c0 5-3.3 8.3-7.5 9.5-4.2-1.2-7.5-4.5-7.5-9.5V6zM9 12l2 2 4-4.5',
+    rocket: 'M13.5 15.5l-5-5C10 6 14 3.5 20.5 3.5 20.5 10 18 14 13.5 15.5zM8.5 10.5L5 11l-2 3 4 .5M13.5 15.5L13 19l-3 2-.5-4M7 17l-2.5 2.5',
+    book: 'M4.5 5.5c2.5-1 5-1 7.5.5 2.5-1.5 5-1.5 7.5-.5v13c-2.5-1-5-1-7.5.5-2.5-1.5-5-1.5-7.5-.5zM12 6v13',
+  }
+  const RANK = { bronze: 1, silver: 2, gold: 3, diamond: 4 }
+  const hex = (r, cx = 50, cy = 48) => Array.from({ length: 6 }, (_, i) => { const a = (Math.PI / 3) * i - Math.PI / 2; return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}` }).join(' ')
+  let bid = 0
+  document.querySelectorAll('[data-badge]').forEach((el) => {
+    const [tier, glyph] = el.dataset.badge.split(':')
+    const size = +(el.dataset.size || 64)
+    const secret = !!el.dataset.secret
+    const id = 'b' + bid++
+    const c = `var(--tier-${tier})`
+    const pips = Array.from({ length: 4 }, (_, i) => `<circle cx="${38 + i * 8}" cy="99" r="2.6" style="fill:${i < RANK[tier] ? c : 'var(--border)'}"/>`).join('')
+    el.innerHTML = `<svg viewBox="0 0 100 104" width="${size}" height="${size * 1.04}" aria-hidden="true" style="${secret ? 'filter:blur(1.2px);opacity:.75' : ''}">
+      <defs><linearGradient id="r${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:${c}"/><stop offset=".55" style="stop-color:${c};stop-opacity:.72"/><stop offset="1" style="stop-color:${c}"/></linearGradient>
+      <radialGradient id="f${id}" cx=".35" cy=".25" r=".9"><stop offset="0" style="stop-color:var(--badge-face-hi)"/><stop offset="1" style="stop-color:var(--badge-face)"/></radialGradient></defs>
+      <polygon points="${hex(42)}" fill="url(#r${id})" stroke="url(#r${id})" stroke-width="9" stroke-linejoin="round"/>
+      <polygon points="${hex(33)}" fill="url(#f${id})" style="stroke:var(--badge-face)" stroke-width="5" stroke-linejoin="round"/>
+      <polygon points="${hex(27)}" fill="none" style="stroke:${c}" stroke-opacity=".28" stroke-width="1"/>
+      ${secret
+        ? `<text x="50" y="58" text-anchor="middle" font-weight="800" font-size="30" style="fill:${c};font-family:var(--font-display)">?</text>`
+        : `<g transform="translate(32 30) scale(1.5)" fill="none" style="stroke:${c}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${GLYPHS[glyph]}"/></g>`}
+      <path d="M22 22 L40 10" style="stroke:var(--catchlight)" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>
+      ${pips}</svg>`
+  })
+
+  // antes/depois: a mesma tela, clonada nos dois mapas de tokens
+  const tpl = document.getElementById('mini-tpl')
+  document.querySelectorAll('[data-mini]').forEach((el) => el.appendChild(tpl.content.cloneNode(true)))
+</script>
+</body>
+</html>
