@@ -99,9 +99,8 @@ async fn handle(s: AppState, socket: WebSocket) {
             ev = rx.recv() => match ev {
                 Ok(ev) => {
                     // Autorização por evento: só entrega se o usuário ainda for membro do servidor.
-                    if matches!(role_of(&s, &ev.server_id, &user_id).await, Ok(Some(_))) {
-                        if sink.send(Message::Text(ev.payload.to_string().into())).await.is_err() { break; }
-                    }
+                    if matches!(role_of(&s, &ev.server_id, &user_id).await, Ok(Some(_)))
+                        && sink.send(Message::Text(ev.payload.to_string().into())).await.is_err() { break; }
                 }
                 Err(broadcast::error::RecvError::Lagged(_)) => {
                     // Cliente lento perdeu eventos: avisa para ressincronizar via REST.
@@ -177,13 +176,11 @@ async fn client_event(s: &AppState, user_id: &str, text: &str, joined: &mut Hash
             joined.remove(cid);
             leave_voice(s, user_id, cid).await;
         }
-        Some("voice.state") => {
-            if joined.contains(cid) {
-                if let Some(sid) = channel_server(s, cid, "voice").await {
-                    s.hub.publish(&sid, json!({"type": "voice.state_changed", "server_id": sid, "channel_id": cid, "user_id": user_id,
-                        "muted": v["muted"].as_bool().unwrap_or(false), "deafened": v["deafened"].as_bool().unwrap_or(false),
-                        "camera": v["camera"].as_bool().unwrap_or(false), "screen": v["screen"].as_bool().unwrap_or(false)}));
-                }
+        Some("voice.state") if joined.contains(cid) => {
+            if let Some(sid) = channel_server(s, cid, "voice").await {
+                s.hub.publish(&sid, json!({"type": "voice.state_changed", "server_id": sid, "channel_id": cid, "user_id": user_id,
+                    "muted": v["muted"].as_bool().unwrap_or(false), "deafened": v["deafened"].as_bool().unwrap_or(false),
+                    "camera": v["camera"].as_bool().unwrap_or(false), "screen": v["screen"].as_bool().unwrap_or(false)}));
             }
         }
         _ => {}
