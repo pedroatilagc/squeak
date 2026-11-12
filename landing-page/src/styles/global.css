@@ -863,6 +863,30 @@ b {
 .feed-item svg {
   flex: none;
 }
+
+/* Foto de perfil das demos (src/components/Avatar.tsx) */
+.ava {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--duck-yellow) 30%, var(--surface-elevated)), var(--surface-elevated) 75%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent);
+  vertical-align: middle;
+}
+.ava img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* o rosto fica no centro do círculo (a arte tem o topete em cima) */
+  transform: translateY(5%) scale(1.06);
+  user-select: none;
+}
+[data-theme='light'] .ava {
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--duck-yellow) 30%, #fff), #fff 75%);
+}
 .feed-text {
   flex: 1;
   min-width: 0;

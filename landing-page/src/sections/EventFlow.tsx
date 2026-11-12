@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Commit } from '../components/Commit'
 import { Badge } from '../components/Badge'
-import { DuckAvatar } from '../components/DuckAvatar'
+import { Avatar } from '../components/Avatar'
 import { gsap, MQ, useGSAP } from '../lib/motion'
 
 /**
@@ -122,13 +122,13 @@ export function EventFlow() {
               <span className="flow-dest-k">feed</span>
               <ul className="flow-feed">
                 <li className="flow-feed-new">
-                  <DuckAvatar accessory="headset" size={20} /> <b>pedro</b> mergeou <b>#42</b> · login com GitHub
+                  <Avatar who="pedro" size={20} /> <b>pedro</b> mergeou <b>#42</b> · login com GitHub
                 </li>
                 <li>
-                  <DuckAvatar accessory="shades" size={20} /> <b>ana</b> aprovou <b>#42</b>
+                  <Avatar who="ana" size={20} /> <b>ana</b> aprovou <b>#42</b>
                 </li>
                 <li>
-                  <DuckAvatar accessory="beanie" size={20} /> <b>caio</b> abriu <b>#51</b>
+                  <Avatar who="caio" size={20} /> <b>caio</b> abriu <b>#51</b>
                 </li>
               </ul>
             </div>

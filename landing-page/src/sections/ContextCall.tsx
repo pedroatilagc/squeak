@@ -1,14 +1,14 @@
 import { useRef } from 'react'
 import { Commit } from '../components/Commit'
-import { DuckAvatar, type Accessory } from '../components/DuckAvatar'
+import { Avatar, type Person } from '../components/Avatar'
 import { gsap, MQ, useGSAP } from '../lib/motion'
 
-type P = { name: string; acc: Accessory; task: string; branch: string; issue: string; state: 'ok' | 'warn'; speaking?: boolean; status: string }
+type P = { name: Person; task: string; branch: string; issue: string; state: 'ok' | 'warn'; speaking?: boolean; status: string }
 
 const PEOPLE: P[] = [
-  { name: 'pedro', acc: 'headset', task: 'Login com GitHub', branch: 'feat/login', issue: '#42', state: 'ok', status: 'mergeado ontem', speaking: true },
-  { name: 'ana', acc: 'shades', task: 'Review do fluxo de auth', branch: 'review/auth', issue: '#38', state: 'ok', status: '2 reviews hoje' },
-  { name: 'caio', acc: 'beanie', task: 'Bug no upload de avatar', branch: 'fix/avatar-upload', issue: '#51', state: 'warn', status: 'travado: precisa de ajuda' },
+  { name: 'pedro', task: 'Login com GitHub', branch: 'feat/login', issue: '#42', state: 'ok', status: 'mergeado ontem', speaking: true },
+  { name: 'ana', task: 'Review do fluxo de auth', branch: 'review/auth', issue: '#38', state: 'ok', status: '2 reviews hoje' },
+  { name: 'caio', task: 'Bug no upload de avatar', branch: 'fix/avatar-upload', issue: '#51', state: 'warn', status: 'travado: precisa de ajuda' },
 ]
 
 export function ContextCall() {
@@ -65,7 +65,7 @@ export function ContextCall() {
             {PEOPLE.map((p) => (
               <div key={p.name} className="call-person">
                 <div className={`call-tile ${p.speaking ? 'is-speaking' : ''}`}>
-                  <DuckAvatar accessory={p.acc} size={88} mood={p.speaking ? 'happy' : 'calm'} />
+                  <Avatar who={p.name} size={88} />
                   <span className="call-name">{p.name}</span>
                   {p.speaking && <span className="call-wave" aria-hidden="true"><i /><i /><i /></span>}
                 </div>

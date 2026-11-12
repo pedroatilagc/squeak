@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Commit } from '../components/Commit'
-import { DuckAvatar } from '../components/DuckAvatar'
+import { Avatar, type Person } from '../components/Avatar'
 import { Badge } from '../components/Badge'
 import { gsap, MQ, ScrollTrigger, useGSAP } from '../lib/motion'
 
@@ -23,21 +23,21 @@ function PreviewComms() {
         <span className="pv-voice">
           <span className="pv-voice-name">daily</span>
           <span className="pv-voice-people">
-            <DuckAvatar accessory="headset" size={20} />
-            <DuckAvatar accessory="shades" size={20} />
-            <DuckAvatar accessory="beanie" size={20} />
+            <Avatar who="pedro" size={20} />
+            <Avatar who="ana" size={20} />
+            <Avatar who="caio" size={20} />
           </span>
         </span>
       </div>
       <div className="pv-chat">
         <div className="pv-msg">
-          <DuckAvatar accessory="beanie" size={30} />
+          <Avatar who="caio" size={30} />
           <p>
             <b>caio</b> alguém olha o erro do upload comigo?
           </p>
         </div>
         <div className="pv-msg">
-          <DuckAvatar accessory="shades" size={30} />
+          <Avatar who="ana" size={30} />
           <p>
             <b>ana</b> bora, compartilha a tela na <span className="pv-chip">#daily</span>
           </p>
@@ -58,9 +58,9 @@ function PreviewComms() {
 function PreviewExec() {
   const cols: [string, [string, string, string?][]][] = [
     ['Backlog', [['#57', 'Exportar relatório'], ['#60', 'Dark mode no app']]],
-    ['Em andamento', [['#51', 'Bug no upload de avatar', 'beanie']]],
-    ['Review', [['#42', 'Login com GitHub', 'headset']]],
-    ['Done', [['#38', 'Fluxo de auth', 'shades']]],
+    ['Em andamento', [['#51', 'Bug no upload de avatar', 'caio']]],
+    ['Review', [['#42', 'Login com GitHub', 'pedro']]],
+    ['Done', [['#38', 'Fluxo de auth', 'ana']]],
   ]
   return (
     <div className="pv pv-exec">
@@ -83,7 +83,7 @@ function PreviewExec() {
                 <span className="pv-card-t">{t}</span>
                 <span className="pv-card-meta">
                   <span className="pv-chip"># auth</span>
-                  {who && <DuckAvatar accessory={who as 'beanie'} size={18} />}
+                  {who && <Avatar who={who as Person} size={18} />}
                 </span>
               </span>
             ))}
@@ -129,7 +129,7 @@ function PreviewRep() {
   return (
     <div className="pv pv-rep">
       <div className="pv-rep-head">
-        <DuckAvatar accessory="shades" size={56} mood="happy" />
+        <Avatar who="ana" size={56} />
         <div>
           <b className="pv-rep-name">ana.dev</b>
           <span className="pv-muted">Backend · Go · Postgres</span>

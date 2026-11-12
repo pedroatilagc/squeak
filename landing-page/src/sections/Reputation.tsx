@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Commit } from '../components/Commit'
 import { Badge } from '../components/Badge'
-import { DuckAvatar } from '../components/DuckAvatar'
+import { Avatar } from '../components/Avatar'
 import { pushToast } from '../lib/app'
 import { squeak } from '../lib/sound'
 import { useReducedMotion } from '../lib/motion'
@@ -38,7 +38,7 @@ function DevCard() {
         </div>
         <div className="devcard-id">
           <span className="devcard-ava">
-            <DuckAvatar accessory="shades" size={84} mood="happy" />
+            <Avatar who="ana" size={84} />
           </span>
           <b className="devcard-name">ana.dev</b>
           <span className="devcard-stack">Go · Postgres · Kubernetes</span>
