@@ -1,8 +1,28 @@
 # Integração GitHub (contrato da API e configuração)
 
-Estado: **código implementado e testado com mocks**. A integração real com o GitHub está **pendente de configuração**
-(é preciso criar a GitHub App abaixo). Sem credenciais, a API responde `status: "unconfigured"` e a interface mostra isso.
-Nada aqui foi validado contra o GitHub de verdade.
+Estado: **código implementado, testado com mocks e validado contra o GitHub real em 12/11/2026** com uma GitHub App
+sem webhook (`GITHUB_MOCK=0`). Sem credenciais, a API responde `status: "unconfigured"` e a interface mostra isso.
+
+Validado pela API, todos com `"mock": false`:
+
+- `GET /integrations` (`disconnected` → `connected` com a conta real) e o Device Flow completo (`device` e `device/poll`).
+- `GET /github/profile`, `/github/contributions`, `/github/activity` e `/github/pull-requests` (os dois `role`), incluindo o
+  estado de CI dos PRs (`checks`).
+- `GET /github/installations` e `/github/installations/{id}/repositories` (repositórios públicos e privados da instalação;
+  instalação invisível → `404`).
+- `DELETE /integrations/github` (idempotente; depois dele as rotas `/github/*` respondem `409 github_disconnected`).
+
+Ainda **não validado**: renovação do token depois de 8 h, webhooks, feed e PRs do servidor (dependem de webhook e de URL
+pública), vínculo de repositórios a um servidor (`PUT /servers/{id}/github/repos`) e as telas do app desktop no modo real.
+
+Cuidados no modo real:
+
+- Quem conectou com `GITHUB_MOCK=1` tem uma conta simulada no banco local. Desconecte em Integrações antes de trocar para o
+  modo real, ou apague `data/squak.db`.
+- Trocar `GITHUB_TOKEN_KEY` depois de conectar deixa os tokens gravados ilegíveis: desconecte e conecte de novo.
+- O token de usuário de uma GitHub App só enxerga repositórios privados onde a app está instalada.
+- Cada pessoa gera a própria `GITHUB_TOKEN_KEY`. Client ID, client secret e slug são os mesmos para todos e circulam só por
+  canal privado, nunca em issue, PR ou commit.
 
 ## Princípios de segurança
 
@@ -41,15 +61,25 @@ Estados de configuração: faltou qualquer uma de `CLIENT_ID`, `CLIENT_SECRET`, 
 2. Nome e Homepage URL à sua escolha. **Callback URL**: não é usada pelo Device Flow, mas o formulário exige um valor
    (ex.: `http://127.0.0.1:8080/integrations/github/callback`). Desmarque "Expire user authorization tokens"? **Não**: deixe marcado
    (tokens de 8 h com refresh). Marque **Enable Device Flow**.
-3. **Webhook**: Active; URL = `https://<seu-host-publico>/webhooks/github` (use um túnel como `cloudflared`/`ngrok` em dev);
-   Secret = valor de `GITHUB_WEBHOOK_SECRET`.
-4. Permissões de **repositório** (somente leitura): Contents, Metadata, Pull requests, Issues, Checks, Actions, Commit statuses.
+3. **Webhook**:
+   - **Sem webhook** (configuração validada): desmarque Active e deixe `GITHUB_WEBHOOK_SECRET` vazio. Perfil, contribuições,
+     atividade, PRs do usuário e instalações funcionam; o feed e os PRs do servidor ficam vazios.
+   - **Com webhook**: Active; URL = `https://<seu-host-publico>/webhooks/github` (use um túnel como `cloudflared`/`ngrok` em dev);
+     Secret = valor de `GITHUB_WEBHOOK_SECRET`.
+4. Permissões de **repositório** (somente leitura):
+   - **Sem webhook**: Metadata, Pull requests, Checks, Commit statuses.
+   - **Com webhook**, some: Contents, Issues, Actions (exigidas pelos eventos `push`, `issues` e `workflow_run`).
+
    Permissões de **conta**: nenhuma é necessária para perfil público e contribuições públicas
    (as contribuições privadas aparecem como contagem anônima se o usuário habilitar "Private contributions" no perfil do GitHub).
-5. Eventos assinados: `push`, `pull_request`, `pull_request_review`, `issues`, `issue_comment`, `check_suite`, `workflow_run`.
-6. Crie a app, copie **Client ID**, gere um **Client secret** e anote o **slug** (final da URL pública da app).
-7. Preencha o `.env`, reinicie a API e, em Integrações → GitHub, clique em **Conectar**.
-8. Para ligar repositórios a um workspace: instale a app na conta/organização (botão "Instalar a GitHub App" na tela do workspace).
+5. Eventos assinados: nenhum sem webhook. Com webhook: `push`, `pull_request`, `pull_request_review`, `issues`,
+   `issue_comment`, `check_suite`, `workflow_run`.
+6. "Where can this GitHub App be installed": **Any account**, se outra pessoa do time for instalar na conta dela.
+7. Crie a app, copie **Client ID** (começa com `Iv23`), gere um **Client secret** (aba General, seção "Client secrets") e
+   anote o **slug** (final da URL da app). O App ID não é usado. O GitHub exige gerar uma **private key** antes de liberar a
+   instalação: o Squak não usa o arquivo `.pem`, guarde fora do repositório.
+8. Preencha o `.env` com `GITHUB_MOCK=0`, reinicie a API e, em Integrações → GitHub, clique em **Conectar**.
+9. Para ligar repositórios a um workspace: instale a app na conta/organização (botão "Instalar a GitHub App" na tela do workspace).
 
 ## Dados guardados (migração `0002_github.sql`)
 
