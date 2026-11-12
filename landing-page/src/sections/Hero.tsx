@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Commit } from '../components/Commit'
 import { waitlistToast } from '../components/StatusBar'
 import { DuckAvatar, type Accessory } from '../components/DuckAvatar'
+import { Wordmark } from '../components/Wordmark'
 import { useReducedMotion } from '../lib/motion'
-import { PixelSqueak } from '../mascot/pixel/PixelSqueak'
+import { PixelSqueak, type PixelSqueakHandle } from '../mascot/pixel/PixelSqueak'
+import { afterBoot } from './Boot'
 
 type Ev = { who: string; acc: Accessory; text: React.ReactNode; xp?: string }
 
@@ -40,7 +42,7 @@ function EventFeed() {
         {items.map(({ key, ev }, i) => (
           <li key={key} className="feed-item" style={{ opacity: 1 - i * 0.17 }}>
             {ev.who === 'squeak' ? (
-              <span className="feed-sys" aria-hidden="true">◆</span>
+              <img className="feed-sys" src="/brand/squeak-logo-256.webp" alt="" width={22} height={20} />
             ) : (
               <DuckAvatar accessory={ev.acc} size={22} />
             )}
@@ -55,23 +57,66 @@ function EventFeed() {
   )
 }
 
+/* ── <squeak/>: o nome digitado como um componente que se fecha sozinho ── */
+
+const SEQ = 'squeak'
+
+function SqueakTag({ start, onDone, onPoke }: { start: boolean; onDone: () => void; onPoke: () => void }) {
+  const reduced = useReducedMotion()
+  const [n, setN] = useState(reduced ? SEQ.length : 0)
+  const done = useRef(onDone)
+  done.current = onDone
+
+  useEffect(() => {
+    if (!start) return
+    if (reduced) {
+      setN(SEQ.length)
+      done.current()
+      return
+    }
+    setN(0)
+    const timers: number[] = []
+    let t = 420
+    for (let i = 1; i <= SEQ.length; i++) {
+      // digitação humana: letras com ritmo irregular, uma pausa antes de fechar a tag
+      t += 80 + Math.random() * 90
+      timers.push(window.setTimeout(() => setN(i), t))
+    }
+    timers.push(window.setTimeout(() => done.current(), t + 140))
+    return () => timers.forEach(clearTimeout)
+  }, [start, reduced])
+
+  const closed = n >= SEQ.length
+  return (
+    <p className={`tag ${closed ? 'is-closed' : ''}`} aria-hidden="true" onClick={onPoke}>
+      <span className="tag-text">{SEQ.slice(0, n)}</span>
+      <span className="tag-caret" />
+    </p>
+  )
+}
+
 export function Hero() {
+  const [ready, setReady] = useState(false)
+  const duck = useRef<PixelSqueakHandle>(null)
+
+  useEffect(() => afterBoot(() => setReady(true)), [])
+
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero-stage">
-        <PixelSqueak maxScale={5} />
+        <PixelSqueak ref={duck} maxScale={5} />
       </div>
 
       <header className="hero-top wrap">
-        <span className="wordmark">
-          <DuckAvatar size={28} /> squeak
-        </span>
+        <Wordmark />
         <span className="hero-version">v0.1.0-alpha · lista de espera aberta</span>
       </header>
 
       <div className="hero-copy wrap">
         <Commit hash="e1f0a2c" msg="init: seu time num lugar só" />
+        <SqueakTag start={ready} onDone={() => {}} onPoke={() => duck.current?.poke()} />
         <h1 id="hero-title" className="hero-title">
+          <span className="sr-only">Squeak: </span>
           Seu time inteiro <span className="nowrap">num lugar só.</span>
         </h1>
         <p className="hero-lead">

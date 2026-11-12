@@ -75,12 +75,60 @@ do amarelo.
 | Texto | **Geist** | Neutra, técnica, excelente em tamanhos pequenos. Não compete com a display. |
 | Mono | **JetBrains Mono** | Commits, status bar, labels, código. É a "voz de máquina" da página. |
 
-- Escala fluida com `clamp()` em `--step--1` … `--step-5`. Hero em `--step-4` (até 120px).
+- Escala fluida com `clamp()` em `--step--1` … `--step-5`. `<squeak/>` do hero em clamp próprio (até 140px); a frase do hero em `--step-3`.
 - Tracking negativo nos títulos (`-0.032em` a `-0.038em`); testado para não grudar letras.
 - **Mono é estrutura, não decoração**: só aparece onde a informação é de máquina (hash, branch,
   XP, contadores, comandos).
 
-## 4. Mascote
+## 4. Logo e assinatura
+
+**A logo é a cabeça do Squeak de óculos thug life**, em ilustração lisa e brilhante (a arte original
+fica em `tools/brand/squeak-logo-source.png`). Ela convive com o mascote em pixel art: a logo é a
+cara da marca, o pixel art é o personagem que anda pela página.
+
+- **Arquivos** (gerados por `python tools/brand-assets.py`, nunca editados à mão):
+  `public/brand/squeak-logo.png|.webp` (1024px, transparente), `squeak-logo-256.webp` (cabeçalho,
+  feed), `favicon.png` (64),
+  `favicon-32.png`, `apple-touch-icon.png` (180, com fundo `--bg`).
+- **Nome como componente: `<squeak/>`.** O nome se escreve como uma tag JSX que se fecha sozinha:
+  um componente que já traz tudo dentro, assim como o produto. `squeak` em Bricolage 800; `<` e `/>`
+  em JetBrains Mono 400–500, em `--yellow-text`. Os sinais ficam ~0,75em do nome, para o nome
+  continuar mandando.
+- **Logo em camadas** (`src/components/DuckLogo.tsx`): pato sem óculos (`squeak-duck.webp`, cabeça
+  reconstruída pelo script), olhos em SVG e óculos soltos (`squeak-glasses.webp`). No hover/foco de
+  qualquer elemento com a classe `dl-host`, **os óculos sobem pra cabeça e o pato pisca um olho**;
+  ao sair, os óculos descem de volta. Vale no cabeçalho e no hero.
+- **Assinatura** (`src/components/Wordmark.tsx`): logo + `<squeak/>`, 34px no cabeçalho.
+  No hover, o pato inclina a cabeça.
+- Em texto corrido e comandos, o nome continua minúsculo e sem tag (`squeak init`).
+- Respiro mínimo em volta da logo: 1/4 da largura. Fundo transparente sobre `--bg` e `--surface`
+  nos dois temas; a arte já tem contorno laranja, não precisa de borda.
+
+### Hero
+
+- **`<squeak/>` digitado na chegada** (depois do boot `$ squeak init`): o `<` aparece com o cursor,
+  as letras entram num ritmo humano irregular, uma pausa, e o `/>` fecha a tag: os sinais acendem em
+  amarelo com um pulo de mola. No hover, as letras dão um pulinho em onda; o clique aperta o pato.
+- **O pato nada num mar de código** (`src/hero/sea.ts`, canvas): não existe água desenhada, nem
+  reflexo. A "água" são só fileiras de código, caracteres e chips de pull request/XP (`#42 merged`,
+  `#51 review`, `+120 XP`) em perspectiva, que se movem com física de água: soma de ondas com
+  dispersão de água funda, órbita quase circular de cada bloco, correntes em velocidades diferentes
+  entre fileiras vizinhas (os caracteres passam uns pelos outros) e cristas que clareiam.
+- **Pato e mar são um sistema só**: o pato (`squeak-swim.webp`) é uma boia com mola amortecida que
+  segue a altura e a inclinação da onda embaixo do casco; o casco some abaixo da linha d'água e as
+  fileiras da frente passam por cima dele.
+- **Desempenho**: blocos de 3 caracteres pré-renderizados (4 no celular), pato pré-renderizado no
+  tamanho final, no máximo 60 quadros/s (30 em tela pequena), resolução limitada e qualidade que
+  baixa sozinha se os quadros atrasarem. O movimento é por tempo: a velocidade do mar não muda com
+  a taxa de quadros. Fora da tela, a animação para.
+- **Interação**: o cursor na água abre anéis de ondulação; clicar na água também. **Apertar o pato**
+  afunda, levanta respingos de caracteres (`{ } ; => ✓`), toca o squeak e solta `squeak!`; a cada 4
+  apertos, um conselho de rubber duck. Quando a tag `<squeak/>` fecha, o pato dá um mergulho.
+- O título continua sendo a frase ("Seu time inteiro num lugar só."); o `<squeak/>` gigante é
+  decorativo para leitores de tela, que ouvem "Squeak:" no início do h1.
+- Com `prefers-reduced-motion`, tudo aparece pronto: tag fechada e o mar num quadro parado.
+
+## 5. Mascote
 
 **O Squeak é um personagem 2D em pixel art, animado e interativo.** (O 3D foi abandonado na v3.)
 
@@ -159,7 +207,7 @@ terminal completo.
 
 **Nenhuma imagem do mascote vem de IA generativa.**
 
-## 5. Elementos-assinatura
+## 6. Elementos-assinatura
 
 1. **Grafo do git como espinha.** Linha vertical à esquerda que se desenha com o scroll. Cada
    seção abre com um commit (`hash` + mensagem convencional): é o rótulo real da seção, não um
@@ -175,7 +223,7 @@ terminal completo.
 Recursos de apoio usados com parcimônia: moldura de janela própria (sem imitar macOS/Windows),
 diff, terminal, file tree, toasts de XP.
 
-## 6. Movimento
+## 7. Movimento
 
 - Easing padrão `cubic-bezier(0.22, 1, 0.36, 1)`; "spring" só para recompensas (badge, toast, XP).
 - Storytelling com GSAP ScrollTrigger em três momentos fixados (problema, pilares, fluxo). O resto
@@ -184,7 +232,7 @@ diff, terminal, file tree, toasts de XP.
   da animação (as janelas já colapsadas, o card já em Done).
 - Mobile (< 900px): sem pin, sem 3D (imagem estática), mesmas informações em sequência.
 
-## 7. Escritório virtual (pixel art)
+## 8. Escritório virtual (pixel art)
 
 - Resolução interna **384×216**, sempre escalada por **fator inteiro** (pixels nítidos).
 - **Paleta própria de 34 cores** (`--px-*` em `tokens.css`), derivada da marca. A cena é noturna
@@ -198,14 +246,14 @@ diff, terminal, file tree, toasts de XP.
 - Vida ambiente: código rolando nos monitores, estrelas e estrela cadente, LEDs do servidor, neon
   que pisca, planta balançando, robô aspirador, relógio do jogo.
 
-## 8. Iconografia e insígnias
+## 9. Iconografia e insígnias
 
 - Insígnias são **medalhões hexagonais em SVG** (`Badge.tsx`): anel no tom do tier, face esmaltada
   escura, glifo em traço 1,7px, quatro "pips" de tier embaixo. Uma única linguagem para todas, de
   sistema ou de empresa.
 - Insígnia secreta = mesmo medalhão desfocado com `?`.
 
-## 9. Tailwind
+## 10. Tailwind
 
 `global.css` mapeia os tokens em `@theme inline` (`bg-surface`, `text-duck`, `font-mono`...).
 A landing usa CSS semântico por seção, porque cada seção tem um conceito visual próprio. O

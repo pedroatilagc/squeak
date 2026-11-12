@@ -80,7 +80,8 @@ O que considero forte e manteria como padrão: espinha do git + commits como ró
 
 | Arquivo | Origem | Como regenerar |
 |---|---|---|
-| Squeak (hero e fechamento) | Desenhado em tempo real pelo motor pixel (`src/mascot/pixel/`) | — |
+| Logo (hero, cabeçalho, feed, favicon, og-image) | Arte enviada pelo Pedro (`tools/brand/squeak-logo-source.png`), recortada por `tools/brand-assets.py` | — |
+| Squeak pixel (fechamento, escritório) | Desenhado em tempo real pelo motor pixel (`src/mascot/pixel/`) | — |
 | `public/assets/mascot/og-image.jpg` (1200×630) | HTML com as fontes da marca + quadro do motor pixel | `npm run dev`, abrir `/tools/og.html`, capturar em 1200×630 |
 | `public/favicon.png` (64×64) | Recorte da cabeça do quadro do motor pixel | `/tools/favicon.html`, capturar em 64×64 com fundo transparente |
 | Bancada de poses | `/tools/pixel-duck.html?p=idle,quack,deal,type,jump,angry&s=4` | — |

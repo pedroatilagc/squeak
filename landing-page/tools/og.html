@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <title>Squeak · og-image</title>
-    <!-- Ferramenta de desenvolvimento: compõe a imagem de compartilhamento (1200x630). -->
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <!-- Ferramenta de desenvolvimento: compõe a imagem de compartilhamento (1200x630).
+         Gerar: abrir /tools/og.html no dev server a 1200x630, capturar e salvar em public/assets/mascot/og-image.jpg -->
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/styles/tokens.css" />
     <style>
 
@@ -16,9 +17,12 @@
       .copy { position: absolute; left: 132px; top: 50%; transform: translateY(-50%); }
       .hash { font: 500 22px 'JetBrains Mono'; color: var(--text-secondary); margin: 0 0 18px; }
       .hash b { color: var(--duck-yellow); font-weight: 500; }
-      h1 { margin: 0; font: 800 172px/0.82 'Bricolage Grotesque'; font-variation-settings: 'opsz' 96; letter-spacing: -0.05em; }
+      h1 { margin: 0; font: 800 132px/0.9 'Bricolage Grotesque'; font-variation-settings: 'opsz' 96; letter-spacing: -0.05em; }
       p { margin: 26px 0 0; font: 500 30px 'JetBrains Mono'; color: var(--text-secondary); }
-      canvas { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 512px; height: 448px; image-rendering: pixelated; }
+      h1 .br { font: 400 0.72em/1 'JetBrains Mono'; letter-spacing: -0.1em; color: var(--duck-yellow); }
+      h1 .br:last-child { margin-left: -0.02em; }
+      .glow { position: absolute; right: -40px; top: 50%; width: 600px; height: 600px; transform: translateY(-50%); background: radial-gradient(closest-side, var(--glow-yellow), transparent 75%); }
+      .logo { position: absolute; right: 56px; top: 50%; transform: translateY(-52%) rotate(-4deg); width: 430px; filter: drop-shadow(0 22px 34px rgba(0,0,0,.4)); }
       .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--duck-yellow); }
     </style>
   </head>
@@ -28,26 +32,17 @@
       <span class="dot" style="top: 150px"></span>
       <span class="dot" style="top: 300px"></span>
       <span class="dot on" style="top: 450px"></span>
-      <canvas id="duck" width="128" height="112"></canvas>
+      <div class="glow"></div>
+      <img class="logo" src="/brand/squeak-logo.webp" alt="" />
       <div class="copy">
         <p class="hash"><b>e1f0a2c</b> init: seu time num lugar só</p>
-        <h1>squeak</h1>
+        <h1><span class="br">&lt;</span>squeak<span class="br">/&gt;</span></h1>
         <p>entregou? contou.</p>
       </div>
       <div class="bar"></div>
     </div>
-    <script type="module">
-      import { render, W, H, PAL_KEYS } from '/src/mascot/pixel/render.ts'
-      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
-      const hex = (v) => { const n = parseInt(v.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
-      const pal = {}
-      for (const k of PAL_KEYS) pal[k] = hex(k === 'white' ? css('--catchlight') : k === 'black' ? css('--px-ink') : css('--sq-' + k))
-      const c = document.getElementById('duck')
-      const ctx = c.getContext('2d')
-      const img = ctx.createImageData(W, H)
-      render({ t: 1.3, bob: 0, squashX: 1, squashY: 1, jump: 0, lean: 0.03, headX: 1, headY: 0, tail: 0, beakOpen: 0, glassLift: 0, brow: 'smug', laptop: 0, typing: 0, glint: 0.45, flip: false, ripples: [{ age: 0.35, strength: 1 }], splash: [], glow: 0, pond: true }, pal, img)
-      ctx.putImageData(img, 0, 0)
-      document.body.dataset.ready = '1'
+    <script>
+      document.fonts.ready.then(() => (document.body.dataset.ready = '1'))
     </script>
   </body>
 </html>
