@@ -119,7 +119,7 @@ Requisitos: **Rust** (testado com 1.99), **Node.js** (testado com 24), **podman*
 ```powershell
 Copy-Item .env.example .env
 ```
-Edite o `.env` e troque `LIVEKIT_API_SECRET` por um valor longo e aleatório. O `.env` não é versionado.
+Edite o `.env` e troque `LIVEKIT_API_SECRET` por um valor longo e aleatório. A integração GitHub vem em modo simulado (`GITHUB_MOCK=1`); as credenciais reais estão descritas em [docs/GITHUB_INTEGRATION.md](docs/GITHUB_INTEGRATION.md). O `.env` não é versionado.
 
 ### 2. Subir o LiveKit com podman
 ```powershell
