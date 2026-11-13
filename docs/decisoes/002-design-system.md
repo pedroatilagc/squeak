@@ -2,11 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | Proposto |
+| **Status** | Aceito |
 | **Data** | 2026-11-12 |
 | **Autores** | Pedro, Samuel |
+| **Revisão** | Samuel, no PR da issue #3 (seção 7) |
 | **Fecha** | issue #3 |
 | **Depende de** | issue #7 (reorganização do repositório), para o pacote `packages/design-tokens` |
+| **Validar na Sprint 1** | pontos 1, 2, 3, 8, 10, 11 e 14, ao aplicar o design system no app (seção 7.3) |
 
 ## Sumário
 
@@ -21,19 +23,20 @@
   - a grade de 4 px;
   - a escala tipográfica fixa e densa (corpo de 13,5 px);
   - as medidas de layout, os ícones e os componentes de estado.
+- **Revisão:** os 16 pontos em aberto foram decididos pelo Samuel (seção 7). Entram tokens novos: `--text-tertiary`, `--border-control`, três superfícies interativas, `--code-function` e `--code-constant`, e `--gutter` do app vira `--app-gutter`. Sete pontos ficam para validação visual na Sprint 1.
 - **Próximo passo:** aplicar na Sprint 1, na issue "Aplicar o design system unificado no app". Hoje a fonte única é o `tokens.css` da landing. Depois da issue #7, ela vira `packages/design-tokens`.
-- **Pontos em aberto:** 16 itens para a revisão do Samuel, na seção 7. Os principais são a troca de Segoe UI por Geist no Windows, a status bar amarela e os tokens de hover e pressionado.
 
 **Fontes desta especificação:**
 
 | Arquivo | Uso neste ADR |
 |---|---|
-| `landing-page/src/styles/tokens.css` | Valores de todos os tokens |
+| `landing-page/src/styles/tokens.css` | Valores de todos os tokens que já existem |
 | `landing-page/docs/brand.md` | Regras de uso |
 | `landing-page/docs/alinhamento.md` | Decisões pendentes |
 | `apps/desktop/src/design/tokens.css` e `docs/REDESIGN.md` | Sistema atual do app, só para comparar e migrar |
+| Revisão do Samuel no PR da issue #3 | Decisões e valores dos tokens novos (seção 7) |
 
-Valores que não existem nesses arquivos não foram inventados: eles aparecem como **aberto**.
+Nenhum valor foi inventado. Os tokens novos usam só os valores que a revisão definiu. O que a revisão não definiu aparece como **a definir**.
 
 ---
 
@@ -43,17 +46,18 @@ Valores que não existem nesses arquivos não foram inventados: eles aparecem co
 
 Como a prévia foi montada:
 
-- Ela importa por caminho relativo `landing-page/src/styles/tokens.css` e `apps/desktop/src/design/tokens.css`. Do arquivo do app, usa só a escala `--t-*`, a grade `--sp-*`, as medidas de layout e os tokens antigos do "antes".
-- O HTML não tem nenhum valor de cor, fonte ou espaço escrito à mão. Os hex e as razões de contraste exibidos são lidos do CSS quando a página abre.
+- Ela importa por caminho relativo `landing-page/src/styles/tokens.css` e `apps/desktop/src/design/tokens.css`. Do arquivo do app, usa só a escala `--t-*`, a grade `--sp-*`, `--r-1`, as medidas de layout e os tokens antigos do "antes".
+- Os tokens novos da revisão ainda não existem em `tokens.css`. Eles ficam num único bloco, `<style id="tokens-da-revisao">`, no topo do HTML: `--text-tertiary`, `--border-control` e `--shadow-pop`. Esse bloco sai do HTML quando os tokens entrarem em `tokens.css`, na Sprint 1.
+- Fora esse bloco, o HTML não tem valor de cor, fonte ou espaço escrito à mão. A única outra cor literal são os dados fictícios do calendário de contribuições, que imitam o que a API do GitHub devolve (seção 7.3, ponto 14). Os hex e as razões de contraste exibidos são lidos do CSS quando a página abre.
 - Ela mostra só o tema escuro.
 
-As capturas abaixo foram feitas em Chrome headless a 2×.
+As capturas abaixo foram feitas em Chrome headless a 2×, no Windows. As capturas dos pontos a validar estão na seção 7.3.
 
 ### Paleta
 
-Marca, superfícies, texto com contraste calculado sobre cada superfície, semânticas e tiers de insígnia.
+Marca, superfícies, texto com contraste calculado sobre cada superfície (incluindo `--text-tertiary`), bordas contra o mínimo de 3:1, semânticas e tiers de insígnia.
 
-![Paleta: cores de marca, superfícies aninhadas, tabela de contraste do texto, cores semânticas e tiers de insígnia](assets/002/01-paleta.png)
+![Paleta: cores de marca, superfícies aninhadas, tabelas de contraste do texto e das bordas, cores semânticas e tiers de insígnia](assets/002/01-paleta.png)
 
 ### Tipografia
 
@@ -63,7 +67,7 @@ As quatro famílias com exemplos reais e a escala fixa do app (seção 5.1), com
 
 ### Componentes básicos
 
-Botão primário e secundário (com o foco por teclado), campo de texto, insígnias por tier, barra de XP, link e branch, toast de XP, status e contagem.
+Botão primário (repouso, hover em `--duck-highlight` e desabilitado), botão secundário com o foco por teclado, campo de texto com `--border-control`, insígnias por tier, barra de XP, link e branch, toast de XP com `--shadow-pop`, status e contagem.
 
 ![Componentes básicos na densidade do app](assets/002/03-componentes.png)
 
@@ -75,7 +79,7 @@ A casca atual do app (`Shell.tsx` e `REDESIGN.md`) com os tokens novos:
 - topbar com a localização e a paleta de comandos;
 - feed de atividade e card de PR na área de conteúdo.
 
-Os dados são fictícios.
+O texto terciário usa `--text-tertiary` sobre `--bg` e `--surface`, e `--text-secondary` nos painéis elevados. Os dados são fictícios.
 
 ![Mock da tela Início do app desktop no estilo novo](assets/002/04-app.png)
 
@@ -89,14 +93,14 @@ A mesma marcação e o mesmo CSS, mudando só o mapa de tokens.
 
 ![Antes e depois: a mesma tela com os tokens atuais do app e com os tokens da landing](assets/002/05-antes-depois.png)
 
-**O que a prévia assume provisoriamente:**
+**O que a prévia ainda assume, porque a revisão não definiu o valor:**
 
-| Elemento | Token usado | Ponto em aberto |
+| Elemento | Usado na prévia | Token que vai substituir |
 |---|---|---|
-| Item ativo da barra lateral | `--surface-elevated` | 4 |
-| Texto terciário | `--text-secondary` | 5 |
-| Contagem de não lidas | Neutra, sem amarelo | — |
-| Status bar | Não aparece | 3 |
+| Item ativo da barra lateral | `--surface-elevated` | Superfície interativa "selecionado" (ponto 4) |
+| Célula vazia do calendário | `--border` | Superfície interativa "fundo" (ponto 4) |
+| Nomes de função e números no código | `--text` | `--code-function` e `--code-constant` (ponto 16) |
+| Rampa laranja do calendário | `--sq-o0` a `--sq-o3` | Rampa definida na Sprint 1 (ponto 14) |
 
 ---
 
@@ -133,6 +137,7 @@ A mesma marcação e o mesmo CSS, mudando só o mapa de tokens.
 1. **O design system do produto inteiro, app desktop e landing, passa a ser o que está hoje na landing page.**
    - Tokens, regras de uso, tipografia e mascote seguem `landing-page/src/styles/tokens.css` e `landing-page/docs/brand.md`.
    - O sistema atual do app é substituído. Dele ficam só as ideias que não conflitam com esta decisão (seção 5.4).
+   - Os tokens novos que a revisão criou (seção 7) entram primeiro no `tokens.css` da landing, como qualquer cor nova (regra 7 da seção 4).
 2. **Por enquanto, o app desktop terá somente o MODO ESCURO dessa paleta.**
    - O tema escuro da landing (seção 3.2) é o tema oficial do app.
    - O tema claro continua na landing e fica documentado como **planejado para o app, sem data** (seção 3.3).
@@ -144,7 +149,7 @@ Até existir `packages/design-tokens` (issue #7), **a fonte de verdade é `landi
 
 ## 3. Especificação do design system
 
-Todos os valores abaixo vêm de `landing-page/src/styles/tokens.css`. As razões de contraste foram **calculadas** a partir dos hex, pela fórmula de luminância relativa da WCAG 2.
+Os valores abaixo vêm de `landing-page/src/styles/tokens.css`, exceto os marcados como **novo**, que vêm da revisão (seção 7). As razões de contraste foram **calculadas** a partir dos hex, pela fórmula de luminância relativa da WCAG 2.
 
 ### 3.1 Cores de marca
 
@@ -152,24 +157,37 @@ As cores de marca são iguais nos dois temas.
 
 | Token | Valor | Papel |
 |---|---|---|
-| `--duck-yellow` | `#FFC83D` | **Primária e recompensa.** CTA, ação principal, `main` no grafo do git, status bar e insígnia de ouro. |
-| `--beak-orange` | `#FF8A3D` | **Progressão e XP.** Tudo que sobe, enche ou evolui: XP, level up, streak, barras de progresso. |
+| `--duck-yellow` | `#FFC83D` | **Primária e recompensa.** CTA, ação principal, `main` no grafo do git e insígnia de ouro. |
+| `--beak-orange` | `#FF8A3D` | **Progressão e XP.** Tudo que sobe, enche ou evolui: XP, level up, streak, barras de progresso, calendário de contribuições. |
 | `--pond-blue` | `#4DA3FF` | **Links, informação e branches.** No grafo, branch é azul e `main` é amarela. |
 
 ### 3.2 Tema escuro (oficial do app)
 
 O seletor na landing é `:root, [data-theme='dark']`, com `color-scheme: dark`.
 
-**Superfícies e texto**
+**Superfícies, texto e bordas**
 
-| Token | Valor | Papel | Contraste sobre `--bg` |
+| Token | Valor | Papel | Contraste sobre `--bg` / `--surface` / `--surface-elevated` |
 |---|---|---|---|
 | `--bg` | `#0F1420` | Fundo base (o "chão") | — |
 | `--surface` | `#171D2B` | Superfície: cartões, painéis, a "folha" | — |
-| `--surface-elevated` | `#212839` | Superfície elevada: popovers e janelas sobre a superfície | — |
-| `--border` | `#2C3448` | Borda e divisória | 1,5:1 (ver ponto 11) |
-| `--text` | `#F2F4F8` | Texto principal | 16,7:1 |
-| `--text-secondary` | `#9AA3B5` | Texto secundário e metadados | 7,3:1 |
+| `--surface-elevated` | `#212839` | Superfície elevada: painéis, popovers, menus e modais | — |
+| `--border` | `#2C3448` | Borda e divisória de região | 1,5:1 / 1,4:1 / 1,2:1 |
+| `--border-control` | `#6B7693` | **Novo.** Borda de input, select e textarea, e só deles (ponto 11) | 4,1:1 / 3,7:1 / 3,3:1 |
+| `--text` | `#F2F4F8` | Texto principal | 16,7:1 / 15,3:1 / 13,4:1 |
+| `--text-secondary` | `#9AA3B5` | Texto secundário e metadados | 7,3:1 / 6,6:1 / 5,8:1 |
+| `--text-tertiary` | `#7F899E` | **Novo.** Placeholder e texto apagado. **Só sobre `--bg` e `--surface`.** Em popover e modal, usar `--text-secondary` (ponto 5). | 5,2:1 / 4,8:1 / 4,2:1 (não usar) |
+
+**Superfícies interativas (novas, ponto 4).** A revisão decidiu três tokens, mas não definiu nomes nem valores. Os nomes abaixo são proposta.
+
+| Token (nome proposto) | Valor | Papel |
+|---|---|---|
+| `--surface-control` | **a definir** | Fundo normal de elementos interativos: botão neutro, chip, `.kbd`, ícone de estado, célula vazia do calendário |
+| `--surface-hover` | **a definir** | Item sob o cursor |
+| `--surface-selected` | **a definir** | Item selecionado ou ativo: navegação, canal, aba, item da paleta de comandos |
+
+- Sobre o mais claro dos três, o texto usa `--text`.
+- **Pressionado** é um estado novo, fora do escopo deste ADR. O app não tem `:active` hoje.
 
 **Texto e ícone em cor de marca.** No escuro, a cor pura passa AA.
 
@@ -180,22 +198,29 @@ O seletor na landing é `:root, [data-theme='dark']`, com `color-scheme: dark`.
 | `--link` | `#4DA3FF` | Links e branches | 7,0:1 / 5,6:1 |
 | `--success-text` | `#3DDC97` | Texto de sucesso | 10,4:1 / 8,3:1 |
 | `--danger-text` | `#FF5C6C` | Texto de erro | 6,1:1 / 4,9:1 |
-| `--on-yellow` | `#1A1F2B` | Texto sobre botão ou faixa amarela | 10,7:1 sobre `#FFC83D` |
+| `--on-yellow` | `#1A1F2B` | Texto sobre botão ou faixa amarela | 10,7:1 sobre `#FFC83D`; 12,8:1 sobre `#FFE08A` (hover) |
 | `--hl` | `#FFC83D` | Destaque em texto corrido | 11,9:1 |
 
-**Atmosfera, código e insígnias**
+**Fundos suaves (ponto 6).** Fundo de chip, reação, seleção e ícone de estado usa a cor do token com **opacidade 0,14**. A linha ou borda do mesmo elemento usa **opacidade 0,4**. Um chip de erro ou de link sobre `--surface-elevated` usa `--text` no texto.
+
+**Atmosfera, sombra, código e insígnias**
 
 | Token | Valor | Papel |
 |---|---|---|
-| `--glow-yellow` | `rgba(255, 200, 61, 0.18)` | Brilho de recompensa, por exemplo no hover do CTA |
-| `--shadow-window` | `0 30px 80px -20px rgba(0,0,0,0.65), 0 0 0 1px var(--border)` | Sombra de janela, nos mockups da landing |
-| `--grain-opacity` | `0.05` | Grão sutil sobre o fundo |
+| `--glow-yellow` | `rgba(255, 200, 61, 0.18)` | Brilho de recompensa. No app, **só em momentos de recompensa** (pontos 8 e 13). |
+| `--shadow-pop` | `0 12px 40px rgba(0,0,0,.55), 0 0 0 1px var(--border)` | **App.** Sombra de popover, menu, tooltip e modal: o blur atual do app (40 px) com o anel em `--border` (ponto 12) |
+| `--shadow-window` | `0 30px 80px -20px rgba(0,0,0,0.65), 0 0 0 1px var(--border)` | Só landing: sombra de janela nos mockups |
+| `--grain-opacity` | `0.05` | Só landing: grão sutil sobre o fundo. O app não tem grão (ponto 13). |
 | `--code-comment` | `#8B95AD` | Sintaxe: comentário (6,1:1 sobre `--bg`) |
 | `--code-keyword` | `#C792FF` | Sintaxe: palavra-chave |
 | `--code-string` | `#3DDC97` | Sintaxe: string |
+| `--code-function` | **a definir** | **Novo.** Sintaxe: nome de função. Sem laranja (ponto 16). |
+| `--code-constant` | **a definir** | **Novo.** Sintaxe: número e constante. Sem laranja (ponto 16). |
 | `--badge-face` | `#121826` | Face esmaltada da insígnia |
 | `--badge-face-hi` | `#2A3348` | Brilho da face da insígnia |
 | `--office-bg` | `#15162A` | Fundo da cena do escritório virtual |
+
+O tema de sintaxe do Shiki no app é montado com os tokens `--code-*`.
 
 ### 3.3 Tema claro — somente landing por enquanto; planejado para o app
 
@@ -226,7 +251,8 @@ O seletor é `[data-theme='light']`, com `color-scheme: light`. O app **não** i
 | `--badge-face` / `--badge-face-hi` | `#1F2535` / `#3A4560` | A face da insígnia continua escura |
 | `--sq-ink`, `--sq-rim`, `--sq-w0…w4`, `--sq-shadow`, `--sq-wet` | ver `tokens.css`, linhas 211–219 | Contorno marrom e água clara no pato pixel |
 
-`--hl` e os tokens derivados ainda estão como decisão pendente em `alinhamento.md`, itens 3.4 e 3.5.
+- `--hl` e os tokens derivados ainda estão como decisão pendente em `alinhamento.md`, itens 3.4 e 3.5.
+- Os tokens novos da revisão (`--text-tertiary`, `--border-control`, superfícies interativas, `--code-function`, `--code-constant` e `--shadow-pop`) só têm valor, ou só foram decididos, para o tema escuro. No claro, ficam a definir quando o tema entrar no app.
 
 ### 3.4 Cores semânticas e tiers de insígnia
 
@@ -236,7 +262,7 @@ As semânticas e os tiers são iguais nos dois temas. No claro, o texto usa as v
 |---|---|---|
 | `--success` | `#3DDC97` | Sucesso: check verde, merge, conectado |
 | `--danger` | `#FF5C6C` | Erro, falha, ação destrutiva |
-| `--warning` | `#FF8A3D` | Alerta. **Mesmo valor de `--beak-orange`** (ver ponto 7). |
+| `--warning` | `#FF8A3D` | Alerta. **Token próprio**, com o mesmo valor de `--beak-orange`. Aparece **sempre com ícone e texto**, nunca só pela cor. É a exceção registrada à regra "laranja = progressão" (ponto 7). |
 | `--tier-bronze` | `#CD7F32` | Insígnia bronze |
 | `--tier-silver` | `#C0C7D1` | Insígnia prata |
 | `--tier-gold` | `#FFC83D` | Insígnia ouro (é o amarelo da marca) |
@@ -256,7 +282,7 @@ As insígnias são medalhões hexagonais em SVG (`Badge.tsx`):
 |---|---|---|
 | `--font-display` | `'Bricolage Grotesque', 'Geist', system-ui, sans-serif` | **Display**: títulos. Na landing usa peso 750–800 e `opsz` 96. |
 | `--font-body` | `'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif` | **Texto**: corpo, interface, botões |
-| `--font-mono` | `'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace` | **Mono**, a "voz de máquina": hash, branch, XP, contadores, comandos, código, status bar |
+| `--font-mono` | `'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace` | **Mono**, a "voz de máquina": hash, branch, XP, contadores, comandos, código |
 | `--font-pixel` | `'Pixelify Sans', 'JetBrains Mono', monospace` | **Pixel**: só nos balões e no HUD do escritório virtual |
 
 Pesos carregados na landing:
@@ -292,10 +318,12 @@ Pesos carregados na landing:
 
 | Token | Valor | Papel |
 |---|---|---|
+| `--r-1` | `4px` | **App.** Só `.kbd` e código inline (ponto 9) |
 | `--radius-s` | `6px` | Controles: botões, inputs, chips |
-| `--radius-m` | `12px` | Cartões e painéis |
+| `--radius-m` | `12px` | **Raio padrão do app**: cartões, painéis, popovers e modais (ponto 9) |
 | `--radius-l` | `20px` | Blocos grandes e janelas |
-| `--statusbar-h` | `28px` | Altura da status bar |
+| `--statusbar-h` | `28px` | Altura da status bar. O app não tem status bar por enquanto (ponto 3). |
+| `--app-gutter` | `clamp(1rem, 2.6vw, 3rem)` | **App.** Margem lateral fluida. É o `--gutter` atual do app, renomeado (ponto 15). |
 | `--page-max` | `1440px` | Só na landing: largura máxima da página |
 | `--spine-x` | `22px` (≥ 900 px de largura: `44px`) | Só na landing: posição da linha do git |
 | `--gutter` | `52px` (≥ 900 px de largura: `112px`) | Só na landing: início da coluna de conteúdo |
@@ -309,8 +337,8 @@ Pesos carregados na landing:
 |---|---|---|
 | `--ease-out` | `cubic-bezier(0.22, 1, 0.36, 1)` | Easing padrão de tudo |
 | `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | **Só recompensa**: insígnia, toast de XP, XP |
-| `--dur-fast` | `160ms` | Hover, foco, troca de estado |
-| `--dur-med` | `320ms` | Entradas e trocas de tema |
+| `--dur-fast` | `160ms` | Hover, foco e troca de estado. **No app, também modal e popover** (ponto 10). |
+| `--dur-med` | `320ms` | Na landing: entradas e trocas de tema. **No app, só o painel lateral deslizando** (ponto 10). |
 
 **Regra de `prefers-reduced-motion`.** Esta é a regra da landing (`global.css`) e vale para o app:
 
@@ -341,7 +369,7 @@ O Squeak é o pato de borracha do time.
 | `--duck-eye` | `#1A1F2B` | Olho |
 | `--catchlight` | `#FFFFFF` | Ponto de brilho do olho |
 | `--duck-outline` (escuro) | `transparent` | Sem contorno no tema escuro |
-| `--duck-highlight` (escuro) | `#FFE08A` | Brilho quente |
+| `--duck-highlight` (escuro) | `#FFE08A` | Brilho quente. No app, também o hover do botão primário (ponto 8). |
 | `--duck-shadow` (escuro) | `#D99A1A` | Sombra quente |
 
 **Regras de uso no tema escuro**
@@ -372,31 +400,31 @@ As regras completas estão em `brand.md`, seção 8.
 
 ## 4. Regras de uso
 
-Estas regras vêm de `brand.md` e valem para o app e para a landing.
+Estas regras vêm de `brand.md` e valem para o app e para a landing, com os ajustes da revisão.
 
 | # | Regra | Na prática |
 |---|---|---|
 | 1 | **60-30-10** | Cerca de 60% de base escura (`--bg`), 30% de superfícies e texto, e 10% de amarelo e laranja. |
-| 2 | **Amarelo nunca como fundo de seção** | O amarelo é recompensa e ação principal: botão primário, foco, `main`, insígnia de ouro. Não serve de fundo de painel, barra lateral ou cabeçalho. A única exceção deliberada da landing é a status bar, com 28 px (ponto 3). |
-| 3 | **Laranja sempre progressão** | Se algo sobe, enche ou evolui, é laranja: XP, level up, streak, barra de progresso. Laranja não é botão, foco nem link. |
+| 2 | **Amarelo nunca como fundo de seção** | O amarelo é recompensa e ação principal: botão primário, foco, `main`, insígnia de ouro. Não serve de fundo de painel, barra lateral ou cabeçalho. A única exceção deliberada é a status bar da landing. **No app não há status bar amarela:** se uma status bar entrar, ela usa `--surface` e o amarelo só no texto de `main` (ponto 3). |
+| 3 | **Laranja sempre progressão** | Se algo sobe, enche ou evolui, é laranja: XP, level up, streak, barra de progresso, calendário de contribuições. Laranja não é botão, foco nem link. **Exceção registrada:** `--warning` tem o valor do laranja e por isso vem sempre com ícone e texto (ponto 7). Sem laranja na sintaxe de código (ponto 16). |
 | 4 | **Azul para branch e link** | Links, nomes de branch e informação são azuis. Assim o amarelo fica exclusivo de `main` e da recompensa. |
 | 5 | **Mono só para informação de máquina** | Hash, branch, XP, contadores, comandos, atalhos e código. Não usar mono como decoração nem em texto corrido. |
-| 6 | **Contraste mínimo WCAG AA** | Texto normal precisa de 4,5:1, texto grande e ícones de 3:1. No escuro, todas as cores de texto da seção 3.2 passam sobre `--bg`, `--surface` e `--surface-elevated`. No claro, nunca usar amarelo puro como texto: usar `--hl` em texto pequeno e `--yellow-text` só em texto grande. |
+| 6 | **Contraste mínimo WCAG AA** | Texto normal precisa de 4,5:1, texto grande e ícones de 3:1. No escuro, as cores de texto da seção 3.2 passam sobre as três superfícies, **exceto `--text-tertiary`, que não vai em `--surface-elevated`**. A borda que é o único limite de um controle usa `--border-control` (3:1 ou mais, WCAG 1.4.11). No claro, nunca usar amarelo puro como texto: usar `--hl` em texto pequeno e `--yellow-text` só em texto grande. |
 | 7 | **Nenhuma cor solta** | Todo componente usa token. Uma cor nova nasce primeiro no arquivo de tokens. |
 
 ---
 
 ## 5. Adaptações para o app desktop
 
-**A landing é uma página de marketing e o app é uma ferramenta.** Ficam iguais as famílias tipográficas, todos os tokens de cor, as regras da seção 4 e o movimento. Mudam a escala tipográfica (fixa e densa), o espaçamento (grade de 4 px) e o layout.
+**A landing é uma página de marketing e o app é uma ferramenta.** Ficam iguais as famílias tipográficas, todos os tokens de cor, as regras da seção 4 e as curvas de movimento. Mudam a escala tipográfica (fixa e densa), o espaçamento (grade de 4 px), o layout e o uso das durações (seção 3.7).
 
-### 5.1 Escala tipográfica fixa (proposta)
+### 5.1 Escala tipográfica fixa
 
-A escala fluida (`--step-*`, até 10 rem) e os títulos gigantes **não entram no app**. A proposta mantém os **tamanhos que o app já usa**, que estão em `apps/desktop/src/design/tokens.css` e são testados em densidade de ferramenta. As famílias passam a ser as da landing.
+A escala fluida (`--step-*`, até 10 rem) e os títulos gigantes **não entram no app**. A escala mantém os **tamanhos que o app já usa**, que estão em `apps/desktop/src/design/tokens.css` e são testados em densidade de ferramenta. As famílias passam a ser as da landing.
 
-| Token | Tamanho | Família e peso propostos | Uso |
+| Token | Tamanho | Família e peso | Uso |
 |---|---|---|---|
-| `--t-xs` | 11,5 px | `--font-mono` 500 ou `--font-body` 400 | Labels mono, contadores, status bar (a da landing já usa `500 11.5px` mono) |
+| `--t-xs` | 11,5 px | `--font-mono` 500 ou `--font-body` 400 | Labels mono e contadores |
 | `--t-sm` | 12,5 px | `--font-body` 400 | Metadados, horários, texto auxiliar |
 | `--t-md` | **13,5 px** | `--font-body` 400, `line-height` 1,45 | **Corpo da interface** (`body`) |
 | `--t-lg` | 15 px | `--font-body` 600 | Título de painel e de seção |
@@ -405,7 +433,7 @@ A escala fluida (`--step-*`, até 10 rem) e os títulos gigantes **não entram n
 
 - O corpo fica entre 13 e 14 px, como pedido. O `line-height` de 1,45 é o atual do app.
 - No app, o display (Bricolage) aparece **só a partir de `--t-xl`**. Abaixo disso, Geist em peso 600 lê melhor em tamanho pequeno.
-- Os pesos de display da tabela são proposta e precisam de teste em tela (ponto 1).
+- A Geist no corpo e os pesos de display são validados em tela na Sprint 1 (ponto 1).
 
 ### 5.2 Hierarquia por superfícies, mapeada para os tokens da landing
 
@@ -415,20 +443,25 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
 |---|---|---|
 | Chão | Barra lateral, fundo da janela | `--bg` `#0F1420` |
 | Folha | Conteúdo principal | `--surface` `#171D2B` |
-| Painel | Painéis, popovers, menus | `--surface-elevated` `#212839` |
-| Hover | Item sob o cursor | **aberto** (ponto 4) |
-| Pressionado | Item pressionado, trilho de scrollbar | **aberto** (ponto 4) |
+| Painel | Painéis, popovers, menus, tooltips e modais | `--surface-elevated` `#212839` |
+| Fundo interativo | Botão neutro, chip, `.kbd`, ícone de estado | `--surface-control` (valor a definir) |
+| Hover | Item sob o cursor | `--surface-hover` (valor a definir) |
+| Selecionado | Item ativo da navegação, canal, aba, item da paleta | `--surface-selected` (valor a definir) |
+| Pressionado | — | Estado novo, fora do escopo |
 | Divisória de região | Linha entre barra lateral e folha | `--border` `#2C3448` |
+| Borda de controle | Input, select e textarea | `--border-control` `#6B7693` |
 
 ### 5.3 Estados de interação
 
-| Estado | Proposta | Origem |
+| Estado | Decisão | Origem |
 |---|---|---|
 | Foco (`:focus-visible`) | Contorno de 2 px em `--duck-yellow` com `outline-offset` de 1 px | A cor vem da landing (que usa 3 px com offset de 3 px). A espessura vem do app, por causa da densidade. |
 | Botão primário | Fundo `--duck-yellow`, texto `--on-yellow` | Landing |
-| Hover do primário | **aberto** (ponto 8) | A landing usa elevação e `--glow-yellow`. O app usava `--accent-hi`. |
+| Hover do primário | Fundo `--duck-highlight` (`#FFE08A`), **sem elevar o botão e sem glow** | Revisão, ponto 8 |
+| Hover e selecionado em geral | `--surface-hover` e `--surface-selected`; no mais claro dos três tokens, texto em `--text` | Revisão, ponto 4 |
+| Pressionado | Fora do escopo. O app não tem `:active` hoje. | Revisão, ponto 4 |
 | Desabilitado | Opacidade 0,45 | App, não conflita |
-| Selecionado e ativo | `aria-current`, `aria-selected`, `aria-pressed` | App, não conflita |
+| Selecionado e ativo (semântica) | `aria-current`, `aria-selected`, `aria-pressed` | App, não conflita |
 
 ### 5.4 O que fica do app atual (não conflita com a decisão)
 
@@ -438,7 +471,8 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
 | Grade de 4 px: `--sp-1…--sp-7` (4, 8, 12, 16, 24, 32 e 48 px) | A landing não tem escala de espaçamento em tokens. |
 | Escala fixa `--t-*` | Adaptação de densidade (seção 5.1) |
 | Medidas de layout: `--sidebar-w` 248 px, `--panel-w` 280 px, `--topbar-h` 44 px | São específicas do app. |
-| `--r-pill` 999 px | É um utilitário de forma, sem equivalente que conflite. |
+| `--r-pill` 999 px e `--r-1` 4 px | Utilitários de forma. `--r-1` fica restrito a `.kbd` e código inline (ponto 9). |
+| `--shadow-pop` | Mantém o blur atual; só o anel muda para `--border` (ponto 12). |
 | Ícones de traço próprios (`design/Icon.tsx`) e nenhum emoji nos controles | Não conflita. |
 | Componentes de estado (`design/states.tsx`) | Não conflita. |
 | Nada de gradientes decorativos ou bordas em tudo | Combina com a regra 60-30-10. |
@@ -450,7 +484,10 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
 | Escala fluida `--step-*` | É de marketing. O app usa `--t-*`. |
 | `--page-max`, `--spine-x`, `--gutter` e `--edge` | São o layout da landing: linha do git e coluna de conteúdo. |
 | Tema claro | Planejado, sem data (decisão 2). |
-| Grão (`--grain-opacity`) e `--shadow-window` | Ponto em aberto (12 e 13) |
+| Grão (`--grain-opacity`) | O app não tem grão (ponto 13). |
+| `--shadow-window` | O app usa `--shadow-pop` (ponto 12). |
+| Status bar amarela | O app fica sem status bar por enquanto; se entrar, é a opção (b) (ponto 3). |
+| Elevação e glow no hover de botão | Glow só em recompensa (pontos 8 e 13). |
 
 ---
 
@@ -465,30 +502,30 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
 | `--s0` | `#0b0d0f` | `--bg` | `#0F1420` | Chão |
 | `--s1` | `#101317` | `--surface` | `#171D2B` | Folha |
 | `--s2` | `#161a1f` | `--surface-elevated` | `#212839` | Painel e popover |
-| `--s3` | `#1d2227` | **aberto** | — | Hover (ponto 4) |
-| `--s4` | `#262c33` | **aberto** | — | Pressionado e scrollbar (ponto 4) |
+| `--s3` | `#1d2227` | `--surface-control`, `--surface-hover` ou `--surface-selected`, conforme o uso | a definir | **Correção:** o texto anterior tratava `--s3` como hover. Dos 25 usos, 9 são hover, 7 são item selecionado e 9 são fundo normal. Cada uso vai para o token do seu papel. |
+| `--s4` | `#262c33` | conforme o uso | — | **Correção:** o texto anterior tratava `--s4` como pressionado. Nenhum dos 4 usos é pressionado, e o app não tem `:active`. Os usos: hover de `button` (`base.css:10`) → `--surface-hover`; item ativo da paleta de comandos (`shell.css:67`) → `--surface-selected`; tooltip do calendário (`github.css:60`) → `--surface-elevated`; polegar da scrollbar (`base.css:7`) → a definir na Sprint 1. |
 | `--hairline` | `rgba(255,255,255,.07)` | `--border` | `#2C3448` | Divisória de região |
-| `--hairline-2` | `rgba(255,255,255,.13)` | `--border` | `#2C3448` | Borda de input (ponto 11) |
+| `--hairline-2` | `rgba(255,255,255,.13)` | `--border-control` em input, select e textarea; `--border` no resto | `#6B7693` / `#2C3448` | Ponto 11 |
 | `--fg` | `#e9ebee` | `--text` | `#F2F4F8` | |
 | `--fg-2` | `#a5acb5` | `--text-secondary` | `#9AA3B5` | |
-| `--fg-3` | `#6e7681` | **aberto** | — | Terceiro nível de texto (ponto 5) |
+| `--fg-3` | `#6e7681` | `--text-tertiary` sobre `--bg` e `--surface`; `--text-secondary` em popover e modal | `#7F899E` | **Correção:** o `--fg-3` atual já reprova AA: 4,24:1, 4,05:1 e 3,80:1 sobre `--s0`, `--s1` e `--s2`. |
 | `--fg-inv` | `#160d05` | `--on-yellow` | `#1A1F2B` | Texto sobre o primário |
 
 **Acento e semânticas**
 
 | Token atual do app | Valor atual | Token novo | Valor novo | Observação |
 |---|---|---|---|---|
-| `--accent` | `#ff8a3d` | `--duck-yellow` (fundo, borda, foco) ou `--yellow-text` (texto) | `#FFC83D` | Ação primária. Usos de progressão vão para `--beak-orange` (passo 4 em 6.3). |
-| `--accent-hi` | `#ffa563` | **aberto** | — | Hover do primário (ponto 8) |
-| `--accent-soft` | `rgba(255,138,61,.14)` | **aberto** | — | Fundo suave de seleção (ponto 6) |
-| `--accent-line` | `rgba(255,138,61,.4)` | **aberto** | — | Ponto 6 |
+| `--accent` | `#ff8a3d` | `--duck-yellow` (fundo, borda, foco) ou `--yellow-text` (texto) | `#FFC83D` | Ação primária e seleção. Usos de progressão vão para `--beak-orange` (passo 4 em 6.3). |
+| `--accent-hi` | `#ffa563` | `--duck-highlight` | `#FFE08A` | Hover do primário (ponto 8) |
+| `--accent-soft` | `rgba(255,138,61,.14)` | cor do papel com opacidade 0,14 | — | Em geral `--duck-yellow` a 0,14 (ponto 6) |
+| `--accent-line` | `rgba(255,138,61,.4)` | cor do papel com opacidade 0,4 | — | Ponto 6 |
 | `--ok` | `#4fd18b` | `--success` / `--success-text` | `#3DDC97` | |
-| `--warn` | `#e8c547` | `--warning` | `#FF8A3D` | Ponto 7 |
+| `--warn` | `#e8c547` | `--warning` | `#FF8A3D` | Sempre com ícone e texto (ponto 7) |
 | `--bad` | `#ff5d6c` | `--danger` / `--danger-text` | `#FF5C6C` | |
 | `--info` | `#5aa9ff` | `--link` / `--pond-blue` | `#4DA3FF` | |
-| `--ok-soft`, `--warn-soft`, `--bad-soft`, `--info-soft` | `rgba(…, .14)` | **aberto** | — | Ponto 6 |
+| `--ok-soft`, `--warn-soft`, `--bad-soft`, `--info-soft` | `rgba(…, .14)` | `--success`, `--warning`, `--danger` e `--pond-blue` com opacidade 0,14 | — | Ponto 6. Chip de erro ou link sobre `--surface-elevated` usa `--text`. |
 
-**Tipografia, espaço, raios e movimento**
+**Tipografia, espaço, raios, sombra e movimento**
 
 | Token atual do app | Valor atual | Token novo | Valor novo | Observação |
 |---|---|---|---|---|
@@ -497,54 +534,70 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
 | `--mono` | Cascadia Code | `--font-mono` | JetBrains Mono | Ponto 2 |
 | `--t-xs … --t-2xl` | 11,5 a 28 px | mantidos | iguais | Seção 5.1 |
 | `--sp-1 … --sp-7` | 4 a 48 px | mantidos | iguais | Seção 5.4 |
-| `--r-1` | `4px` | **aberto** | — | Ponto 9 |
+| `--r-1` | `4px` | mantido | `4px` | Só `.kbd` e código inline (ponto 9) |
 | `--r-2` | `6px` | `--radius-s` | `6px` | Mesmo valor |
-| `--r-3` | `10px` | `--radius-m` | `12px` | Ponto 9 |
+| `--r-3` | `10px` | `--radius-m` | `12px` | Raio padrão (ponto 9) |
 | `--r-pill` | `999px` | mantido | `999px` | |
-| `--shadow-pop` | `0 12px 40px rgba(0,0,0,.55), 0 0 0 1px var(--hairline-2)` | **aberto** | — | Ponto 12 |
+| `--shadow-pop` | `0 12px 40px rgba(0,0,0,.55), 0 0 0 1px var(--hairline-2)` | mantido | `0 12px 40px rgba(0,0,0,.55), 0 0 0 1px var(--border)` | Ponto 12 |
 | `--ease` | `cubic-bezier(.2,.7,.2,1)` | `--ease-out` | `cubic-bezier(0.22,1,0.36,1)` | |
 | `--dur-1` | `110ms` | `--dur-fast` | `160ms` | Ponto 10 |
-| `--dur-2` | `180ms` | `--dur-fast` | `160ms` | `--dur-med` (320 ms) fica para entrada de painel e modal (ponto 10). |
+| `--dur-2` | `180ms` | `--dur-fast` | `160ms` | Inclusive modal e popover. `--dur-med` (320 ms) só no painel lateral deslizando (ponto 10). |
 | — | — | `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` | Novo no app, só para recompensa |
 | `--sidebar-w`, `--panel-w`, `--topbar-h` | 248, 280 e 44 px | mantidos | iguais | |
-| `--gutter` | `clamp(1rem, 2.6vw, 3rem)` | renomear para `--app-gutter` | igual | O nome colide com o `--gutter` da landing (ponto 15). |
+| `--gutter` | `clamp(1rem, 2.6vw, 3rem)` | `--app-gutter` | igual | O nome colidia com o `--gutter` da landing. A classe `.gutter` do chat (`messaging.css`) não muda (ponto 15). |
+| — | — | `--code-function`, `--code-constant` | a definir | Novos, sem laranja (ponto 16) |
 
 ### 6.2 O que muda visualmente no app
 
 | Área | Antes | Depois |
 |---|---|---|
-| Acento | Laranja "brasa" em botão primário, foco, seleção, abas ativas, chips e links-botão | Amarelo do pato nesses lugares. O laranja só aparece em progressão. |
+| Acento | Laranja "brasa" em botão primário, foco, seleção, abas ativas, chips e links-botão | Amarelo do pato nesses lugares. O laranja só aparece em progressão e no alerta. |
 | Fontes | Segoe UI Variable e Cascadia Code: aparência nativa do Windows | Geist no corpo, Bricolage nos títulos de tela, JetBrains Mono no código: a mesma voz da landing |
-| Superfícies | Cinza neutro quase preto, em 5 níveis | Azul-noite, em 3 níveis (mais hover e pressionado, ainda abertos). O app fica um pouco mais claro e mais frio. |
-| Bordas | Hairline translúcida e quase invisível | Borda sólida `#2C3448` |
-| Alerta | Amarelo `#e8c547` | Laranja `#FF8A3D` (ponto 7) |
-| Raios | 6 e 10 px | 6 e 12 px: cartões e painéis um pouco mais redondos |
-| Movimento | 110 e 180 ms | 160 ms e outra curva, com mola só em recompensa |
+| Superfícies | Cinza neutro quase preto, em 5 níveis | Azul-noite, em 3 níveis, mais 3 tokens de superfície interativa. O app fica um pouco mais claro e mais frio. |
+| Bordas | Hairline translúcida e quase invisível | Borda sólida `#2C3448` nas divisórias; `#6B7693` em input, select e textarea |
+| Texto terciário | `#6e7681`, abaixo de AA | `#7F899E`, AA sobre `--bg` e `--surface` |
+| Alerta | Amarelo `#e8c547` | Laranja `#FF8A3D`, sempre com ícone e texto |
+| Raios | 4, 6 e 10 px | 6 e 12 px; 4 px só em `.kbd` e código inline |
+| Movimento | 110 e 180 ms | 160 ms em tudo, inclusive modal e popover; 320 ms só no painel lateral deslizando; mola só em recompensa |
+| Calendário de contribuições | Cores que a API do GitHub devolve (rampa verde do tema claro) | Rampa laranja por nível (a validar) |
+| Status bar | Não existe | Continua sem, por enquanto |
 | Marca | Nenhuma | Logo, avatares de pato e tiers de insígnia disponíveis como tokens |
 
 **Consequências**
 
 | | |
 |---|---|
-| **Positivas** | Uma marca só, da landing ao app. A reputação (XP, insígnias) chega ao app com a gramática de cor pronta. Uma única tabela de contraste para manter. |
-| **Negativas** | O app perde a aparência nativa do Windows. As fontes passam a ser embutidas no app, o que aumenta o pacote. Hoje 12 tokens do app não têm equivalente e ficam como pontos em aberto. Toda tela do app precisa de conferência visual. |
+| **Positivas** | Uma marca só, da landing ao app. A reputação (XP, insígnias) chega ao app com a gramática de cor pronta. Uma única tabela de contraste para manter. O texto terciário e a borda de input passam a cumprir a WCAG. |
+| **Negativas** | O app perde a aparência nativa do Windows. As fontes passam a ser embutidas no app, o que aumenta o pacote. Ainda faltam valores para os 3 tokens de superfície interativa, os 2 tokens de sintaxe novos, a rampa laranja do calendário e o polegar da scrollbar. Toda tela do app precisa de conferência visual. |
 
 ### 6.3 Passos para a Sprint 1 (issue "Aplicar o design system unificado no app")
 
-1. **Embutir as fontes no app.** Bricolage Grotesque, Geist e JetBrains Mono entram como arquivos locais, porque o app desktop não pode depender do Google Fonts. Os pesos são os da seção 3.5. Pixelify Sans só entra quando o escritório virtual chegar ao app.
-2. **Trocar `apps/desktop/src/design/tokens.css`:**
+1. **Embutir as fontes no app.** Bricolage Grotesque, Geist e JetBrains Mono entram como arquivos locais: o app desktop não pode depender do Google Fonts, e a CSP do Tauri não tem `font-src`. Os pesos são os da seção 3.5. Pixelify Sans só entra quando o escritório virtual chegar ao app.
+2. **Definir os valores que faltam** e registrar no `tokens.css` da landing, com contraste conferido:
+   - `--surface-control`, `--surface-hover` e `--surface-selected`;
+   - `--code-function` e `--code-constant`, sem laranja;
+   - a rampa laranja do calendário de contribuições;
+   - a cor do polegar da scrollbar.
+3. **Trocar `apps/desktop/src/design/tokens.css`:**
    - copiar da landing a marca, as semânticas, os tiers, o mascote, o movimento, as famílias e o tema escuro, com `color-scheme: dark`;
-   - acrescentar os tokens próprios do app (`--t-*`, `--sp-*`, `--r-pill`, medidas de layout e `--app-gutter`);
+   - acrescentar os tokens novos da revisão (`--text-tertiary`, `--border-control`, superfícies interativas, `--code-function`, `--code-constant`);
+   - acrescentar os tokens próprios do app (`--t-*`, `--sp-*`, `--r-1`, `--r-pill`, `--shadow-pop`, medidas de layout e `--app-gutter`);
    - não incluir o tema claro.
-3. **Criar uma camada de compatibilidade temporária.** Os nomes antigos viram aliases dos novos (por exemplo, `--s1: var(--surface)` e `--fg: var(--text)`). Assim a migração anda arquivo por arquivo: `base.css`, `shell.css`, `messaging.css`, `github.css`, `settings.css` e `voice.css`. Os aliases somem no fim da sprint.
-4. **Reclassificar cada uso de `--accent`.** Hoje há 37 usos de `--accent*` nos CSS do app.
+4. **Criar uma camada de compatibilidade temporária.** Os nomes antigos viram aliases dos novos (por exemplo, `--s1: var(--surface)` e `--fg: var(--text)`). Assim a migração anda arquivo por arquivo: `base.css`, `shell.css`, `messaging.css`, `github.css`, `settings.css` e `voice.css`. Os aliases somem no fim da sprint.
+5. **Reclassificar cada uso de `--accent`, `--s3` e `--s4`.** Hoje há 37 usos de `--accent*` nos CSS do app.
    - Ação primária, foco, seleção e item ativo → amarelo.
    - Progressão → laranja.
-   - O calendário de contribuições (`.cg-cell`) precisa de decisão (ponto 14).
-5. **Aplicar a regra de `prefers-reduced-motion`** da seção 3.7 no lugar da regra atual do app, que zera as durações e força 0 ms.
-6. **Remover hex soltos dos CSS do app.** Exemplo: `#ffb3ba` e `rgba(255, 93, 108, .35)` em `.error`, em `base.css`.
-7. **Conferir contraste e estados** (hover, foco, desabilitado, selecionado) em todas as telas, com capturas antes e depois. Validar os pontos em aberto que precisam de teste em tela: 1, 4, 5, 8 e 11.
-8. **Atualizar `docs/REDESIGN.md`**, seção 4 "Sistema visual", para apontar para este ADR.
+   - **Correção:** no calendário de contribuições, `--accent` é só o contorno da célula selecionada (`github.css:59`); ele segue a regra da seleção. A cor das células vem da API do GitHub (`ContributionGraph.tsx:13`), e a troca pela rampa laranja é o ponto 14.
+   - Cada uso de `--s3` e `--s4` vai para fundo, hover ou selecionado (seção 6.1).
+6. **Aplicar a regra de `prefers-reduced-motion`** da seção 3.7 no lugar da regra atual do app, que zera as durações e força 0 ms.
+7. **Remover hex soltos dos CSS do app.** Exemplos:
+   - `#ffb3ba` e `rgba(255, 93, 108, .35)` em `.error`, em `base.css`;
+   - `#0a0d12` e `#11151b` no bloco de código, e `#6e7681` nos números de linha, em `messaging.css`.
+8. **Montar o tema do Shiki** com os tokens `--code-*` (ponto 16).
+9. **Validar em tela os pontos 1, 2, 3, 8, 10, 11 e 14** (seção 7.3), com capturas antes e depois. Conferir também contraste e estados (hover, foco, desabilitado, selecionado) em todas as telas.
+10. **Atualizar `docs/REDESIGN.md`:**
+    - seção 4 "Sistema visual", para apontar para este ADR;
+    - o calendário de contribuições, que deixa de usar "as cores/níveis reais da API" e passa à rampa laranja (ponto 14).
 
 ### 6.4 Fonte única futura: `packages/design-tokens`
 
@@ -555,37 +608,87 @@ Estrutura proposta, quando a issue #7 permitir:
 | Arquivo | Conteúdo | Quem usa |
 |---|---|---|
 | `base.css` | Marca, mascote, semânticas, tiers, famílias, movimento, raios, paleta `--px-*` e rampas `--sq-*` | App e landing |
-| `theme-dark.css` | Tema escuro (seção 3.2) | App e landing |
+| `theme-dark.css` | Tema escuro (seção 3.2), com os tokens novos da revisão | App e landing |
 | `theme-light.css` | Tema claro (seção 3.3) | Landing (e o app, quando o tema claro entrar) |
 | `landing.css` | `--step-*`, `--page-max`, `--spine-x`, `--gutter`, `--edge` e `--statusbar-h` | Landing |
-| `app.css` | `--t-*`, `--sp-*`, `--r-pill`, medidas de layout e `--app-gutter` | App |
+| `app.css` | `--t-*`, `--sp-*`, `--r-1`, `--r-pill`, `--shadow-pop`, medidas de layout e `--app-gutter` | App |
 
 Os dois projetos importam o pacote. O `tokens.css` da landing e o do app deixam de ter valores próprios.
 
 ---
 
-## 7. Pontos em aberto para a revisão do Samuel
+## 7. Decisões da revisão
 
-| # | Ponto | Por que pode gerar discussão | Proposta ou opções |
+O Samuel revisou o ADR no PR da issue #3. Os 16 pontos que estavam em aberto foram decididos. Sete deles ficam para validação visual na Sprint 1, ao aplicar o design system no app.
+
+### 7.1 Decisões
+
+| # | Ponto | Decisão | Situação |
 |---|---|---|---|
-| 1 | **Geist no lugar de Segoe UI num app Windows** | Segoe UI Variable é nativa, bem ajustada ao ClearType e não pesa no pacote. Geist precisa ser embutida e pode renderizar diferente em 13,5 px. | Testar Geist em 12,5 e 13,5 px no Tauri/Windows antes de fechar. A pilha de `--font-body` já tem `'Segoe UI'` como reserva. |
-| 2 | **JetBrains Mono no lugar de Cascadia Code** | Cascadia é a mono nativa do Windows Terminal, e muitos devs Windows estão acostumados com ela. | Adotar JetBrains Mono, que mantém a voz da marca. A pilha de `--font-mono` já tem Cascadia como reserva. |
-| 3 | **Status bar amarela no app** | O app não tem status bar hoje. Na landing ela é a exceção deliberada à regra "amarelo nunca como fundo", e ainda está pendente em `alinhamento.md`, item 3.2. Numa janela aberta o dia todo, uma faixa amarela fixa cansa mais do que numa página lida uma vez. | (a) Não ter status bar no app. (b) Status bar em `--surface` com o amarelo só no texto ou ícone de `main`. (c) Amarela, igual à landing. |
-| 4 | **Hover e pressionado sem token** (`--s3` e `--s4`) | A landing tem só 3 superfícies. O app usa hover em 25 lugares e pressionado em 4. | Criar dois tokens de superfície novos, derivados do azul-noite, na revisão do design system. Valores a definir. |
-| 5 | **Terceiro nível de texto sem token** (`--fg-3`) | O app usa `--fg-3` em 27 lugares (placeholder, texto apagado). A landing tem só `--text` e `--text-secondary`. | Usar `--text-secondary` e aceitar menos níveis, ou criar `--text-tertiary` conferindo AA. |
-| 6 | **Variantes suaves das cores** (`--accent-soft`, `--accent-line`, `--ok-soft`, `--warn-soft`, `--bad-soft`, `--info-soft`) | A landing não tem fundos translúcidos para estados. O app usa opacidade de 0,14 hoje. | Definir uma regra única para fundos suaves sobre os tokens da landing. Opacidade a definir. |
-| 7 | **Alerta e progressão com a mesma cor** | `--warning` é `#FF8A3D`, igual a `--beak-orange`, e isso quebra a regra "laranja sempre progressão". O alerta atual do app (amarelo) colidiria com a primária. | Definir uma cor de alerta própria, ou diferenciar o alerta sempre por ícone e texto. |
-| 8 | **Hover do botão primário** | A landing sobe o botão 2 px e acende `--glow-yellow`. Isso é bom num CTA, mas é exagerado num botão de toolbar. Não existe "amarelo hover". | Num botão denso, só o glow e sem elevação, ou criar um token de hover amarelo. |
-| 9 | **Raio de 4 px e 10 → 12 px** | `--r-1` (4 px, código inline) não tem equivalente. Passar de 10 para 12 px arredonda os painéis. | Usar `--radius-s` (6 px) no código inline, ou manter um raio extra pequeno. |
-| 10 | **Durações** | O app usava de 110 a 180 ms (referência Raycast). A landing usa 160 e 320 ms, e 320 ms pode parecer lento numa ferramenta. | `--dur-fast` em toda micro-interação e `--dur-med` só para entrada de painel e modal. Conferir na prática. |
-| 11 | **Contraste das bordas** | `--border` tem 1,5:1 sobre `--bg`. A WCAG 1.4.11 pede 3:1 quando a borda é o único limite de um controle, como um input. A hairline atual do app também não passa. | Separar o input pelo contraste da superfície (`--bg` dentro de `--surface`), ou criar um token de borda de controle com 3:1. |
-| 12 | **Sombra de popover e modal** | A landing só tem `--shadow-window`, pensada para mockup de janela. O app precisa de sombra para popover, menu e modal. | Usar `--shadow-window` ou definir um token de sombra para o app. |
-| 13 | **Grão e glow no app** | Na landing, o grão (`--grain-opacity`) tira o "digital liso". O app evitava efeitos decorativos de propósito (`REDESIGN.md`). | Não ter grão no app. Usar `--glow-yellow` só em momentos de recompensa. |
-| 14 | **Calendário de contribuições** (`.cg-cell` usa `--accent`) | Contribuição é progressão (laranja). O `REDESIGN.md` diz que o calendário usa "as cores/níveis reais da API" do GitHub. | Decidir entre laranja (gramática Squeak), amarelo, ou as cores do GitHub. |
-| 15 | **Colisão de nome `--gutter`** | Na landing é o início da coluna de conteúdo (52 e 112 px). No app é a margem lateral fluida. | Renomear a do app para `--app-gutter` (seção 6.1). |
-| 16 | **Tema de sintaxe do código** | O app usa Shiki para destacar código. A landing tem só 3 tokens de sintaxe (`--code-comment`, `--code-keyword`, `--code-string`). | Montar um tema Shiki a partir dos tokens da marca, ou manter um tema pronto que respeite o contraste. |
+| 1 | Geist no lugar de Segoe UI | Geist no corpo. Ela é 3,2% mais larga que a Segoe UI. As fontes vão embutidas no app, porque a CSP do Tauri não tem `font-src`. | validar na Sprint 1 |
+| 2 | JetBrains Mono no lugar de Cascadia Code | JetBrains Mono substitui a Cascadia. | validar na Sprint 1 |
+| 3 | Status bar | Sem status bar no app por enquanto. Quando houver conteúdo para ela, opção (b): fundo `--surface`, com `main` em amarelo no texto. | validar na Sprint 1 |
+| 4 | Hover e pressionado | Três tokens de superfície interativa: fundo, hover e selecionado. No mais claro, o texto usa `--text`. Pressionado é um estado novo, fora do escopo. Nomes propostos e valores a definir (seção 3.2). | decidido |
+| 5 | Terceiro nível de texto | Novo `--text-tertiary` `#7F899E`, só sobre `--bg` e `--surface`. Em popover e modal, `--text-secondary`. | decidido |
+| 6 | Variantes suaves das cores | Fundos coloridos com opacidade 0,14 e linhas com 0,4. Chip de erro ou link sobre `--surface-elevated` usa `--text`. | decidido |
+| 7 | Alerta e progressão com a mesma cor | `--warning` é um token separado, com o valor do laranja (`#FF8A3D`), sempre com ícone e texto. A exceção à regra "laranja = progressão" fica registrada (seção 4, regra 3). | decidido |
+| 8 | Hover do botão primário | `#FFE08A` (`--duck-highlight`), sem elevar o botão. Glow só em recompensa. | validar na Sprint 1 |
+| 9 | Raios | Raio padrão de 12 px (`--radius-m`). Raio de 4 px (`--r-1`) só para `.kbd` e código inline. | decidido |
+| 10 | Durações | `--dur-fast` em tudo, inclusive modal e popover. `--dur-med` só para o painel lateral deslizando. | validar na Sprint 1 |
+| 11 | Contraste das bordas | Novo `--border-control` `#6B7693`, só em input, select e textarea. | validar na Sprint 1 |
+| 12 | Sombra de popover e modal | Sombra do app com o blur atual (40 px) e anel de 1 px em `--border`. | decidido |
+| 13 | Grão e glow no app | Sem textura de grão. Glow só em recompensa. | decidido |
+| 14 | Calendário de contribuições | Rampa laranja por nível no gráfico de contribuições. Isso altera o `docs/REDESIGN.md`. | validar na Sprint 1 |
+| 15 | Colisão de nome `--gutter` | A variável do app vira `--app-gutter`. A classe `.gutter` do chat não muda. | decidido |
+| 16 | Tema de sintaxe do código | Tema do Shiki montado com os tokens. Criar ao menos `--code-function` e `--code-constant`. Sem laranja na sintaxe. | decidido |
 
-**Correções menores, sem discussão:**
+### 7.2 Correções de fato
+
+A revisão corrigiu quatro afirmações do texto proposto. O texto acima já está corrigido, e as correções ficam registradas aqui.
+
+| # | O que o ADR dizia | O que é verdade | Onde foi corrigido |
+|---|---|---|---|
+| 4 | `--s3` era hover (25 usos) e `--s4` era pressionado (4 usos). | Dos 25 usos de `--s3`, 9 são hover, 7 são item selecionado e 9 são fundo normal. Nenhum dos 4 usos de `--s4` é estado pressionado, e o app não tem `:active`. | Seções 3.2, 5.2, 5.3 e 6.1 |
+| 5 | `--fg-3` precisava de um substituto "conferindo AA", como se o atual passasse. | O `--fg-3` atual já reprova AA: 4,24:1, 4,05:1 e 3,80:1 sobre `--s0`, `--s1` e `--s2`. | Seções 6.1 e 6.2 |
+| 11 | Bastava separar o input pelo contraste de superfície ou por um token de borda. | Nenhuma das duas opções do ADR chega a 3:1. Por exemplo, `--bg` dentro de `--surface` dá 1,1:1, e `--border` dá 1,5:1 sobre `--bg`. Daí o `--border-control`. | Seções 3.2, 4 e 6.1 |
+| 14 | O calendário (`.cg-cell`) usava `--accent` nas células. | A cor das células vem da API do GitHub (`ContributionGraph.tsx:13`). O `--accent` é só o contorno da célula selecionada (`github.css:59`). | Seção 6.3, passo 5 |
+
+### 7.3 Validar na Sprint 1
+
+As comparações abaixo estão na seção "Pontos a validar" da [prévia HTML](002-design-system-preview.html). Cada uma muda uma coisa só, com dados fictícios. Na prévia, as do ponto 10 também funcionam ao vivo.
+
+**Ponto 1: Geist no corpo.** A mesma conversa em 13,5 px, na mesma largura, em Segoe UI Variable Text e em Geist. A prévia mede a diferença de largura no navegador: nesta captura, 3,3%.
+
+![Ponto 1: a mesma conversa do chat em Segoe UI Variable Text e em Geist, em 13,5 px](assets/002/06-ponto-01-fonte.png)
+
+**Ponto 2: JetBrains Mono.** Um bloco de código e código inline em Cascadia Code e em JetBrains Mono, com os tokens de sintaxe que já existem.
+
+![Ponto 2: bloco de código e código inline em Cascadia Code e em JetBrains Mono](assets/002/07-ponto-02-mono.png)
+
+**Ponto 3: status bar.** A parte de baixo do app sem status bar e com a opção (b). O conteúdo da barra é ilustrativo.
+
+![Ponto 3: a área inferior do app sem status bar e com a status bar da opção (b)](assets/002/08-ponto-03-status-bar.png)
+
+**Ponto 8: hover do primário.** O botão Mergear em repouso e em hover, com o contraste do texto: 10,7:1 e 12,8:1.
+
+![Ponto 8: botão primário em repouso, em --duck-yellow, e em hover, em --duck-highlight](assets/002/09-ponto-08-hover.png)
+
+**Ponto 10: durações.** Botões que abrem um modal e um popover com `--dur-fast` e com `--dur-med`. Os quadros mostram a entrada a cada 40 ms, calculada com `--ease-out`.
+
+![Ponto 10: entrada de modal e popover com --dur-fast e --dur-med, quadro a quadro](assets/002/10-ponto-10-duracao.png)
+
+**Ponto 11: borda de input.** Os mesmos campos com `--border` e com `--border-control`, sobre `--surface` e dentro de um modal, com o contraste da borda calculado.
+
+![Ponto 11: inputs com --border e com --border-control, sobre --surface e dentro de um modal](assets/002/11-ponto-11-borda.png)
+
+**Ponto 14: calendário de contribuições.** O mesmo calendário com as cores da API do GitHub e com uma rampa laranja.
+
+- A rampa laranja é **ilustrativa**: usa `--sq-o0` a `--sq-o3`, que já existem. A rampa final é definida na Sprint 1.
+- A captura mostra um efeito da rampa atual: a API devolve a rampa do tema claro do GitHub, então no fundo escuro o nível mais baixo é o mais claro.
+
+![Ponto 14: calendário de contribuições com a rampa verde da API e com a rampa laranja](assets/002/12-ponto-14-contribuicoes.png)
+
+### 7.4 Correções menores, sem discussão
 
 - O comentário em `tokens.css` diz "30 cores no total" para a paleta pixel, mas são 34 tokens `--px-*`, como diz o `brand.md`.
 - O comentário do `tokens.css` do app usa o nome "Squak".

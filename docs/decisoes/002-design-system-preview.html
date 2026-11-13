@@ -8,6 +8,8 @@
   Prévia visual do ADR 002 (docs/decisoes/002-design-system.md). Abra localmente no navegador.
 
   Nenhum valor de cor, fonte ou espaço é escrito aqui: tudo vem dos dois arquivos de tokens abaixo.
+  A única exceção é o bloco <style id="tokens-da-revisao">: os tokens novos que a revisão do Samuel decidiu
+  e que ainda não existem em tokens.css. Eles entram lá na Sprint 1, e o bloco sai daqui.
   · apps/desktop/src/design/tokens.css entra PRIMEIRO, só pelo que o ADR mantém do app
     (escala --t-*, grade --sp-*, --r-pill e medidas de layout) e pelos tokens antigos usados no "antes".
   · landing-page/src/styles/tokens.css entra DEPOIS e vence nos nomes repetidos (--font-display, --gutter).
@@ -19,6 +21,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
+<style id="tokens-da-revisao">
+  /* Tokens decididos na revisão do ADR 002 (seção 7). Ainda não estão em tokens.css: entram lá na Sprint 1.
+     Os três tokens de superfície interativa e os de sintaxe (função e constante) ainda não têm valor. */
+  :root {
+    --text-tertiary: #7F899E;   /* só sobre --bg e --surface; em popover e modal, --text-secondary */
+    --border-control: #6B7693;  /* só em input, select e textarea */
+    --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border); /* blur atual do app, anel em --border */
+  }
+</style>
 <style>
   /* ═══ Página de revisão ═══════════════════════════════════════════ */
   * { box-sizing: border-box; }
@@ -80,6 +91,11 @@
   .cr.ok::after { content: ' AA'; color: var(--success-text); }
   .cr.big::after { content: ' só grande'; color: var(--orange-text); }
   .cr.no::after { content: ' não-texto'; color: var(--text-secondary); }
+  .cr.avoid { color: var(--text-secondary); }
+  .cr.avoid::after { content: ' não usar'; color: var(--danger-text); }
+  .cr.pass3::after { content: ' ≥ 3:1'; color: var(--success-text); }
+  .cr.fail3::after { content: ' < 3:1'; color: var(--danger-text); }
+  .tok-table + .tok-table { margin-top: var(--sp-3); }
 
   .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
   .sem-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -136,8 +152,9 @@
   .theme-new {
     --ui-bg: var(--bg); --ui-surface: var(--surface); --ui-elevated: var(--surface-elevated);
     --ui-active: var(--surface-elevated); --ui-border: var(--border);
-    --ui-text: var(--text); --ui-text-2: var(--text-secondary); --ui-text-3: var(--text-secondary);
-    --ui-primary: var(--duck-yellow); --ui-on-primary: var(--on-yellow); --ui-primary-text: var(--yellow-text);
+    --ui-text: var(--text); --ui-text-2: var(--text-secondary); --ui-text-3: var(--text-tertiary);
+    --ui-border-ctl: var(--border-control); --ui-r-code: var(--r-1);
+    --ui-primary: var(--duck-yellow); --ui-primary-hover: var(--duck-highlight); --ui-on-primary: var(--on-yellow); --ui-primary-text: var(--yellow-text);
     --ui-progress: var(--beak-orange); --ui-progress-text: var(--orange-text);
     --ui-link: var(--link); --ui-success: var(--success-text); --ui-danger: var(--danger-text);
     --ui-main: var(--yellow-text);
@@ -149,7 +166,8 @@
     --ui-bg: var(--s0); --ui-surface: var(--s1); --ui-elevated: var(--s2);
     --ui-active: var(--s3); --ui-border: var(--hairline);
     --ui-text: var(--fg); --ui-text-2: var(--fg-2); --ui-text-3: var(--fg-3);
-    --ui-primary: var(--accent); --ui-on-primary: var(--fg-inv); --ui-primary-text: var(--accent);
+    --ui-border-ctl: var(--hairline-2); --ui-r-code: var(--r-1);
+    --ui-primary: var(--accent); --ui-primary-hover: var(--accent-hi); --ui-on-primary: var(--fg-inv); --ui-primary-text: var(--accent);
     --ui-progress: var(--accent); --ui-progress-text: var(--accent);
     --ui-link: var(--info); --ui-success: var(--ok); --ui-danger: var(--bad);
     --ui-main: var(--fg-2);
@@ -158,6 +176,8 @@
     --ui-head-weight: 650; --ui-r-ctl: var(--r-2); --ui-r-card: var(--r-3);
     --ui-ease: var(--ease); --ui-dur: var(--dur-1);
   }
+  /* --text-tertiary não passa AA sobre --surface-elevated: em painel, popover e modal o terciário vira secundário */
+  .theme-new .panel, .theme-new .palette, .theme-new .on-elevated { --ui-text-3: var(--text-secondary); }
   [class*='theme-'] { font-family: var(--ui-font); color: var(--ui-text); font-size: var(--t-md); line-height: 1.45; }
 
   .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
@@ -166,15 +186,16 @@
 
   .btn { font: 600 var(--t-md) var(--ui-font); display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-3); min-height: calc(var(--sp-6) - var(--sp-1)); border-radius: var(--ui-r-ctl); border: 1px solid transparent; cursor: pointer; transition: background var(--ui-dur) var(--ui-ease); color: var(--ui-text); background: var(--ui-active); }
   .btn.primary { background: var(--ui-primary); color: var(--ui-on-primary); }
+  .btn.primary:hover:not(:disabled), .btn.primary.hover { background: var(--ui-primary-hover); }
   .btn.ghost { background: transparent; color: var(--ui-text-2); }
   .btn.secondary { background: var(--ui-elevated); border-color: var(--ui-border); }
   .btn:disabled { opacity: .45; cursor: default; }
   .btn.focus, .btn:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 1px; }
-  .kbd { font: 500 var(--t-xs) var(--ui-mono); color: var(--ui-text-2); border: 1px solid var(--ui-border); border-radius: var(--ui-r-ctl); padding: 0 var(--sp-1); }
+  .kbd { font: 500 var(--t-xs) var(--ui-mono); color: var(--ui-text-2); border: 1px solid var(--ui-border); border-radius: var(--ui-r-code); padding: 0 var(--sp-1); }
 
   .field { display: grid; gap: var(--sp-1); width: 100%; }
   .field label { font-size: var(--t-sm); color: var(--ui-text-2); }
-  .field .input { font: 400 var(--t-md) var(--ui-font); color: var(--ui-text); background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: var(--ui-r-ctl); padding: var(--sp-2) var(--sp-3); }
+  .field .input { font: 400 var(--t-md) var(--ui-font); color: var(--ui-text); background: var(--ui-bg); border: 1px solid var(--ui-border-ctl); border-radius: var(--ui-r-ctl); padding: var(--sp-2) var(--sp-3); }
   .field .input.ph { color: var(--ui-text-3); }
   .field .input.focus { outline: 2px solid var(--ui-primary); outline-offset: 1px; }
   .field small { font-size: var(--t-xs); color: var(--ui-text-3); }
@@ -193,7 +214,7 @@
   .track { height: var(--sp-2); border-radius: var(--r-pill); background: var(--ui-bg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--ui-border); }
   .track > i { display: block; height: 100%; border-radius: inherit; background: var(--ui-progress); }
 
-  .toast { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-m); background: var(--surface-elevated); border: 1px solid var(--border); border-left: 3px solid var(--beak-orange); box-shadow: var(--shadow-window); max-width: 380px; }
+  .toast { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-m); background: var(--surface-elevated); border-left: 3px solid var(--beak-orange); box-shadow: var(--shadow-pop); max-width: 380px; }
   .toast-mark { color: var(--orange-text); font: 700 var(--t-sm) var(--font-mono); }
   .toast b { font-weight: 600; }
   .toast div span { display: block; color: var(--text-secondary); font-size: var(--t-sm); }
@@ -323,6 +344,117 @@
   .ba-list b { color: var(--text); font-weight: 600; }
   .mini .area-body { align-content: start; }
 
+
+  /* ═══ f. Pontos a validar ═════════════════════════════════════════ */
+  .vcase { padding-top: var(--sp-5); }
+  .vcase + .vcase { margin-top: var(--sp-6); border-top: 1px dashed var(--border); }
+  .vcase-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-1) var(--sp-3); align-items: baseline; margin-bottom: var(--sp-4); }
+  .vnum { font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 1px var(--sp-2); white-space: nowrap; }
+  .vcase-head h3 { font: 600 var(--t-lg) var(--font-body); }
+  .vcase-head p { grid-column: 2 / -1; color: var(--text-secondary); font-size: var(--t-sm); max-width: 86ch; }
+  .vstate { font: 500 var(--t-xs) var(--font-mono); color: var(--link); white-space: nowrap; }
+  .vs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+  .vs-col { margin: 0; display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  .vs-col figcaption { display: flex; gap: var(--sp-2); align-items: baseline; flex-wrap: wrap; }
+  .vs-col figcaption b { font-weight: 600; }
+  .vs-col figcaption code { font-size: var(--t-xs); color: var(--text-secondary); }
+  .frame { background: var(--ui-surface); border-radius: var(--ui-r-card); box-shadow: 0 0 0 1px var(--ui-border); overflow: hidden; position: relative; }
+  .vnote { margin-top: var(--sp-3); color: var(--text-secondary); font-size: var(--t-sm); display: flex; flex-direction: column; gap: var(--sp-1); max-width: 130ch; }
+  .vnote b { color: var(--text); font-weight: 600; }
+  .vwarn { color: var(--danger-text); }
+
+  /* Ponto 1: a mesma conversa em duas fontes */
+  .f-segoe { --ui-font: var(--font); }
+  .f-geist { --ui-font: var(--font-body); }
+  .chat-demo { padding: var(--sp-1) 0 var(--sp-3); font-family: var(--ui-font); }
+  .chat-demo .day { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-2) var(--sp-4) 0; color: var(--ui-text-3); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; }
+  .chat-demo .day::before, .chat-demo .day::after { content: ''; flex: 1; height: 1px; background: var(--ui-border); }
+  .msg { display: flex; gap: var(--sp-3); padding: 2px var(--sp-4); }
+  .msg:not(.grouped) { margin-top: var(--sp-2); }
+  .msg .gut { width: 32px; flex: none; }
+  .msg-body { min-width: 0; flex: 1; }
+  .msg-meta { display: flex; gap: var(--sp-2); align-items: baseline; }
+  .msg-meta b { font-weight: 650; }
+  .msg-meta time { color: var(--ui-text-3); font-size: var(--t-xs); }
+  .msg p { margin: 2px 0; }
+  .code-i { font-family: var(--ui-mono); background: var(--ui-bg); padding: 1px 5px; border-radius: var(--ui-r-code); font-size: .92em; }
+
+  /* Ponto 2: código em duas monos */
+  .f-cascadia { --ui-mono: var(--mono); }
+  .f-jetbrains { --ui-mono: var(--font-mono); }
+  .code-demo { padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-3); }
+  .code-blk { background: var(--ui-bg); border-radius: var(--ui-r-card); overflow: hidden; box-shadow: inset 0 0 0 1px var(--ui-border); }
+  .code-blk header { display: flex; gap: var(--sp-2); align-items: center; padding: var(--sp-1) var(--sp-3); font-size: var(--t-sm); color: var(--ui-text-2); border-bottom: 1px solid var(--ui-border); }
+  .code-blk header .ic { color: var(--ui-text-3); }
+  .code-blk pre { margin: 0; padding: var(--sp-2) var(--sp-3); font: 400 var(--t-md)/1.5 var(--ui-mono); overflow-x: auto; }
+  .code-blk .ln { display: inline-block; width: 2.4em; margin-right: 1em; text-align: right; color: var(--ui-text-3); user-select: none; }
+  .tk-k { color: var(--code-keyword); } .tk-s { color: var(--code-string); } .tk-c { color: var(--code-comment); }
+  .glyphs { font: 400 var(--t-lg) var(--ui-mono); letter-spacing: .04em; }
+
+  /* Ponto 3: a parte de baixo da janela */
+  .bottom-demo { display: flex; flex-direction: column; height: 244px; background: var(--ui-bg); }
+  .bottom-demo .app { flex: 1; height: auto; min-height: 0; grid-template-columns: 184px minmax(0, 1fr); }
+  .bottom-demo .sheet-row { padding-top: var(--sp-2); }
+  .bottom-demo .sheet { justify-content: flex-end; }
+  .composer-demo { margin: var(--sp-1) var(--sp-4) var(--sp-3); background: var(--ui-elevated); border-radius: var(--ui-r-card); padding: var(--sp-2) var(--sp-3); color: var(--ui-text-3); }
+  .statusbar { height: var(--statusbar-h); flex: none; display: flex; align-items: center; gap: var(--sp-4); padding: 0 var(--sp-3); background: var(--surface); border-top: 1px solid var(--border); font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); white-space: nowrap; overflow: hidden; }
+  .statusbar span { display: inline-flex; align-items: center; gap: var(--sp-1); }
+  .statusbar .is-main { color: var(--yellow-text); }
+  .statusbar .sb-right { margin-left: auto; display: flex; gap: var(--sp-4); }
+
+  /* Ponto 8: hover do primário */
+  .btn-demo { padding: var(--sp-5) var(--sp-4); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+  .btn-demo .xp { margin-left: auto; }
+
+  /* Ponto 10: durações de modal e popover */
+  .dur-fast { --demo-dur: var(--dur-fast); }
+  .dur-med { --demo-dur: var(--dur-med); }
+  @keyframes demo-pop { from { opacity: 0; transform: translateY(calc(var(--sp-1) * -1)) scale(.98); } }
+  @keyframes demo-fade { from { opacity: 0; } }
+  .dur-stage { height: 196px; }
+  .dur-bar { display: flex; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--ui-border); }
+  .dur-bar .label { margin-left: auto; align-self: center; }
+  .dur-hint { padding: var(--sp-4); color: var(--ui-text-3); font-size: var(--t-sm); }
+  .pop-demo { position: absolute; z-index: 2; top: calc(var(--sp-3) + var(--sp-6) + var(--sp-1)); left: calc(var(--sp-4) + 120px); min-width: 210px; background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); padding: var(--sp-1); animation: demo-pop var(--demo-dur) var(--ease-out); }
+  .menu-i { display: flex; gap: var(--sp-2); align-items: center; padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-s); }
+  .menu-i .kbd { margin-left: auto; }
+  .modal-back-demo { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 66%, transparent); animation: demo-fade var(--demo-dur) var(--ease-out); }
+  .modal-demo { width: min(320px, 90%); background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); padding: var(--sp-4); display: grid; gap: var(--sp-3); animation: demo-pop var(--demo-dur) var(--ease-out); }
+  .modal-demo h4 { font: 600 var(--t-lg) var(--font-body); }
+  .modal-demo p { color: var(--text-secondary); font-size: var(--t-sm); }
+  .modal-demo .acts { display: flex; gap: var(--sp-2); justify-content: flex-end; }
+  .pop-demo[hidden], .modal-back-demo[hidden] { display: none; }
+  @media (prefers-reduced-motion: reduce) { .pop-demo, .modal-back-demo, .modal-demo { animation: none; } }
+  .strip { margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-3); }
+  .strip-row { display: grid; grid-template-columns: 136px repeat(9, minmax(0, 1fr)); gap: var(--sp-2); align-items: center; }
+  .strip-row b { font: 500 var(--t-xs) var(--font-mono); color: var(--text); }
+  .strip-row b span { display: block; color: var(--text-tertiary); font-weight: 400; }
+  .fr { display: grid; gap: var(--sp-1); justify-items: center; min-width: 0; }
+  .fr-box { width: 100%; height: 60px; background: var(--bg); border-radius: var(--radius-s); display: grid; justify-items: center; align-content: start; padding-top: var(--sp-2); overflow: hidden; }
+  .fr-card { width: 72%; background: var(--surface-elevated); border-radius: var(--radius-s); box-shadow: var(--shadow-pop); display: grid; gap: var(--sp-1); padding: var(--sp-2); }
+  .fr-card i { display: block; height: var(--sp-1); border-radius: var(--r-pill); background: var(--border); }
+  .fr-card i:nth-child(2) { width: 70%; }
+  .fr small { font: 500 var(--t-xs) var(--font-mono); color: var(--text-tertiary); white-space: nowrap; }
+  .fr.done small { color: var(--success-text); }
+
+  /* Ponto 11: bordas de input */
+  .b-cur { --demo-border: var(--border); }
+  .b-ctl { --demo-border: var(--border-control); }
+  .inp-demo { display: grid; gap: var(--sp-3); padding: var(--sp-4); }
+  .inp-demo.in-modal { background: var(--surface-elevated); margin: 0 var(--sp-4) var(--sp-4); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); }
+  .inp-demo .where { display: flex; justify-content: space-between; gap: var(--sp-2); flex-wrap: wrap; }
+  .inp-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--sp-2); }
+  .inp { font: 400 var(--t-md) var(--font-body); color: var(--text); background: var(--bg); border: 1px solid var(--demo-border); border-radius: var(--radius-s); padding: var(--sp-2) var(--sp-3); width: 100%; min-width: 0; color-scheme: dark; }
+  .inp::placeholder { color: var(--ui-text-3); }
+  .inp:focus-visible { outline: 2px solid var(--duck-yellow); outline-offset: 1px; }
+
+  /* Ponto 14: calendário de contribuições */
+  .cg-demo { margin: var(--sp-4); }
+  .cg-demo svg { display: block; width: 100%; height: auto; }
+  .cg-demo .cg-label { fill: var(--ui-text-3); }
+  .cg-legend { display: flex; align-items: center; gap: var(--sp-1); justify-content: flex-end; margin-top: var(--sp-2); color: var(--ui-text-3); font-size: var(--t-xs); }
+  .cg-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
   /* ═══ Telas estreitas: as grades viram uma coluna; o mock rola na horizontal ═══ */
   @media (max-width: 900px) {
     .page { padding: var(--sp-4); }
@@ -334,6 +466,11 @@
     .window .app { min-width: 1100px; }
     .mini .app { min-width: 560px; }
     .tok-table { display: block; overflow-x: auto; }
+    .vs { grid-template-columns: minmax(0, 1fr); }
+    .vcase-head { grid-template-columns: auto minmax(0, 1fr); }
+    .vcase-head .vstate { grid-column: 2; }
+    .strip { overflow-x: auto; }
+    .strip-row { min-width: 720px; }
   }
 </style>
 </head>
@@ -371,7 +508,7 @@
     <span class="wm"><span class="br">&lt;</span>squeak<span class="br">/&gt;</span></span>
     <div class="doc-title">
       <b>ADR 002 · Design system unificado</b>
-      <span class="label">prévia visual para a revisão da issue #3</span>
+      <span class="label">prévia visual · ADR aceito na revisão da issue #3</span>
     </div>
     <div class="doc-meta">
       <span class="pill">tema escuro · oficial do app</span>
@@ -414,13 +551,17 @@
         <div class="sem-row">
           <div class="sem"><div class="bar" style="background:var(--success)"></div><b>Sucesso</b><small><code>--success · <span data-hex="--success"></span></code></small></div>
           <div class="sem"><div class="bar" style="background:var(--danger)"></div><b>Erro</b><small><code>--danger · <span data-hex="--danger"></span></code></small></div>
-          <div class="sem"><div class="bar" style="background:var(--warning)"></div><b>Alerta</b><small><code>--warning · <span data-hex="--warning"></span></code><br />igual ao laranja (ponto 7)</small></div>
+          <div class="sem"><div class="bar" style="background:var(--warning)"></div><b>Alerta</b><small><code>--warning · <span data-hex="--warning"></span></code><br />token próprio com o valor do laranja; sempre com ícone e texto (ponto 7)</small></div>
         </div>
       </div>
       <div>
         <h3 class="group-title">Texto <small>contraste calculado sobre cada superfície</small></h3>
         <table class="tok-table" id="text-table">
           <thead><tr><th>token</th><th>hex</th><th>bg</th><th>surface</th><th>elevated</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <table class="tok-table" id="border-table">
+          <thead><tr><th>borda · WCAG 1.4.11</th><th>hex</th><th>bg</th><th>surface</th><th>elevated</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -503,12 +644,13 @@
     </div>
     <div class="comp-grid">
       <div class="comp">
-        <div class="comp-head"><b>Botão primário</b><span class="label">--duck-yellow · --on-yellow</span></div>
+        <div class="comp-head"><b>Botão primário</b><span class="label">--duck-yellow · hover --duck-highlight</span></div>
         <div class="comp-body">
           <button class="btn primary"><svg class="ic s"><use href="#i-merge"/></svg> Mergear pull request</button>
+          <button class="btn primary hover">Hover</button>
           <button class="btn primary" disabled>Mergear</button>
         </div>
-        <p class="comp-rule">Uma ação principal por tela. Desabilitado: opacidade 0,45.</p>
+        <p class="comp-rule">Uma ação principal por tela. Hover em <code>--duck-highlight</code>, sem elevar o botão. Desabilitado: opacidade 0,45.</p>
       </div>
       <div class="comp">
         <div class="comp-head"><b>Botão secundário</b><span class="label">--surface-elevated · --border</span></div>
@@ -520,10 +662,10 @@
         <p class="comp-rule">O segundo botão mostra o foco por teclado: 2 px em <code>--duck-yellow</code>, deslocamento de 1 px.</p>
       </div>
       <div class="comp">
-        <div class="comp-head"><b>Campo de texto</b><span class="label">--bg dentro de --surface</span></div>
+        <div class="comp-head"><b>Campo de texto</b><span class="label">borda --border-control</span></div>
         <div class="comp-body" style="flex-direction:column;align-items:stretch">
           <div class="field"><label>Título do pull request</label><div class="input focus">feat(auth): login com GitHub</div></div>
-          <div class="field"><label>Branch de destino</label><div class="input ph">main</div><small>O campo se separa pelo contraste de superfície (ponto 11).</small></div>
+          <div class="field"><label>Branch de destino</label><div class="input ph">main</div><small>A borda de controle passa de 3:1 sobre as três superfícies (ponto 11).</small></div>
         </div>
       </div>
       <div class="comp">
@@ -557,7 +699,7 @@
         <p class="comp-rule">Branch de trabalho em azul; <code>main</code> é a única em amarelo.</p>
       </div>
       <div class="comp wide">
-        <div class="comp-head"><b>Toast de XP</b><span class="label">borda --beak-orange · entra com --ease-spring</span></div>
+        <div class="comp-head"><b>Toast de XP</b><span class="label">borda --beak-orange · sombra --shadow-pop · entra com --ease-spring</span></div>
         <div class="comp-body" style="gap:var(--sp-5)">
           <div class="toast"><span class="toast-mark">+120 XP</span><div><b>PR #42 mergeado</b><span>feat(auth): login com GitHub · card foi para Done</span></div></div>
           <div class="toast"><span class="toast-mark">+50 XP</span><div><b>Você destravou o caio no #51</b><span>Ajuda conta. Mensagem não conta.</span></div></div>
@@ -703,7 +845,8 @@
       <span><b>Amarelo:</b> logo, item ativo, <code>main</code>, botão Mergear.</span>
       <span><b>Laranja:</b> XP e nível.</span>
       <span><b>Azul:</b> links e branches.</span>
-      <span><b>Provisório:</b> item ativo em <code>--surface-elevated</code> e texto terciário em <code>--text-secondary</code> (pontos 4 e 5).</span>
+      <span><b>Provisório:</b> item ativo em <code>--surface-elevated</code> até a Sprint 1 dar valor ao token de selecionado (ponto 4).</span>
+      <span><b>Terciário:</b> <code>--text-tertiary</code> na barra lateral; <code>--text-secondary</code> nos painéis elevados (ponto 5).</span>
     </div>
   </section>
 
@@ -732,6 +875,204 @@
         </ul>
       </div>
     </div>
+  </section>
+
+  <!-- ═══ f. Pontos a validar ═══ -->
+  <section class="sec theme-new" id="validar">
+    <div class="sec-head">
+      <span class="sec-ref">ADR §7 · Decisões da revisão</span>
+      <h2>Pontos a validar</h2>
+      <p>Os pontos que a revisão decidiu, mas deixou para conferir em tela na Sprint 1, ao aplicar o design system no app. Cada comparação muda uma coisa só. Dados fictícios.</p>
+    </div>
+
+    <article class="vcase" id="p1" data-shot="06-ponto-01-fonte">
+      <header class="vcase-head"><span class="vnum">ponto 1</span><h3>Corpo em Geist no lugar da Segoe UI</h3><span class="vstate">validar na Sprint 1</span><p>A mesma conversa em 13,5 px (<code>--t-md</code>), na mesma largura e com as mesmas cores. Só a família muda.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Atual</b><code>--font · Segoe UI Variable Text</code></figcaption>
+        <div class="frame theme-new f-segoe"><div class="chat-demo">
+          <div class="day">hoje</div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
+            <p>Revisei o #42. A sessão precisa expirar junto com o token do GitHub, senão a pessoa continua logada com um token que já morreu.</p></div></div>
+          <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Deixei dois comentários no <span class="code-i">useSession.ts</span>, nas linhas 31 e 58.</p></div></div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
+            <p>Boa. Vou renovar o token 5 minutos antes de expirar e encerrar a sessão se a renovação falhar.</p></div></div>
+          <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Subo em 3 commits ainda hoje. Dá para revisar depois da daily?</p></div></div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
+            <p>Eu reviso. Se quiser parear, fico na sala pareamento até as 16h.</p></div></div>
+        </div></div></figure>
+        <figure class="vs-col"><figcaption><b>Decidido</b><code>--font-body · Geist</code></figcaption>
+        <div class="frame theme-new f-geist"><div class="chat-demo">
+          <div class="day">hoje</div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
+            <p>Revisei o #42. A sessão precisa expirar junto com o token do GitHub, senão a pessoa continua logada com um token que já morreu.</p></div></div>
+          <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Deixei dois comentários no <span class="code-i">useSession.ts</span>, nas linhas 31 e 58.</p></div></div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
+            <p>Boa. Vou renovar o token 5 minutos antes de expirar e encerrar a sessão se a renovação falhar.</p></div></div>
+          <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Subo em 3 commits ainda hoje. Dá para revisar depois da daily?</p></div></div>
+          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
+            <p>Eu reviso. Se quiser parear, fico na sala pareamento até as 16h.</p></div></div>
+        </div></div></figure>
+      </div>
+      <div class="vnote"><span data-p1-measure></span><span>As fontes vão embutidas no app: a CSP do Tauri não tem <code>font-src</code>.</span></div>
+    </article>
+    <article class="vcase" id="p2" data-shot="07-ponto-02-mono">
+      <header class="vcase-head"><span class="vnum">ponto 2</span><h3>Código em JetBrains Mono no lugar da Cascadia Code</h3><span class="vstate">validar na Sprint 1</span><p>Um bloco de código e código inline, com os tokens de sintaxe que já existem. Só a família mono muda.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Atual</b><code>--mono · Cascadia Code</code></figcaption>
+        <div class="frame theme-new f-cascadia"><div class="code-demo">
+          <div class="code-blk"><header><svg class="ic s"><use href="#i-commit"/></svg>src/auth/useSession.ts</header>
+<pre><span class="ln">31</span><span class="tk-c">// renova 5 min antes de expirar</span>
+<span class="ln">32</span><span class="tk-k">export function</span> shouldRenew(expiresAt: <span class="tk-k">number</span>) {
+<span class="ln">33</span>  <span class="tk-k">const</span> margin = 5 * 60_000
+<span class="ln">34</span>  <span class="tk-k">if</span> (expiresAt &lt;= 0) <span class="tk-k">throw new</span> Error(<span class="tk-s">'sessão sem prazo'</span>)
+<span class="ln">35</span>  <span class="tk-k">return</span> expiresAt - Date.now() &lt; margin
+<span class="ln">36</span>}</pre></div>
+          <p>Rode <span class="code-i">npm run tauri dev</span> e abra <span class="code-i">Ctrl K</span> → <span class="code-i">github: entrar</span>.</p>
+          <div class="glyphs">Il1| O0 {} =&gt; !== -&gt; 0x1F</div>
+        </div></div></figure>
+        <figure class="vs-col"><figcaption><b>Decidido</b><code>--font-mono · JetBrains Mono</code></figcaption>
+        <div class="frame theme-new f-jetbrains"><div class="code-demo">
+          <div class="code-blk"><header><svg class="ic s"><use href="#i-commit"/></svg>src/auth/useSession.ts</header>
+<pre><span class="ln">31</span><span class="tk-c">// renova 5 min antes de expirar</span>
+<span class="ln">32</span><span class="tk-k">export function</span> shouldRenew(expiresAt: <span class="tk-k">number</span>) {
+<span class="ln">33</span>  <span class="tk-k">const</span> margin = 5 * 60_000
+<span class="ln">34</span>  <span class="tk-k">if</span> (expiresAt &lt;= 0) <span class="tk-k">throw new</span> Error(<span class="tk-s">'sessão sem prazo'</span>)
+<span class="ln">35</span>  <span class="tk-k">return</span> expiresAt - Date.now() &lt; margin
+<span class="ln">36</span>}</pre></div>
+          <p>Rode <span class="code-i">npm run tauri dev</span> e abra <span class="code-i">Ctrl K</span> → <span class="code-i">github: entrar</span>.</p>
+          <div class="glyphs">Il1| O0 {} =&gt; !== -&gt; 0x1F</div>
+        </div></div></figure>
+      </div>
+      <div class="vnote"><span data-p2-measure></span><span>Nomes de função e números ficam em <code>--text</code> até a Sprint 1 criar <code>--code-function</code> e <code>--code-constant</code>, sem laranja (ponto 16).</span></div>
+    </article>
+    <article class="vcase" id="p3" data-shot="08-ponto-03-status-bar">
+      <header class="vcase-head"><span class="vnum">ponto 3</span><h3>Status bar</h3><span class="vstate">validar na Sprint 1</span><p>A parte de baixo da janela: barra lateral com o usuário e o compositor do chat. O app fica sem status bar por enquanto; quando houver conteúdo para ela, entra a opção (b).</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Agora</b><code>sem status bar</code></figcaption>
+        <div class="frame theme-new"><div class="bottom-demo">
+          <div class="app">
+            <aside class="sidebar">
+              <div class="sb-scroll" style="margin-top:0;border-top:0">
+                <div class="cat">Voz</div>
+                <div class="chan live"><svg class="ic s"><use href="#i-volume"/></svg>daily</div>
+                <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
+              </div>
+              <div class="userbar">
+                <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+              </div>
+            </aside>
+            <div class="main"><div class="sheet-row"><div class="sheet">
+              <div class="chat-demo">
+                <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
+              </div>
+              <div class="composer-demo on-elevated">Mensagem em #auth</div>
+            </div></div></div>
+          </div>
+        </div></div></figure>
+        <figure class="vs-col"><figcaption><b>Opção (b), quando houver conteúdo</b><code>fundo --surface · main em --yellow-text</code></figcaption>
+        <div class="frame theme-new"><div class="bottom-demo">
+          <div class="app">
+            <aside class="sidebar">
+              <div class="sb-scroll" style="margin-top:0;border-top:0">
+                <div class="cat">Voz</div>
+                <div class="chan live"><svg class="ic s"><use href="#i-volume"/></svg>daily</div>
+                <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
+              </div>
+              <div class="userbar">
+                <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+              </div>
+            </aside>
+            <div class="main"><div class="sheet-row"><div class="sheet">
+              <div class="chat-demo">
+                <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
+              </div>
+              <div class="composer-demo on-elevated">Mensagem em #auth</div>
+            </div></div></div>
+          </div>
+          <div class="statusbar"><span class="is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span>patos-dev/app</span><span>sincronizado há 2 min</span>
+            <span class="sb-right"><span><span class="live-dot"></span>daily · 3 na call</span><span>v0.4.0</span></span></div>
+        </div></div></figure>
+      </div>
+      <div class="vnote"><span>A altura vem de <code>--statusbar-h</code>. O amarelo aparece só no texto de <code>main</code>, nunca como fundo. O conteúdo da barra é ilustrativo.</span></div>
+    </article>
+    <article class="vcase" id="p8" data-shot="09-ponto-08-hover">
+      <header class="vcase-head"><span class="vnum">ponto 8</span><h3>Hover do botão primário</h3><span class="vstate">validar na Sprint 1</span><p>Os mesmos botões de ação de um PR. No hover, o fundo passa para <code>--duck-highlight</code>; o botão não sobe e não acende glow.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Repouso</b><code>--duck-yellow</code></figcaption>
+        <div class="frame theme-new"><div class="btn-demo on-elevated"><button class="btn primary"><svg class="ic s"><use href="#i-merge"/></svg>Mergear</button><button class="btn secondary">Ver diff</button><span class="xp">mergear: +120 XP</span></div></div></figure>
+        <figure class="vs-col"><figcaption><b>Hover</b><code>--duck-highlight</code></figcaption>
+        <div class="frame theme-new"><div class="btn-demo on-elevated"><button class="btn primary hover"><svg class="ic s"><use href="#i-merge"/></svg>Mergear</button><button class="btn secondary">Ver diff</button><span class="xp">mergear: +120 XP</span></div></div></figure>
+      </div>
+      <div class="vnote"><span data-p8-measure></span><span>O glow (<code>--glow-yellow</code>) fica só para momentos de recompensa. Na prévia, o botão da esquerda também responde ao hover de verdade.</span></div>
+    </article>
+    <article class="vcase" id="p10" data-shot="10-ponto-10-duracao">
+      <header class="vcase-head"><span class="vnum">ponto 10</span><h3>Duração de modal e popover</h3><span class="vstate">validar na Sprint 1</span><p>Decidido: <code>--dur-fast</code> em tudo, inclusive modal e popover. <code>--dur-med</code> fica só para o painel lateral deslizando; aqui ele aparece apenas para comparar.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Decidido</b><code>--dur-fast</code></figcaption>
+        <div class="frame theme-new dur-fast dur-stage" data-dur>
+          <div class="dur-bar"><button class="btn secondary" data-open="modal">Abrir modal</button><button class="btn secondary" data-open="pop">Abrir popover</button><span class="label">--dur-fast · <span data-ms="--dur-fast"></span></span></div>
+          <p class="dur-hint">Clique nos botões para ver a entrada. Esc ou um clique fora fecha.</p>
+          <div class="pop-demo" hidden><div class="menu-i"><svg class="ic s"><use href="#i-branch"/></svg>Trocar branch<span class="kbd">B</span></div><div class="menu-i"><svg class="ic s"><use href="#i-external"/></svg>Abrir no GitHub</div><div class="menu-i"><svg class="ic s"><use href="#i-check"/></svg>Marcar como revisado</div></div>
+          <div class="modal-back-demo" hidden><div class="modal-demo" role="dialog" aria-label="Mergear pull request"><h4>Mergear #42?</h4><p>feat/login entra em main com 7 commits.</p><div class="acts"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" data-close>Mergear</button></div></div></div>
+        </div></figure>
+        <figure class="vs-col"><figcaption><b>Para comparar</b><code>--dur-med</code></figcaption>
+        <div class="frame theme-new dur-med dur-stage" data-dur>
+          <div class="dur-bar"><button class="btn secondary" data-open="modal">Abrir modal</button><button class="btn secondary" data-open="pop">Abrir popover</button><span class="label">--dur-med · <span data-ms="--dur-med"></span></span></div>
+          <p class="dur-hint">Clique nos botões para ver a entrada. Esc ou um clique fora fecha.</p>
+          <div class="pop-demo" hidden><div class="menu-i"><svg class="ic s"><use href="#i-branch"/></svg>Trocar branch<span class="kbd">B</span></div><div class="menu-i"><svg class="ic s"><use href="#i-external"/></svg>Abrir no GitHub</div><div class="menu-i"><svg class="ic s"><use href="#i-check"/></svg>Marcar como revisado</div></div>
+          <div class="modal-back-demo" hidden><div class="modal-demo" role="dialog" aria-label="Mergear pull request"><h4>Mergear #42?</h4><p>feat/login entra em main com 7 commits.</p><div class="acts"><button class="btn ghost" data-close>Cancelar</button><button class="btn primary" data-close>Mergear</button></div></div></div>
+        </div></figure>
+      </div>
+      <div class="frame theme-new strip" aria-label="Quadros da entrada a cada 40 ms">
+        <div class="strip-row" data-strip="--dur-fast"><b>--dur-fast<span data-ms="--dur-fast"></span></b></div>
+        <div class="strip-row" data-strip="--dur-med"><b>--dur-med<span data-ms="--dur-med"></span></b></div>
+      </div>
+      <div class="vnote"><span>Os quadros mostram a entrada a cada 40 ms: opacidade, deslocamento de 4 px (<code>--sp-1</code>) e escala de 0,98, como o <code>@keyframes pop</code> do app, com a curva <code>--ease-out</code>.</span></div>
+    </article>
+    <article class="vcase" id="p11" data-shot="11-ponto-11-borda">
+      <header class="vcase-head"><span class="vnum">ponto 11</span><h3>Borda de input</h3><span class="vstate">validar na Sprint 1</span><p>Os mesmos campos sobre <code>--surface</code> e dentro de um modal. A WCAG 1.4.11 pede 3:1 quando a borda é o único limite do controle.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Atual</b><code>--border</code></figcaption>
+        <div class="frame theme-new b-cur">
+          <div class="inp-demo ">
+            <div class="where"><span class="label">sobre --surface</span><span class="label" data-bcr="--surface"></span></div>
+            <div class="inp-row"><input class="inp" value="feat(auth): login com GitHub" aria-label="Título" /><input class="inp" placeholder="Branch de destino" aria-label="Branch de destino" />
+              <select class="inp" aria-label="Revisor"><option>caio</option><option>ana</option></select></div>
+          </div>
+          <div class="inp-demo in-modal on-elevated">
+            <div class="where"><span class="label">num modal · --surface-elevated</span><span class="label" data-bcr="--surface-elevated"></span></div>
+            <div class="inp-row"><input class="inp" value="feat(auth): login com GitHub" aria-label="Título" /><input class="inp" placeholder="Branch de destino" aria-label="Branch de destino" />
+              <select class="inp" aria-label="Revisor"><option>caio</option><option>ana</option></select></div>
+          </div>
+        </div></figure>
+        <figure class="vs-col"><figcaption><b>Decidido</b><code>--border-control</code></figcaption>
+        <div class="frame theme-new b-ctl">
+          <div class="inp-demo ">
+            <div class="where"><span class="label">sobre --surface</span><span class="label" data-bcr="--surface"></span></div>
+            <div class="inp-row"><input class="inp" value="feat(auth): login com GitHub" aria-label="Título" /><input class="inp" placeholder="Branch de destino" aria-label="Branch de destino" />
+              <select class="inp" aria-label="Revisor"><option>caio</option><option>ana</option></select></div>
+          </div>
+          <div class="inp-demo in-modal on-elevated">
+            <div class="where"><span class="label">num modal · --surface-elevated</span><span class="label" data-bcr="--surface-elevated"></span></div>
+            <div class="inp-row"><input class="inp" value="feat(auth): login com GitHub" aria-label="Título" /><input class="inp" placeholder="Branch de destino" aria-label="Branch de destino" />
+              <select class="inp" aria-label="Revisor"><option>caio</option><option>ana</option></select></div>
+          </div>
+        </div></figure>
+      </div>
+      <div class="vnote"><span>Os contrastes ao lado de cada bloco comparam a borda com o fundo do campo (<code>--bg</code>) e com a superfície em volta; vale o menor.</span><span><code>--border-control</code> é só para input, select e textarea. As divisórias continuam em <code>--border</code>.</span></div>
+    </article>
+    <article class="vcase" id="p14" data-shot="12-ponto-14-contribuicoes">
+      <header class="vcase-head"><span class="vnum">ponto 14</span><h3>Calendário de contribuições</h3><span class="vstate">validar na Sprint 1</span><p>O mesmo calendário fictício. Hoje as células usam as cores que a API do GitHub devolve; a decisão é uma rampa laranja por nível, porque contribuição é progressão.</p></header>
+      <div class="vs">
+        <figure class="vs-col"><figcaption><b>Atual</b><code>cores da API do GitHub</code></figcaption>
+        <div class="frame theme-new"><div class="panel cg-demo"><div class="panel-head"><h3>Contribuições</h3><span class="label">últimos 7 meses · 612</span></div>
+          <div data-cg="api"></div></div></div></figure>
+        <figure class="vs-col"><figcaption><b>Decidido</b><code>rampa laranja por nível</code></figcaption>
+        <div class="frame theme-new"><div class="panel cg-demo"><div class="panel-head"><h3>Contribuições</h3><span class="label">últimos 7 meses · 612</span></div>
+          <div data-cg="orange"></div></div></div></figure>
+      </div>
+      <div class="vnote"><span>A API devolve a rampa do tema claro do GitHub: no fundo escuro, o nível mais baixo é o mais claro. As cores da esquerda são as do mock do app (<code>services/api/src/github/client/mock.rs:16</code>).</span><span><b>Ilustrativo:</b> a rampa da direita usa <code>--sq-o0…o3</code>, que já existem; os valores finais saem na Sprint 1. A célula vazia usa <code>--border</code> até existir o token de fundo interativo. O contorno da célula selecionada é amarelo, como toda seleção. A troca muda o <code>docs/REDESIGN.md</code>.</span></div>
+    </article>
   </section>
 </main>
 
@@ -784,15 +1125,15 @@
   }
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
   const TEXT = [
-    ['--text', 'Texto principal'], ['--text-secondary', 'Texto secundário'], ['--yellow-text', 'Amarelo'],
+    ['--text', 'Texto principal'], ['--text-secondary', 'Texto secundário'], ['--text-tertiary', 'Texto terciário', '--surface-elevated'], ['--yellow-text', 'Amarelo'],
     ['--orange-text', 'Progressão'], ['--link', 'Link e branch'], ['--success-text', 'Sucesso'], ['--danger-text', 'Erro'],
   ]
   const tbody = document.querySelector('#text-table tbody')
-  for (const [t, label] of TEXT) {
+  for (const [t, label, avoid] of TEXT) {
     const v = tok(t)
     const cells = ['--bg', '--surface', '--surface-elevated'].map((s) => {
       const r = ratio(v, tok(s))
-      const cls = r >= 4.5 ? 'ok' : r >= 3 ? 'big' : 'no'
+      const cls = s === avoid ? 'avoid' : r >= 4.5 ? 'ok' : r >= 3 ? 'big' : 'no'
       return `<td><span class="cr ${cls}">${r.toFixed(1).replace('.', ',')}:1</span></td>`
     }).join('')
     tbody.insertAdjacentHTML('beforeend', `<tr><td><span class="dot" style="background:var(${t})"></span><span style="color:var(${t});font-weight:600">${label}</span><br><code class="hex">${t}</code></td><td><code class="hex">${v.toUpperCase()}</code></td>${cells}</tr>`)
@@ -800,6 +1141,18 @@
   {
     const r = ratio(tok('--on-yellow'), tok('--duck-yellow'))
     tbody.insertAdjacentHTML('beforeend', `<tr><td><span class="dot" style="background:var(--duck-yellow)"></span><span style="background:var(--duck-yellow);color:var(--on-yellow);font-weight:600;padding:0 var(--sp-1);border-radius:var(--radius-s)">Sobre amarelo</span><br><code class="hex">--on-yellow</code></td><td><code class="hex">${tok('--on-yellow').toUpperCase()}</code></td><td colspan="3"><span class="cr ok">${r.toFixed(1).replace('.', ',')}:1</span> <span class="label">sobre --duck-yellow</span></td></tr>`)
+  }
+
+  {
+    const tb = document.querySelector('#border-table tbody')
+    for (const [t, label] of [['--border', 'Divisória de região'], ['--border-control', 'Input, select e textarea']]) {
+      const v = tok(t)
+      const cells = ['--bg', '--surface', '--surface-elevated'].map((s) => {
+        const r = ratio(v, tok(s))
+        return `<td><span class="cr ${r >= 3 ? 'pass3' : 'fail3'}">${r.toFixed(1).replace('.', ',')}:1</span></td>`
+      }).join('')
+      tb.insertAdjacentHTML('beforeend', `<tr><td><span class="dot" style="background:var(${t})"></span>${label}<br><code class="hex">${t}</code></td><td><code class="hex">${v.toUpperCase()}</code></td>${cells}</tr>`)
+    }
   }
 
   // insígnias: mesma geometria de landing-page/src/components/Badge.tsx
@@ -839,6 +1192,106 @@
   // antes/depois: a mesma tela, clonada nos dois mapas de tokens
   const tpl = document.getElementById('mini-tpl')
   document.querySelectorAll('[data-mini]').forEach((el) => el.appendChild(tpl.content.cloneNode(true)))
+
+  // ═══ Pontos a validar ═══
+  const cv = document.createElement('canvas').getContext('2d')
+  const widthOf = (font, text) => { cv.font = font; return cv.measureText(text).width }
+  // uma fonte local está instalada quando muda a largura em relação às duas genéricas
+  const installed = (family) => {
+    const t = 'mmmmmmmmmmlli1WQ@#0O'
+    return ['serif', 'monospace'].some((g) => widthOf(`40px ${family}, ${g}`, t) !== widthOf(`40px ${g}`, t))
+  }
+  const pct = (x) => (x * 100).toFixed(1).replace('.', ',') + '%'
+  const lines = (els) => [...els].reduce((n, el) => n + Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)), 0)
+
+  document.fonts.ready.then(() => {
+    // ponto 1
+    {
+      const sample = [...document.querySelectorAll('#p1 .f-segoe .msg p')].map((p) => p.textContent).join(' ')
+      const size = tok('--t-md')
+      const r = widthOf(`400 ${size} ${tok('--font-body')}`, sample) / widthOf(`400 ${size} ${tok('--font')}`, sample)
+      const el = document.querySelector('[data-p1-measure]')
+      el.innerHTML = `Nesta conversa, a Geist ocupa <b>${pct(r - 1)}</b> a mais de largura que a Segoe UI Variable Text no mesmo tamanho (a revisão mediu 3,2%). ` +
+        `Linhas de texto: <b>${lines(document.querySelectorAll('#p1 .f-segoe .msg p'))}</b> na Segoe e <b>${lines(document.querySelectorAll('#p1 .f-geist .msg p'))}</b> na Geist.` +
+        (installed("'Segoe UI Variable Text'") ? '' : ' <span class="vwarn">A Segoe UI Variable não está instalada neste sistema: a coluna da esquerda está na fonte reserva.</span>')
+    }
+    // ponto 2
+    {
+      const r = widthOf(`400 ${tok('--t-md')} ${tok('--font-mono')}`, 'm') / widthOf(`400 ${tok('--t-md')} ${tok('--mono')}`, 'm')
+      document.querySelector('[data-p2-measure]').innerHTML = `Largura do caractere: a JetBrains Mono é <b>${pct(Math.abs(r - 1))}</b> ${r >= 1 ? 'mais larga' : 'mais estreita'} que a Cascadia Code.` +
+        (installed("'Cascadia Code'") ? '' : ' <span class="vwarn">A Cascadia Code não está instalada neste sistema: a coluna da esquerda está na fonte reserva.</span>')
+    }
+  })
+
+  // ponto 8
+  document.querySelector('[data-p8-measure]').innerHTML =
+    `Contraste do texto <code>--on-yellow</code>: <b>${ratio(tok('--on-yellow'), tok('--duck-yellow')).toFixed(1).replace('.', ',')}:1</b> em repouso e <b>${ratio(tok('--on-yellow'), tok('--duck-highlight')).toFixed(1).replace('.', ',')}:1</b> no hover.`
+
+  // ponto 10: demos ao vivo
+  const msOf = (v) => (v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000)
+  document.querySelectorAll('[data-ms]').forEach((el) => { el.textContent = msOf(tok(el.dataset.ms)) + ' ms' })
+  document.querySelectorAll('[data-dur]').forEach((stage) => {
+    const pop = stage.querySelector('.pop-demo'), modal = stage.querySelector('.modal-back-demo')
+    const close = () => { pop.hidden = true; modal.hidden = true }
+    stage.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => {
+      e.stopPropagation(); const t = b.dataset.open === 'pop' ? pop : modal; const was = t.hidden; close(); t.hidden = !was
+    }))
+    stage.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close))
+    modal.addEventListener('click', (e) => { if (e.target === modal) close() })
+    document.addEventListener('click', (e) => { if (!pop.contains(e.target)) pop.hidden = true })
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close() })
+  })
+  // ponto 10: quadros calculados com --ease-out
+  {
+    const [x1, y1, x2, y2] = tok('--ease-out').match(/-?[\d.]+/g).map(Number)
+    const bez = (a, b, t) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t * t * b + t ** 3
+    const ease = (x) => { let lo = 0, hi = 1, t = x; for (let i = 0; i < 40; i++) { if (bez(x1, x2, t) < x) lo = t; else hi = t; t = (lo + hi) / 2 } return bez(y1, y2, t) }
+    const shift = parseFloat(tok('--sp-1'))
+    document.querySelectorAll('[data-strip]').forEach((row) => {
+      const d = msOf(tok(row.dataset.strip))
+      for (let t = 0; t <= 320; t += 40) {
+        const p = t >= d ? 1 : ease(t / d)
+        row.insertAdjacentHTML('beforeend', `<div class="fr${p === 1 ? ' done' : ''}"><div class="fr-box"><div class="fr-card" style="opacity:${p.toFixed(3)};transform:translateY(${(-(1 - p) * shift).toFixed(2)}px) scale(${(0.98 + 0.02 * p).toFixed(4)})"><i></i><i></i><i></i></div></div><small>${t} ms · ${Math.round(p * 100)}%</small></div>`)
+      }
+    })
+  }
+
+  // ponto 11: contraste da borda com o fundo do campo e com a superfície
+  document.querySelectorAll('[data-bcr]').forEach((el) => {
+    const b = getComputedStyle(el.closest('.frame')).getPropertyValue('--demo-border').trim() // já resolvido para o hex do token
+    const f = (r) => `<span class="cr ${r >= 3 ? 'pass3' : 'fail3'}">${r.toFixed(1).replace('.', ',')}:1</span>`
+    el.innerHTML = `campo ${f(ratio(b, tok('--bg')))} · em volta ${f(ratio(b, tok(el.dataset.bcr)))}`
+  })
+
+  // ponto 14: calendário fictício, mesma geometria de ContributionGraph.tsx
+  {
+    // dados fictícios: as cores que a API do GitHub devolve, iguais às do mock do app (services/api/src/github/client/mock.rs:16)
+    const API_COLORS = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']
+    const EMPTY = 'var(--border)' // provisório: o app usa --s3; o token de fundo interativo ainda não tem valor
+    const RAMPS = { api: [EMPTY, ...API_COLORS.slice(1)], orange: [EMPTY, 'var(--sq-o0)', 'var(--sq-o1)', 'var(--sq-o2)', 'var(--sq-o3)'] }
+    const CELL = 12, STEP = 15, LEFT = 30, TOP = 20, WEEKS = 30
+    let seed = 7
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+    const levels = Array.from({ length: WEEKS }, (_, w) => Array.from({ length: 7 }, (_, d) => {
+      const r = rnd() * (d === 0 || d === 6 ? 0.55 : 1) * (0.6 + 0.4 * Math.sin(w / 4) ** 2)
+      return r < 0.18 ? 0 : r < 0.4 ? 1 : r < 0.62 ? 2 : r < 0.8 ? 3 : 4
+    }))
+    const SEL = [21, 3]
+    const MONTHS = ['mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov']
+    document.querySelectorAll('[data-cg]').forEach((host) => {
+      const ramp = RAMPS[host.dataset.cg]
+      const w = LEFT + WEEKS * STEP, h = TOP + 7 * STEP
+      let cells = ''
+      levels.forEach((wk, c) => wk.forEach((lv, d) => {
+        const sel = c === SEL[0] && d === SEL[1]
+        cells += `<rect x="${LEFT + c * STEP}" y="${TOP + d * STEP}" width="${CELL}" height="${CELL}" rx="2.5" style="fill:${ramp[lv]}${sel ? ';stroke:var(--duck-yellow);stroke-width:2' : ''}"/>`
+      }))
+      const months = MONTHS.map((m, i) => `<text class="cg-label" x="${LEFT + Math.round(i * 4.35) * STEP}" y="11" font-size="10">${m}</text>`).join('')
+      const days = [[1, 'seg'], [3, 'qua'], [5, 'sex']].map(([r, t]) => `<text class="cg-label" x="0" y="${TOP + r * STEP + 10}" font-size="10">${t}</text>`).join('')
+      host.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Calendário fictício de contribuições">${months}${days}${cells}</svg>` +
+        `<div class="cg-legend">Menos ${ramp.map((c) => `<i style="background:${c}"></i>`).join('')} Mais</div>`
+    })
+  }
 </script>
 </body>
 </html>
