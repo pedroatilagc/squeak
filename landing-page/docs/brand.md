@@ -201,7 +201,7 @@ terminal completo.
 
 | Formato | Onde |
 |---|---|
-| Avatar SVG (`DuckAvatar.tsx`) | UI: feed, call, card do dev. Mesmo óculos pixelado no rosto. |
+| Fotos de perfil (`Avatar.tsx`, `public/avatars/`) | UI: feed, call, chat, kanban, card do dev, sala de aula. Um pato por pessoa (pedro: headset amarelo · ana: fones rosa · caio: gorro · lu: óculos roxos · bia: laço · leo: óculos na testa · mari: óculos pixelados; o zé reaproveita o do caio). Gerado por `python tools/avatars.py` a partir de `tools/brand/avatars/`. |
 | Sprite 16×16 (`src/office/sprites.ts`) | Escritório virtual |
 | `favicon.png` e `og-image.jpg` | Renderizados do próprio motor pixel por `tools/favicon.html` e `tools/og.html` |
 

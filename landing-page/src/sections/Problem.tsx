@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Commit } from '../components/Commit'
 import { Window } from '../components/Window'
-import { DuckAvatar } from '../components/DuckAvatar'
+import { Avatar } from '../components/Avatar'
 import { gsap, MQ, useGSAP } from '../lib/motion'
 
 const Sk = ({ w, tone = '' }: { w: number; tone?: string }) => <span className={`sk ${tone}`} style={{ width: `${w}%` }} />
@@ -170,7 +170,7 @@ export function Problem() {
                 </aside>
                 <div className="sqw-main">
                   <div className="sqw-msg">
-                    <DuckAvatar accessory="shades" size={26} />
+                    <Avatar who="ana" size={26} />
                     <span>
                       <b>ana</b> aprovou o login. Pode mergear.
                     </span>

@@ -1,5 +1,5 @@
 import { Commit } from '../components/Commit'
-import { DuckAvatar } from '../components/DuckAvatar'
+import { Avatar, type Person } from '../components/Avatar'
 
 /** Times: burndown do sprint. */
 function Burndown() {
@@ -16,17 +16,17 @@ function Burndown() {
 
 /** Sala de aula: quem contribuiu no projeto do grupo. */
 function Roster() {
-  const rows: [string, number, 'shades' | 'headset' | 'beanie' | 'cap'][] = [
-    ['bia', 38, 'shades'],
-    ['leo', 31, 'headset'],
-    ['mari', 27, 'cap'],
-    ['zé', 0, 'beanie'],
+  const rows: [string, number, Person][] = [
+    ['bia', 38, 'bia'],
+    ['leo', 31, 'leo'],
+    ['mari', 27, 'mari'],
+    ['zé', 0, 'ze'],
   ]
   return (
     <ul className="roster" aria-hidden="true">
       {rows.map(([n, c, a]) => (
         <li key={n} className={c === 0 ? 'is-zero' : ''}>
-          <DuckAvatar accessory={a} size={22} />
+          <Avatar who={a} size={22} />
           <span className="roster-n">{n}</span>
           <span className="roster-bar">
             <i style={{ width: `${(c / 40) * 100}%` }} />

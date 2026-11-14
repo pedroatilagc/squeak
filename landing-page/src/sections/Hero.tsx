@@ -1,24 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { Commit } from '../components/Commit'
 import { waitlistToast } from '../components/StatusBar'
-import { DuckAvatar, type Accessory } from '../components/DuckAvatar'
+import { Avatar, type Person } from '../components/Avatar'
 import { Wordmark } from '../components/Wordmark'
 import { useReducedMotion } from '../lib/motion'
 import { PixelSqueak, type PixelSqueakHandle } from '../mascot/pixel/PixelSqueak'
 import { afterBoot } from './Boot'
 
-type Ev = { who: string; acc: Accessory; text: React.ReactNode; xp?: string }
+type Ev = { who: Person | 'squeak'; text: React.ReactNode; xp?: string }
 
 const EVENTS: Ev[] = [
-  { who: 'pedro', acc: 'headset', text: <>abriu <b>PR #42</b> · <code>feat/login</code></> },
-  { who: 'ana', acc: 'shades', text: <>revisou e pediu 2 mudanças em <b>#42</b></> },
-  { who: 'pedro', acc: 'headset', text: <>aplicou as mudanças · <code>3 commits</code></> },
-  { who: 'ana', acc: 'shades', text: <>aprovou <b>#42</b></> },
-  { who: 'squeak', acc: 'none', text: <><b>#42</b> mergeado · card foi pra <b>Done</b></>, xp: '+120 XP' },
-  { who: 'squeak', acc: 'none', text: <>Merge Machine <b>II</b> desbloqueada</>, xp: 'insígnia' },
-  { who: 'caio', acc: 'beanie', text: <>moveu <b>#51</b> pra <b>Em andamento</b></> },
-  { who: 'lu', acc: 'cap', text: <>iniciou call em <b>#daily</b> · 3 pessoas</> },
-  { who: 'ana', acc: 'shades', text: <>ajudou caio a destravar <b>#51</b></>, xp: '+50 XP' },
+  { who: 'pedro', text: <>abriu <b>PR #42</b> · <code>feat/login</code></> },
+  { who: 'ana', text: <>revisou e pediu 2 mudanças em <b>#42</b></> },
+  { who: 'pedro', text: <>aplicou as mudanças · <code>3 commits</code></> },
+  { who: 'ana', text: <>aprovou <b>#42</b></> },
+  { who: 'squeak', text: <><b>#42</b> mergeado · card foi pra <b>Done</b></>, xp: '+120 XP' },
+  { who: 'squeak', text: <>Merge Machine <b>II</b> desbloqueada</>, xp: 'insígnia' },
+  { who: 'caio', text: <>moveu <b>#51</b> pra <b>Em andamento</b></> },
+  { who: 'lu', text: <>iniciou call em <b>#daily</b> · 3 pessoas</> },
+  { who: 'ana', text: <>ajudou caio a destravar <b>#51</b></>, xp: '+50 XP' },
 ]
 
 function EventFeed() {
@@ -44,7 +44,7 @@ function EventFeed() {
             {ev.who === 'squeak' ? (
               <img className="feed-sys" src="/brand/squeak-logo-256.webp" alt="" width={22} height={20} />
             ) : (
-              <DuckAvatar accessory={ev.acc} size={22} />
+              <Avatar who={ev.who} size={22} />
             )}
             <span className="feed-text">
               <span className="feed-who">{ev.who}</span> {ev.text}
