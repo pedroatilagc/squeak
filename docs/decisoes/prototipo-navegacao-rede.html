@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Squeak · Protótipo de navegação</title>
+<!--
+  Protótipo navegável da casca do app como rede social: Feed, Explorar, Ranking BR, Mapa, Perfil, Mensagens e workspaces.
+  Abra direto no navegador, a partir desta pasta do repositório (os tokens e as imagens vêm por caminho relativo).
+
+  Tokens: os mesmos da prévia do ADR 002.
+  · apps/desktop/src/design/tokens.css entra primeiro, só pela escala --t-*, a grade --sp-*, --r-1, --r-pill e as medidas de layout.
+  · landing-page/src/styles/tokens.css entra depois e vence nos nomes repetidos.
+  · O bloco tokens-da-revisao repete os tokens novos do ADR 002 que ainda não estão em tokens.css.
+  Os três tokens de superfície interativa ainda não têm valor: aqui, hover e selecionado usam superfícies existentes (ver --ui-hover e --ui-selected).
+  Todos os dados são fictícios.
+-->
+<link rel="stylesheet" href="../../apps/desktop/src/design/tokens.css" />
+<link rel="stylesheet" href="../../landing-page/src/styles/tokens.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
+<style id="tokens-da-revisao">
+  /* Tokens decididos na revisão do ADR 002 (seção 7), ainda fora de tokens.css. */
+  :root {
+    --text-tertiary: #7F899E;
+    --border-control: #6B7693;
+    --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
+  }
+</style>
+<style>
+  /* Superfícies interativas provisórias (ADR 002, ponto 4: valores a definir na Sprint 1) */
+  :root { --ui-hover: var(--surface); --ui-selected: var(--surface-elevated); }
+  .sheet, .card, .peek { --ui-hover: var(--surface-elevated); --ui-selected: var(--border); }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font: 400 var(--t-md)/1.45 var(--font-body); -webkit-font-smoothing: antialiased; overflow: hidden; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  input { font: inherit; color: inherit; }
+  code, .mono { font-family: var(--font-mono); }
+  :focus-visible { outline: 2px solid var(--duck-yellow); outline-offset: 1px; border-radius: var(--radius-s); }
+  @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
+
+  .ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .ic.s { width: 15px; height: 15px; } .ic.xs { width: 13px; height: 13px; }
+
+  /* ═══ Moldura da página ═══ */
+  .page-head { height: 44px; display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-4); color: var(--text-secondary); font-size: var(--t-sm); }
+  .page-head b { color: var(--text); font-weight: 600; }
+  .page-head .wm { font: 800 var(--t-lg) var(--font-display); letter-spacing: -0.03em; color: var(--text); }
+  .page-head .wm span { font: 500 var(--t-md) var(--font-mono); color: var(--yellow-text); }
+  .page-head .sep { width: 1px; height: 16px; background: var(--border); }
+  .page-head .grow { flex: 1; }
+  .linkbtn { color: var(--link); font-weight: 500; }
+  .linkbtn:hover { text-decoration: underline; }
+  .window { position: relative; margin: 0 var(--sp-3) var(--sp-3); height: calc(100vh - 44px - var(--sp-3)); min-height: 680px; border-radius: var(--radius-l); overflow: hidden; box-shadow: var(--shadow-window); background: var(--bg); }
+  .app { display: grid; grid-template-columns: 64px var(--sidebar-w) minmax(0, 1fr); height: 100%; min-width: 1160px; }
+  .scroll-x { overflow-x: auto; height: 100%; }
+
+  /* ═══ Barra de destinos ═══ */
+  .rail { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) 0; border-right: 1px solid var(--border); }
+  .rail-btn { position: relative; width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-m); color: var(--text-secondary); transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+  .rail-btn:hover { background: var(--ui-hover); color: var(--text); }
+  .rail-btn.on { background: var(--ui-selected); color: var(--text); }
+  .rail-btn.on .ic { color: var(--yellow-text); }
+  .rail-btn.logo img { width: 34px; height: auto; }
+  .rail-btn.ws { font: 700 var(--t-sm) var(--font-mono); color: var(--text-secondary); background: var(--surface); }
+  .rail-btn.ws img { width: 30px; height: auto; }
+  .rail-btn.ws.on { background: var(--ui-selected); color: var(--yellow-text); box-shadow: inset 0 0 0 1px var(--border); }
+  .rail-sep { width: 28px; height: 1px; background: var(--border); margin: var(--sp-2) 0; }
+  .rail-label { font: 500 10px var(--font-mono); color: var(--text-tertiary); letter-spacing: .04em; margin: var(--sp-1) 0 2px; }
+  .rail .grow { flex: 1; }
+  .badge { position: absolute; top: -3px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); background: var(--surface-elevated); color: var(--text); font: 700 10.5px/18px var(--font-mono); text-align: center; box-shadow: 0 0 0 2px var(--bg); }
+  .badge.dot { min-width: 9px; width: 9px; height: 9px; padding: 0; top: 3px; right: 3px; background: var(--text); }
+  [data-tip] { position: relative; }
+  .rail [data-tip]:hover::after { content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap; background: var(--surface-elevated); color: var(--text); font: 600 var(--t-sm) var(--font-body); padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-s); box-shadow: var(--shadow-pop); z-index: 30; pointer-events: none; animation: fade var(--dur-fast) var(--ease-out); }
+
+  /* ═══ Barra lateral contextual ═══ */
+  .side { display: flex; flex-direction: column; min-height: 0; padding: var(--sp-2); }
+  .side-head { height: 36px; display: flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-2); margin-bottom: var(--sp-1); }
+  .side-head h2 { font: 650 var(--t-lg) var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side-head .chip { margin-left: auto; }
+  .side-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+  .cat { font: 650 var(--t-xs) var(--font-body); text-transform: uppercase; letter-spacing: .07em; color: var(--text-tertiary); padding: var(--sp-3) var(--sp-2) var(--sp-1); }
+  .nav-i { display: flex; align-items: center; gap: var(--sp-2); padding: 5px var(--sp-2); min-height: 30px; border-radius: var(--radius-s); color: var(--text-secondary); font-weight: 500; width: 100%; text-align: left; }
+  .nav-i:hover { background: var(--ui-hover); color: var(--text); }
+  .nav-i.on { background: var(--ui-selected); color: var(--text); }
+  .nav-i.on > .ic { color: var(--yellow-text); }
+  .nav-i .ic { color: var(--text-tertiary); }
+  .nav-i .r { margin-left: auto; font: 500 var(--t-xs) var(--font-mono); color: var(--text-tertiary); }
+  .nav-i.unread { color: var(--text); font-weight: 650; }
+  .nav-i.live, .nav-i.live .ic { color: var(--success-text); }
+  .nav-i .ava { margin-right: 2px; }
+  .vmember { display: flex; align-items: center; gap: var(--sp-2); padding: 2px var(--sp-2) 2px 30px; color: var(--text-secondary); font-size: var(--t-sm); }
+  .side-note { margin: var(--sp-3) var(--sp-2) var(--sp-1); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-m); background: var(--surface); color: var(--text-secondary); font-size: var(--t-sm); display: grid; gap: var(--sp-1); }
+  .side-note b { color: var(--text); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); padding: var(--sp-1) var(--sp-2); }
+
+  /* Call que acompanha a navegação */
+  .dock { margin-top: var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-m); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); display: grid; gap: var(--sp-2); animation: rise var(--dur-med) var(--ease-out); }
+  .dock-top { display: flex; align-items: center; gap: var(--sp-2); }
+  .dock-top a { display: grid; line-height: 1.25; min-width: 0; }
+  .dock-top a b { color: var(--success-text); font-weight: 600; font-size: var(--t-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dock-top a small { color: var(--text-tertiary); font: 500 var(--t-xs) var(--font-mono); }
+  .dock-top a:hover b { text-decoration: underline; }
+  .dock-bot { display: flex; align-items: center; gap: var(--sp-1); }
+  .dock-bot .stack { margin-right: auto; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex: none; }
+  .ibtn { width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius-s); color: var(--text-secondary); }
+  .ibtn:hover { background: var(--ui-hover); color: var(--text); }
+  .ibtn.on { color: var(--danger-text); }
+  .ibtn.leave:hover { color: var(--danger-text); }
+  .userbar { display: flex; align-items: center; gap: 2px; padding-top: var(--sp-2); margin-top: var(--sp-2); border-top: 1px solid var(--border); }
+  .me { flex: 1; display: flex; gap: var(--sp-2); align-items: center; min-width: 0; padding: var(--sp-1); border-radius: var(--radius-s); }
+  .me:hover { background: var(--ui-hover); }
+  .me span { display: grid; line-height: 1.25; }
+  .me b { font-weight: 600; }
+  .me small { color: var(--text-tertiary); font-size: var(--t-xs); }
+  .me .xp { margin-left: auto; }
+
+  /* ═══ Área principal ═══ */
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .topbar { height: var(--topbar-h); flex: none; display: flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3) 0 0; }
+  .hist { display: flex; gap: 2px; }
+  .crumbs { display: flex; align-items: center; gap: var(--sp-1); color: var(--text-tertiary); font-size: var(--t-sm); white-space: nowrap; min-width: 0; }
+  .crumbs a:hover { color: var(--text); text-decoration: underline; }
+  .crumbs .cur { color: var(--text); font-weight: 600; }
+  .crumbs .scope { display: inline-flex; align-items: center; gap: var(--sp-1); padding: 1px var(--sp-2); border-radius: var(--r-pill); background: var(--surface); color: var(--text-secondary); font: 500 var(--t-xs) var(--font-mono); }
+  .crumbs .scope.ws { color: var(--yellow-text); }
+  .search { margin-left: auto; display: flex; align-items: center; gap: var(--sp-2); width: 340px; padding: var(--sp-1) var(--sp-2); border-radius: var(--radius-s); background: var(--surface-elevated); color: var(--text-secondary); font-size: var(--t-sm); }
+  .search:hover { color: var(--text); }
+  .kbd { font: 500 var(--t-xs) var(--font-mono); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--r-1); padding: 0 var(--sp-1); }
+  .search .kbd { margin-left: auto; }
+  .bell-wrap { position: relative; }
+
+  .sheet-row { flex: 1; min-height: 0; display: flex; gap: var(--sp-2); padding: 0 var(--sp-2) var(--sp-2) 0; }
+  .sheet { flex: 1; min-width: 0; background: var(--surface); border-radius: var(--radius-m); box-shadow: 0 0 0 1px var(--border); overflow: hidden; display: flex; flex-direction: column; }
+  .sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+  .screen { animation: fade var(--dur-fast) var(--ease-out); }
+  .area-head { min-height: 52px; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-5); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .area-head h1 { font: 700 var(--t-xl) var(--font-display); letter-spacing: -0.02em; }
+  .area-head .label { color: var(--text-secondary); }
+  .area-head .grow { flex: 1; }
+  .label { font: 500 var(--t-xs) var(--font-mono); color: var(--text-tertiary); }
+  .pad { padding: var(--sp-4) var(--sp-5) var(--sp-6); }
+
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes pop { from { opacity: 0; transform: translateY(calc(var(--sp-1) * -1)) scale(.98); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(var(--sp-2)); } }
+  @keyframes slide { from { opacity: 0; transform: translateX(var(--sp-5)); } }
+
+  /* ═══ Peças ═══ */
+  .ava { position: relative; display: inline-grid; place-items: center; flex: none; overflow: hidden; border-radius: 50%; width: 24px; height: 24px; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--duck-yellow) 30%, var(--surface-elevated)), var(--surface-elevated) 75%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent); cursor: pointer; }
+  .ava img { display: block; width: 100%; height: 100%; object-fit: cover; transform: translateY(5%) scale(1.06); }
+  .ava.mono { background: var(--surface-elevated); color: var(--text-secondary); font: 600 var(--t-xs) var(--font-mono); text-transform: lowercase; }
+  .ava.s { width: 20px; height: 20px; font-size: 9px; }
+  .ava.m { width: 32px; height: 32px; }
+  .ava.l { width: 40px; height: 40px; }
+  .ava.xl { width: 88px; height: 88px; font-size: var(--t-xl); }
+  .stack { display: inline-flex; }
+  .stack .ava { box-shadow: 0 0 0 2px var(--surface); }
+  .stack .ava + .ava { margin-left: calc(var(--sp-2) * -1); }
+  .who { font-weight: 600; cursor: pointer; }
+  .who:hover { text-decoration: underline; }
+  .xp { font: 700 var(--t-xs) var(--font-mono); color: var(--orange-text); white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: var(--sp-1); padding: 1px var(--sp-2); border-radius: var(--r-pill); background: var(--ui-hover); color: var(--text-secondary); font: 500 var(--t-xs) var(--font-mono); white-space: nowrap; }
+  .chip.ws { color: var(--text); }
+  .card .chip, .comm .chip, .room-card .chip, .peek .chip, .hovercard .chip { background: var(--bg); }
+  button.chip:hover { color: var(--text); }
+  button.chip.on { background: color-mix(in srgb, var(--duck-yellow) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--duck-yellow) 40%, transparent); color: var(--text); }
+  .branch { display: inline-flex; align-items: center; gap: var(--sp-1); font: 500 var(--t-sm) var(--font-mono); color: var(--link); }
+  .branch.is-main { color: var(--yellow-text); }
+  .link { color: var(--link); font-weight: 500; }
+  .link:hover { text-decoration: underline; }
+  .code-i { font-family: var(--font-mono); background: var(--bg); padding: 1px 5px; border-radius: var(--r-1); font-size: .92em; }
+
+  .btn { font: 600 var(--t-md) var(--font-body); display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-3); min-height: 28px; border-radius: var(--radius-s); white-space: nowrap; transition: background var(--dur-fast) var(--ease-out); }
+  .btn.primary { background: var(--duck-yellow); color: var(--on-yellow); }
+  .btn.primary:hover { background: var(--duck-highlight); }
+  .btn.secondary { background: var(--surface-elevated); box-shadow: inset 0 0 0 1px var(--border); }
+  .btn.secondary:hover { background: var(--border); }
+  .btn.ghost { color: var(--text-secondary); }
+  .btn.ghost:hover { background: var(--ui-hover); color: var(--text); }
+  .btn.sm { font-size: var(--t-sm); min-height: 24px; padding: 2px var(--sp-2); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.done .ic { color: var(--success-text); }
+
+  .card { background: var(--surface-elevated); border-radius: var(--radius-m); padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+  .card .label, .card .cat { color: var(--text-secondary); }
+  .nav-i.on .r { color: var(--text-secondary); }
+  .card-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+  .card-head h3 { font: 600 var(--t-lg) var(--font-body); }
+  .card-head .r { margin-left: auto; }
+  .xpbar { display: grid; gap: var(--sp-1); }
+  .xpbar-top { display: flex; justify-content: space-between; font-size: var(--t-sm); color: var(--text-secondary); gap: var(--sp-2); }
+  .xpbar-top b { color: var(--text); font-weight: 600; }
+  .track { height: var(--sp-2); border-radius: var(--r-pill); background: var(--bg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--border); }
+  .track > i { display: block; height: 100%; border-radius: inherit; background: var(--beak-orange); }
+  .row { display: flex; align-items: center; gap: var(--sp-2); }
+  .row .grow { flex: 1; min-width: 0; }
+  .muted { color: var(--text-secondary); }
+  .small { font-size: var(--t-sm); }
+  .list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+  .two-col { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sp-4); align-items: start; }
+  .empty { padding: var(--sp-7) var(--sp-5); text-align: center; color: var(--text-secondary); display: grid; justify-items: center; gap: var(--sp-2); }
+  .empty img { width: 72px; }
+
+  /* ═══ Feed ═══ */
+  .compose { display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-3) var(--sp-4); }
+  .compose-in { flex: 1; text-align: left; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-s); background: var(--bg); color: var(--text-secondary); box-shadow: inset 0 0 0 1px var(--border-control); }
+  .post { padding: var(--sp-3) var(--sp-4); }
+  .post-head { display: flex; gap: var(--sp-3); align-items: flex-start; }
+  .post-head .grow { min-width: 0; flex: 1; }
+  .post-meta { display: flex; gap: var(--sp-2); align-items: center; margin-top: 2px; color: var(--text-secondary); font-size: var(--t-sm); flex-wrap: wrap; }
+  .post-body { margin: var(--sp-3) 0 0 52px; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+  .post-body p { max-width: 70ch; }
+  .post-actions { flex-wrap: wrap; display: flex; gap: var(--sp-1); margin: var(--sp-2) 0 0 44px; }
+  .act { white-space: nowrap; display: inline-flex; align-items: center; gap: var(--sp-1); padding: 3px var(--sp-2); border-radius: var(--radius-s); color: var(--text-secondary); font-size: var(--t-sm); font-weight: 500; }
+  .act:hover { background: var(--ui-hover); color: var(--text); }
+  .act.on { color: var(--yellow-text); }
+  .act .n { font-family: var(--font-mono); font-size: var(--t-xs); }
+  .inset { background: var(--bg); border-radius: var(--radius-m); padding: var(--sp-3); display: grid; gap: var(--sp-2); }
+  .inset .row { flex-wrap: wrap; }
+  .pr-t { font-weight: 600; }
+  .pr-t .num { color: var(--text-secondary); font-weight: 400; }
+  .badge-row { display: flex; align-items: center; gap: var(--sp-3); }
+  .badge-row b { font-weight: 600; }
+  .lvl-big { font: 700 var(--t-2xl) var(--font-mono); color: var(--orange-text); letter-spacing: -0.02em; }
+  .room { display: grid; gap: var(--sp-2); padding: var(--sp-3) 0; }
+  .room + .room { border-top: 1px solid var(--border); }
+  .room b { font-weight: 600; }
+  .sugg { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; }
+  .sugg + .sugg { border-top: 1px solid var(--border); }
+  .sugg > span:not(.ava):not(.comm-mark):not(.pos-big) { display: grid; line-height: 1.3; min-width: 0; flex: 1; }
+  .sugg small { color: var(--text-secondary); font-size: var(--t-xs); }
+
+  /* ═══ Explorar ═══ */
+  .x-search { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-s); background: var(--bg); box-shadow: inset 0 0 0 1px var(--border-control); color: var(--text-secondary); width: min(520px, 100%); }
+  .x-search input { flex: 1; background: none; border: 0; outline: 0; color: var(--text); }
+  .x-search input::placeholder { color: var(--text-tertiary); }
+  .h2 { font: 600 var(--t-lg) var(--font-body); margin: var(--sp-5) 0 var(--sp-3); display: flex; align-items: baseline; gap: var(--sp-2); }
+  .h2 small { color: var(--text-secondary); font: 400 var(--t-sm) var(--font-body); }
+  .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+  .room-card { background: var(--surface-elevated); border-radius: var(--radius-m); padding: var(--sp-3) var(--sp-4); display: grid; gap: var(--sp-2); }
+  .room-card .live { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--success-text); font: 600 var(--t-xs) var(--font-mono); }
+  .room-card b { font-weight: 600; }
+  .comms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+  .comm { background: var(--surface-elevated); border-radius: var(--radius-m); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); }
+  .comm-top { display: flex; gap: var(--sp-3); align-items: center; }
+  .comm-mark { width: 40px; height: 40px; border-radius: var(--radius-m); background: var(--bg); display: grid; place-items: center; font: 700 var(--t-sm) var(--font-mono); color: var(--yellow-text); flex: none; }
+  .comm-top b { font-weight: 600; font-size: var(--t-lg); }
+  .comm p { color: var(--text-secondary); font-size: var(--t-sm); flex: 1; }
+  .comm .foot { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+  .comm .foot .btn { margin-left: auto; }
+  .stat { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--text-secondary); font-size: var(--t-xs); }
+  .comm-top .stat { display: flex; margin-top: 2px; }
+  .stat .live-dot { width: 6px; height: 6px; }
+
+  /* ═══ Ranking ═══ */
+  .season { display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; }
+  .you { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-m); background: var(--surface-elevated); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--duck-yellow) 40%, transparent); margin-bottom: var(--sp-4); }
+  .pos-big { font: 700 var(--t-2xl) var(--font-mono); letter-spacing: -0.02em; }
+  .you .xpbar { min-width: 0; }
+  .rank { width: 100%; border-collapse: collapse; }
+  .rank-wrap { overflow-x: auto; }
+  .rank th, .rank td { white-space: nowrap; }
+  .rank th { text-align: left; font: 500 var(--t-xs) var(--font-mono); color: var(--text-tertiary); padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .rank td { padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .rank tr:hover td { background: color-mix(in srgb, var(--surface-elevated) 50%, transparent); }
+  .rank tr.is-me td { background: color-mix(in srgb, var(--duck-yellow) 14%, transparent); }
+  .rank .num { text-align: right; font: 500 var(--t-sm) var(--font-mono); font-variant-numeric: tabular-nums; }
+  .rank .pos { font: 700 var(--t-md) var(--font-mono); width: 56px; }
+  .rank .pos.t1 { color: var(--tier-gold); } .rank .pos.t2 { color: var(--tier-silver); } .rank .pos.t3 { color: var(--tier-bronze); }
+  .rank .dev { display: flex; align-items: center; gap: var(--sp-2); }
+  .rank .dev small { color: var(--text-tertiary); font: 500 var(--t-xs) var(--font-mono); }
+  .up { color: var(--orange-text); font: 600 var(--t-xs) var(--font-mono); }
+  .down, .same { color: var(--text-tertiary); font: 500 var(--t-xs) var(--font-mono); }
+  .tiers { display: inline-flex; gap: 3px; }
+  .tiers i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); display: inline-block; }
+  .gap-row td { text-align: center; color: var(--text-tertiary); font: 500 var(--t-xs) var(--font-mono); padding: var(--sp-1); }
+
+  /* ═══ Mapa ═══ */
+  .map-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-4); align-items: start; }
+  .scene { background: var(--office-bg); border-radius: var(--radius-m); padding: var(--sp-5); display: grid; justify-items: center; gap: var(--sp-4); box-shadow: inset 0 0 0 1px var(--px-wall); }
+  .scene-title { font: 700 var(--t-lg) var(--font-pixel); color: var(--px-duck); letter-spacing: .02em; }
+  .tiles { display: grid; grid-template-columns: repeat(7, 54px); grid-template-rows: repeat(9, 54px); gap: 6px; }
+  .tile { display: grid; place-items: center; font: 700 var(--t-sm) var(--font-mono); color: var(--px-white); box-shadow: inset 0 0 0 2px var(--px-ink), 4px 4px 0 0 var(--px-ink); transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); cursor: pointer; }
+  .tile:hover { transform: translate(-2px, -2px); box-shadow: inset 0 0 0 2px var(--px-ink), 6px 6px 0 0 var(--px-ink); }
+  .tile.l0 { background: var(--px-wall); color: var(--px-metal); }
+  .tile.l1 { background: var(--sq-o0); } .tile.l2 { background: var(--sq-o1); }
+  .tile.l3 { background: var(--sq-o2); color: var(--px-ink); } .tile.l4 { background: var(--sq-o3); color: var(--px-ink); }
+  .tile.sel { outline: 3px solid var(--px-duck); outline-offset: 2px; }
+  .tile.home::after { content: ''; position: absolute; }
+  .px-legend { display: flex; align-items: center; gap: var(--sp-2); font: 500 var(--t-sm) var(--font-pixel); color: var(--px-metal); }
+  .px-legend i { width: 16px; height: 16px; box-shadow: inset 0 0 0 2px var(--px-ink); display: inline-block; }
+  .px-tip { position: fixed; z-index: 60; pointer-events: none; background: var(--px-white); color: var(--px-ink); font: 500 var(--t-md)/1.2 var(--font-pixel); padding: var(--sp-1) var(--sp-2); box-shadow: 0 0 0 2px var(--px-ink), 4px 4px 0 0 var(--px-ink); white-space: nowrap; }
+  .uf-panel { display: grid; gap: var(--sp-3); }
+  .uf-panel h2 { font: 700 var(--t-xl) var(--font-display); letter-spacing: -0.02em; }
+  .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+  .kpi { background: var(--bg); border-radius: var(--radius-s); padding: var(--sp-2) var(--sp-3); display: grid; }
+  .kpi b { font: 700 var(--t-lg) var(--font-mono); }
+  .kpi span { color: var(--text-secondary); font-size: var(--t-xs); }
+
+  /* ═══ Perfil ═══ */
+  .prof-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-5); align-items: start; padding: var(--sp-5); border-bottom: 1px solid var(--border); }
+  .prof-head h1 { font: 750 var(--t-2xl) var(--font-display); letter-spacing: -0.032em; display: flex; align-items: baseline; gap: var(--sp-3); }
+  .prof-head h1 small { font: 500 var(--t-sm) var(--font-mono); color: var(--text-secondary); letter-spacing: 0; }
+  .prof-head .bio { margin-top: var(--sp-2); max-width: 64ch; }
+  .facts { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin-top: var(--sp-2); color: var(--text-secondary); font-size: var(--t-sm); }
+  .facts span { display: inline-flex; align-items: center; gap: var(--sp-1); }
+  .prof-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; justify-content: flex-end; }
+  .stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-2); padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border); }
+  .stats div { display: grid; }
+  .stats b { font: 700 var(--t-lg) var(--font-mono); font-variant-numeric: tabular-nums; }
+  .stats b.o { color: var(--orange-text); }
+  .stats span { color: var(--text-secondary); font-size: var(--t-xs); }
+  .tabs { display: flex; gap: var(--sp-1); padding: var(--sp-2) var(--sp-5) 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: var(--sp-2) var(--sp-3); color: var(--text-secondary); font-weight: 500; box-shadow: inset 0 -2px 0 transparent; }
+  .tab:hover { color: var(--text); }
+  .tab.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--duck-yellow); }
+  .badges { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+  .badges figure { display: grid; justify-items: center; gap: var(--sp-1); width: 84px; text-align: center; }
+  .badges figcaption { font-size: var(--t-xs); color: var(--text-secondary); line-height: 1.3; }
+  .cg svg { display: block; width: 100%; height: auto; }
+  .cg .cg-label { fill: var(--text-secondary); }
+  .cg-legend { display: flex; align-items: center; gap: var(--sp-1); justify-content: flex-end; margin-top: var(--sp-2); color: var(--text-secondary); font-size: var(--t-xs); }
+  .cg-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .deliv { display: flex; gap: var(--sp-2); align-items: center; padding: var(--sp-2) 0; font-size: var(--t-sm); }
+  .deliv + .deliv { border-top: 1px solid var(--border); }
+  .deliv .ic { color: var(--text-secondary); }
+  .deliv .grow { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ═══ Mensagens e workspace ═══ */
+  .chat { padding: var(--sp-2) 0 var(--sp-3); }
+  .day { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-3) var(--sp-5) var(--sp-1); color: var(--text-tertiary); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; }
+  .day::before, .day::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .msg { display: flex; gap: var(--sp-3); padding: 3px var(--sp-5); }
+  .msg:hover { background: color-mix(in srgb, var(--surface-elevated) 45%, transparent); }
+  .msg:not(.grouped) { margin-top: var(--sp-2); }
+  .msg .gut { width: 32px; flex: none; }
+  .msg-body { min-width: 0; flex: 1; }
+  .msg-meta { display: flex; gap: var(--sp-2); align-items: baseline; }
+  .msg-meta time { color: var(--text-tertiary); font-size: var(--t-xs); }
+  .composer { margin: 0 var(--sp-5) var(--sp-4); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-m); background: var(--surface-elevated); color: var(--text-secondary); display: flex; align-items: center; gap: var(--sp-2); }
+  .composer span { flex: 1; }
+  .req { margin: var(--sp-5); padding: var(--sp-4); border-radius: var(--radius-m); background: var(--surface-elevated); display: grid; gap: var(--sp-3); max-width: 560px; }
+  .req blockquote { border-left: 3px solid var(--border); padding-left: var(--sp-3); color: var(--text-secondary); }
+
+  /* ═══ Camadas: cartão, peek, Ctrl K, notificações, toast, roteiro ═══ */
+  .hovercard { position: fixed; z-index: 70; width: 290px; background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-3); animation: pop var(--dur-fast) var(--ease-out); }
+  .hovercard[hidden] { display: none; }
+  .hc-top { display: flex; gap: var(--sp-3); align-items: center; }
+  .hc-top span { display: grid; line-height: 1.3; min-width: 0; }
+  .hc-top b { font-weight: 650; font-size: var(--t-lg); }
+  .hc-top small { color: var(--text-secondary); font: 500 var(--t-xs) var(--font-mono); }
+  .hc-mid { display: flex; align-items: center; gap: var(--sp-3); color: var(--text-secondary); font-size: var(--t-sm); }
+  .hc-acts { display: flex; gap: var(--sp-2); }
+  .hc-acts .btn { flex: 1; }
+  .peek { width: 320px; flex: none; background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: 0 0 0 1px var(--border); overflow-y: auto; animation: slide var(--dur-med) var(--ease-out); display: flex; flex-direction: column; }
+  .peek-head { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-2) 0 var(--sp-4); }
+  .peek-head .label { color: var(--text-secondary); }
+  .peek-head .ibtn { margin-left: auto; }
+  .peek-body { padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-4); }
+  .peek-id { display: grid; justify-items: start; gap: var(--sp-2); }
+  .peek-id h2 { font: 700 var(--t-xl) var(--font-display); letter-spacing: -0.02em; }
+  .peek .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0; border: 0; }
+  .peek .badges { gap: var(--sp-2); }
+  .peek .badges figure { width: 64px; }
+
+  .overlay { position: absolute; inset: 0; z-index: 80; background: color-mix(in srgb, var(--bg) 66%, transparent); display: grid; justify-items: center; align-items: start; padding-top: 12vh; animation: fade var(--dur-fast) var(--ease-out); }
+  .overlay[hidden] { display: none; }
+  .palette { width: min(620px, 92%); background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); overflow: hidden; animation: pop var(--dur-fast) var(--ease-out); }
+  .pal-in { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .pal-in input { flex: 1; background: none; border: 0; outline: 0; font-size: var(--t-lg); color: var(--text); }
+  .pal-in input::placeholder { color: var(--text-secondary); }
+  .pal-scopes { display: flex; gap: var(--sp-3); padding: var(--sp-2) var(--sp-4); color: var(--text-secondary); font-size: var(--t-xs); border-bottom: 1px solid var(--border); }
+  .pal-scopes b { font-family: var(--font-mono); color: var(--text); }
+  .pal-list { max-height: 380px; overflow-y: auto; padding: var(--sp-1); }
+  .pal-group { font: 650 var(--t-xs) var(--font-body); text-transform: uppercase; letter-spacing: .07em; color: var(--text-secondary); padding: var(--sp-2) var(--sp-3) var(--sp-1); }
+  .pal-item { display: flex; align-items: center; gap: var(--sp-3); width: 100%; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-s); text-align: left; }
+  .pal-item .ic { color: var(--text-secondary); }
+  .pal-item small { margin-left: auto; color: var(--text-secondary); font: 500 var(--t-xs) var(--font-mono); }
+  .pal-item.on { background: var(--border); }
+  .pal-item.on .ic { color: var(--yellow-text); }
+  .pal-empty { padding: var(--sp-5); text-align: center; color: var(--text-secondary); }
+
+  .pop { position: absolute; z-index: 75; top: calc(100% + var(--sp-1)); right: 0; width: 340px; background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); padding: var(--sp-1); animation: pop var(--dur-fast) var(--ease-out); }
+  .pop[hidden] { display: none; }
+  .pop h4 { font: 600 var(--t-md) var(--font-body); padding: var(--sp-2) var(--sp-3); }
+  .notif { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-s); font-size: var(--t-sm); width: 100%; text-align: left; }
+  .notif:hover { background: var(--border); }
+  .notif small { display: block; color: var(--text-secondary); font: 500 var(--t-xs) var(--font-mono); margin-top: 2px; }
+
+  .toast { position: absolute; z-index: 90; left: 50%; bottom: var(--sp-5); transform: translateX(-50%); background: var(--surface-elevated); box-shadow: var(--shadow-pop); border-radius: var(--radius-m); padding: var(--sp-2) var(--sp-4); display: flex; align-items: center; gap: var(--sp-2); animation: rise var(--dur-fast) var(--ease-out); white-space: nowrap; }
+  .toast[hidden] { display: none; }
+  .toast .ic { color: var(--success-text); }
+
+  .tour { position: absolute; z-index: 65; right: var(--sp-5); bottom: var(--sp-5); width: 330px; background: var(--surface-elevated); border-radius: var(--radius-m); box-shadow: var(--shadow-pop); padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-2); animation: rise var(--dur-med) var(--ease-out); }
+  .tour[hidden] { display: none; }
+  .tour-head { display: flex; align-items: center; gap: var(--sp-2); }
+  .tour-head img { width: 28px; }
+  .tour-head b { font-weight: 650; }
+  .tour-head .ibtn { margin-left: auto; }
+  .tour ol { padding-left: var(--sp-5); display: grid; gap: var(--sp-1); color: var(--text-secondary); font-size: var(--t-sm); }
+  .tour ol b { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<!-- Ícones: traços de apps/desktop/src/design/Icon.tsx. compass, trophy, map, bell, user-plus, mic-off, pin, headphones e globe são novos, no mesmo estilo. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-pr" viewBox="0 0 24 24"><path d="M6 8.5v7M18 15.5V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2"/></symbol>
+  <symbol id="i-merge" viewBox="0 0 24 24"><path d="M6 9v12M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 9a9 9 0 0 0 9 9"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></symbol>
+  <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3M3 3l18 18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1M16 4.5a3.5 3.5 0 0 1 0 7M22 21v-1a5 5 0 0 0-4-4.9"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9M15 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM9 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-command" viewBox="0 0 24 24"><path d="M15 6a3 3 0 1 1 3 3H6a3 3 0 1 1 3-3v12a3 3 0 1 1-3-3h12a3 3 0 1 1-3 3V6z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M7 11h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+  <symbol id="i-issue" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16v.01"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM15.5 8.5l-2 5-5 2 2-5 5-2z"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M10 17h4v4h-4z"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6zM9 3v15M15 6v15"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1M19 8v6M16 11h6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3M4 15a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2v-3zM20 15a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2v-3z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/></symbol>
+</svg>
+
+<header class="page-head">
+  <span class="wm"><span>&lt;</span>squeak<span>/&gt;</span></span>
+  <span class="sep"></span>
+  <span><b>Protótipo de navegação</b> · o app como rede social, além do workspace</span>
+  <span class="grow"></span>
+  <span>Dados fictícios · tokens do ADR 002</span>
+  <button class="linkbtn" id="tour-open">Roteiro da demo</button>
+</header>
+
+<div class="window">
+  <div class="scroll-x">
+    <div class="app">
+      <nav class="rail" id="rail" aria-label="Destinos"></nav>
+      <aside class="side">
+        <div class="side-body-wrap" style="display:flex;flex-direction:column;flex:1;min-height:0" id="side"></div>
+        <div id="dock"></div>
+        <div class="userbar">
+          <a class="me" href="#/u/pedro" data-tipless><span class="ava m"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small id="me-status">em call</small></span><span class="xp">nv 7</span></a>
+          <button class="ibtn" aria-label="Configurações" data-todo="Configurações"><svg class="ic s"><use href="#i-sliders"/></svg></button>
+        </div>
+      </aside>
+      <div class="main">
+        <header class="topbar">
+          <div class="hist">
+            <button class="ibtn" aria-label="Voltar (Alt+←)" title="Voltar (Alt+←)" onclick="history.back()"><svg class="ic s"><use href="#i-arrow-left"/></svg></button>
+            <button class="ibtn" aria-label="Avançar (Alt+→)" title="Avançar (Alt+→)" onclick="history.forward()"><svg class="ic s"><use href="#i-arrow-right"/></svg></button>
+          </div>
+          <nav class="crumbs" id="crumbs" aria-label="Localização"></nav>
+          <button class="search" id="search-open"><svg class="ic s"><use href="#i-search"/></svg>Buscar pessoas, comunidades, canais<span class="kbd">Ctrl K</span></button>
+          <div class="bell-wrap">
+            <button class="ibtn" id="bell" aria-label="Notificações" aria-expanded="false" style="position:relative"><svg class="ic"><use href="#i-bell"/></svg><span class="badge dot" id="bell-dot"></span></button>
+            <div class="pop" id="notifs" hidden></div>
+          </div>
+        </header>
+        <div class="sheet-row">
+          <section class="sheet"><div class="sheet-scroll" id="sheet"></div></section>
+          <div id="peek-slot" style="display:contents"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="pal" hidden>
+    <div class="palette" role="dialog" aria-label="Buscar">
+      <div class="pal-in"><svg class="ic"><use href="#i-search"/></svg><input id="pal-q" placeholder="Para onde você quer ir?" autocomplete="off" /><span class="kbd">Esc</span></div>
+      <div class="pal-scopes"><span><b>@</b> pessoas</span><span><b>#</b> canais</span><span><b>&gt;</b> workspaces e comunidades</span><span><b>/</b> comandos</span></div>
+      <div class="pal-list" id="pal-list"></div>
+    </div>
+  </div>
+  <div class="hovercard" id="hc" hidden></div>
+  <div class="toast" id="toast" hidden></div>
+  <aside class="tour" id="tour" hidden>
+    <div class="tour-head"><img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" /><b>O que testar</b><button class="ibtn" id="tour-close" aria-label="Fechar roteiro"><svg class="ic s"><use href="#i-x"/></svg></button></div>
+    <ol>
+      <li><b>Passe o mouse</b> no nome ou no avatar de alguém.</li>
+      <li><b>Clique numa pessoa:</b> o perfil abre ao lado, sem sair da tela.</li>
+      <li>Você está na <b>call daily</b>: vá para Ranking e Mapa, a call vai junto.</li>
+      <li><b>Ctrl K</b> e digite <code>@</code>, <code>#</code> ou <code>&gt;</code>.</li>
+      <li>No <b>Mapa</b>, clique num estado e abra o ranking dele.</li>
+      <li>Em <b>Mensagens</b>, aceite o pedido do leo.</li>
+      <li><b>Alt+←</b> volta, como num navegador.</li>
+    </ol>
+  </aside>
+</div>
+<div class="px-tip" id="px-tip" hidden></div>
+
+<script>
+const AVA = '../../landing-page/public/avatars/'
+const LOGO = '../../landing-page/public/brand/squeak-logo-256.webp'
+const $ = (s, r = document) => r.querySelector(s)
+const ic = (n, c = 's') => `<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`
+const fmt = (n) => n.toLocaleString('pt-BR')
+
+// ═══ Dados fictícios ═══
+const UF = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal', ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais', PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte', RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins' }
+// rel: me · none · following · pending (eu pedi) · incoming (pediram para mim) · connected
+const P = {
+  pedro: { name: 'pedro', art: 'pedro', city: 'Campinas', uf: 'SP', lvl: 7, sxp: 6120, rel: 'me', stack: ['TypeScript', 'Rust', 'Tauri'], bio: 'Desktop e infra do Squeak. Pato de headset amarelo.', followers: 84, conns: 23, badges: ['gold:merge', 'silver:pair', 'bronze:book'] },
+  ana: { name: 'ana', art: 'ana', city: 'Recife', uf: 'PE', lvl: 9, sxp: 13980, rel: 'connected', stack: ['TypeScript', 'React', 'Node'], bio: 'Front-end e revisão de código. Organiza o code review aberto do Front-end Nordeste.', followers: 412, conns: 61, badges: ['gold:eye', 'gold:merge', 'silver:pair', 'bronze:book'] },
+  caio: { name: 'caio', art: 'caio', city: 'Belo Horizonte', uf: 'MG', lvl: 6, sxp: 5210, rel: 'following', stack: ['Python', 'SQL'], bio: 'Dados no patos-dev. Puxa as dúvidas de entrevista júnior no Dados & ML Minas.', followers: 97, conns: 18, badges: ['silver:book', 'bronze:pair'] },
+  lu: { name: 'lu', art: 'lu', city: 'Porto Alegre', uf: 'RS', lvl: 8, sxp: 11840, rel: 'connected', stack: ['Go', 'Kubernetes'], bio: 'Infra e deploys. Óculos pixelados roxos, sempre.', followers: 233, conns: 40, badges: ['gold:shield', 'silver:flame', 'bronze:merge'] },
+  bia: { name: 'bia', art: 'bia', city: 'Salvador', uf: 'BA', lvl: 11, sxp: 15210, rel: 'following', stack: ['TypeScript', 'Rust'], bio: 'Mergeia mais rápido que o CI. Merge Machine III.', followers: 980, conns: 75, badges: ['gold:merge', 'diamond:rocket', 'gold:eye', 'silver:pair'] },
+  leo: { name: 'leo', art: 'leo', city: 'Curitiba', uf: 'PR', lvl: 5, sxp: 4480, rel: 'incoming', stack: ['C#', 'Godot'], bio: 'Gamedev nas horas vagas. Óculos na testa.', followers: 51, conns: 9, badges: ['bronze:rocket'] },
+  mari: { name: 'mari', art: 'mari', city: 'Fortaleza', uf: 'CE', lvl: 10, sxp: 17960, rel: 'none', stack: ['Rust', 'WebAssembly'], bio: 'Mantém o parser do Rust BR. Live de pareamento às quintas.', followers: 1520, conns: 88, badges: ['diamond:shield', 'gold:merge', 'gold:pair', 'silver:book'] },
+  duda: { name: 'duda', city: 'São Paulo', uf: 'SP', lvl: 12, sxp: 18420, rel: 'none', stack: ['Go', 'Postgres'], bio: 'Backend e bancos de dados.', followers: 2100, conns: 120, badges: ['diamond:rocket', 'gold:merge'] },
+  rafa: { name: 'rafa', city: 'São Paulo', uf: 'SP', lvl: 11, sxp: 16880, rel: 'none', stack: ['Kotlin', 'Android'], bio: 'Mobile.', followers: 870, conns: 54, badges: ['gold:book'] },
+  thai: { name: 'thaís', city: 'Brasília', uf: 'DF', lvl: 10, sxp: 14650, rel: 'none', stack: ['Go', 'TypeScript'], bio: 'Open source no governo.', followers: 640, conns: 47, badges: ['gold:shield'] },
+  gui: { name: 'gui', city: 'Florianópolis', uf: 'SC', lvl: 9, sxp: 12700, rel: 'following', stack: ['Elixir'], bio: 'Elixir e café.', followers: 310, conns: 22, badges: ['silver:merge'] },
+  nina: { name: 'nina', city: 'Manaus', uf: 'AM', lvl: 9, sxp: 11230, rel: 'none', stack: ['Python', 'ML'], bio: 'Visão computacional.', followers: 280, conns: 19, badges: ['silver:eye'] },
+  vini: { name: 'vini', city: 'Goiânia', uf: 'GO', lvl: 8, sxp: 10950, rel: 'none', stack: ['PHP', 'Laravel'], bio: 'Web desde sempre.', followers: 190, conns: 15, badges: ['bronze:merge'] },
+  jess: { name: 'jéssica', city: 'Rio de Janeiro', uf: 'RJ', lvl: 8, sxp: 10410, rel: 'none', stack: ['Java', 'Spring'], bio: 'Backend de pagamentos.', followers: 220, conns: 31, badges: ['silver:shield'] },
+}
+const RANK_DELTA = { duda: 0, mari: 2, rafa: -1, bia: 1, thai: 3, ana: -2, gui: 0, lu: 4, nina: -1, vini: 1, jess: -3, caio: 5, leo: 0, pedro: 37 }
+const PEDRO_BR = 412
+
+const WS = {
+  'patos-dev': { name: 'patos-dev', kind: 'time', mark: 'logo', badge: 3, text: [['geral'], ['auth', 'unread'], ['deploys'], ['code-review']], voice: [['daily', ['ana', 'caio', 'lu']], ['pareamento', []]], members: 8 },
+  'rust-br': { name: 'Rust BR', kind: 'comunidade', mark: 'rs', text: [['boas-vindas'], ['ajuda', 'unread'], ['vagas'], ['showcase']], voice: [['live-pareamento', ['mari']]], members: 1240 },
+  'front-ne': { name: 'Front-end Nordeste', kind: 'comunidade', mark: 'fn', text: [['geral'], ['react'], ['css-raiz'], ['vagas']], voice: [['code-review-aberto', ['ana']]], members: 860 },
+}
+const COMMS = [
+  { id: 'rust-br', name: 'Rust BR', mark: 'rs', ufs: 'SP', members: 1240, active: 34, stack: ['Rust'], desc: 'Rust em português. Pareamento ao vivo às quintas e um parser escrito do zero pela comunidade.', joined: true, access: 'open' },
+  { id: 'front-ne', name: 'Front-end Nordeste', mark: 'fn', ufs: 'PE · CE', members: 860, active: 21, stack: ['TypeScript', 'React'], desc: 'Code review aberto toda semana. Quem é júnior ganha revisão de gente sênior.', joined: true, access: 'open' },
+  { id: 'python-sul', name: 'Python Sul', mark: 'py', ufs: 'RS', members: 640, active: 9, stack: ['Python'], desc: 'Meetups em Porto Alegre e uma trilha de estudos para quem está começando.', joined: false, access: 'open' },
+  { id: 'gamedev-br', name: 'Gamedev BR', mark: 'gd', ufs: 'SP · PR', members: 1020, active: 17, stack: ['C#', 'Godot'], desc: 'Game jams mensais. A entrada passa por um pedido, para manter o foco.', joined: false, access: 'request' },
+  { id: 'dados-mg', name: 'Dados & ML Minas', mark: 'dm', ufs: 'MG', members: 410, active: 6, stack: ['Python', 'SQL'], desc: 'Dúvidas de entrevista, revisão de portfólio e vagas de dados em Minas.', joined: false, access: 'open' },
+  { id: 'oss-df', name: 'Open Source Brasília', mark: 'os', ufs: 'DF', members: 290, active: 4, stack: ['Go', 'TypeScript'], desc: 'Contribuições para software público. Issues boas para primeira contribuição.', joined: false, access: 'open' },
+]
+const ROOMS = [
+  { title: 'Live: parser em Rust do zero', comm: 'Rust BR', ws: 'rust-br', room: 'live-pareamento', host: 'mari', n: 23 },
+  { title: 'Code review aberto: React 19', comm: 'Front-end Nordeste', ws: 'front-ne', room: 'code-review-aberto', host: 'ana', n: 41 },
+  { title: 'Dúvidas de entrevista júnior', comm: 'Dados & ML Minas', ws: 'dados-mg', room: 'sala-aberta', host: 'caio', n: 12 },
+]
+const MAPDATA = { SP: 4210, RJ: 1630, MG: 1480, PR: 1120, RS: 1040, SC: 910, PE: 870, CE: 760, DF: 720, BA: 690, GO: 430, PB: 310, RN: 280, ES: 270, AM: 240, PA: 230, MS: 210, MT: 190, MA: 150, AL: 140, PI: 130, SE: 120, RO: 80, TO: 70, AC: 30, AP: 25, RR: 20 }
+// grade aproximada (tile map): [linha, coluna]
+const TILE = { RR: [0, 1], AP: [0, 3], AM: [1, 1], PA: [1, 2], MA: [1, 3], CE: [1, 4], RN: [1, 5], AC: [2, 0], RO: [2, 1], TO: [2, 2], PI: [2, 3], PE: [2, 4], PB: [2, 5], MT: [3, 1], GO: [3, 2], BA: [3, 3], SE: [3, 4], AL: [3, 5], MS: [4, 1], DF: [4, 2], MG: [4, 3], ES: [4, 4], SP: [5, 2], RJ: [5, 3], PR: [6, 2], SC: [7, 2], RS: [8, 2] }
+
+let POSTS = [
+  { id: 1, who: 'bia', kind: 'merge', ws: 'patos-dev', t: 'há 12 min', scope: ['seguindo', 'workspaces'], kudos: 14, comments: 3 },
+  { id: 2, who: 'mari', kind: 'badge', ws: 'rust-br', t: 'há 40 min', scope: ['brasil'], kudos: 52, comments: 9 },
+  { id: 3, who: 'ana', kind: 'post', ws: 'front-ne', t: 'há 1 h', scope: ['seguindo', 'workspaces'], kudos: 31, comments: 12 },
+  { id: 4, who: 'lu', kind: 'level', ws: 'patos-dev', t: 'há 2 h', scope: ['seguindo', 'workspaces'], kudos: 22, comments: 4 },
+  { id: 5, who: 'mari', kind: 'room', ws: 'rust-br', t: 'agora', scope: ['brasil', 'workspaces'], kudos: 8, comments: 0 },
+  { id: 6, who: 'caio', kind: 'join', ws: 'dados-mg', t: 'há 3 h', scope: ['seguindo'], kudos: 5, comments: 1 },
+  { id: 7, who: 'duda', kind: 'merge2', ws: null, t: 'há 4 h', scope: ['brasil'], kudos: 77, comments: 15 },
+]
+const kudosOn = new Set()
+const CHATS = {
+  'patos-dev/auth': [['ana', '10:42', 'Revisei o #42. A sessão precisa expirar junto com o token do GitHub, senão a pessoa continua logada com um token que já morreu.'], ['ana', '', 'Deixei dois comentários no <span class="code-i">useSession.ts</span>, nas linhas 31 e 58.'], ['pedro', '10:47', 'Boa. Vou renovar o token 5 minutos antes de expirar e encerrar a sessão se a renovação falhar.'], ['caio', '10:51', 'Eu reviso depois da daily.']],
+  dm_ana: [['ana', 'ontem', 'Vi que você entrou no ranking de SP! Parabéns pelo #42.'], ['pedro', 'ontem', 'Valeu! Quinta tem code review aberto no Front-end Nordeste? Queria levar o PR do login.'], ['ana', '09:12', 'Tem sim, 19h. Leva que eu reviso ao vivo.']],
+  dm_lu: [['lu', 'seg', 'O deploy de staging voltou. Era o certificado.'], ['pedro', 'seg', 'Salvou a semana.']],
+}
+const DEFAULT_CHAT = (ws) => [['mari', '09:30', `Bem-vindos ao ${WS[ws].name}! Leiam o #boas-vindas antes de postar vaga.`], ['leo', '09:41', 'Alguém já usou o novo borrow checker com async closures?'], ['mari', '09:44', 'Hoje na live a gente passa por isso. 19h, sala de voz.']]
+
+const state = { call: { ws: 'patos-dev', room: 'daily', people: ['ana', 'caio', 'lu'], start: Date.now() - 12 * 60000 - 4000, muted: false }, peek: null, notifSeen: false, mapUf: 'SP', mapMetric: 'devs' }
+
+// ═══ Peças de UI ═══
+const AV = (id, size = '') => { const p = P[id]; return p.art ? `<span class="ava ${size}" data-user="${id}"><img src="${AVA}${p.art}.webp" alt="" /></span>` : `<span class="ava mono ${size}" data-user="${id}">${p.name.slice(0, 2)}</span>` }
+const NAME = (id) => `<a class="who" href="#/u/${id}" data-user="${id}">${P[id].name}</a>`
+const wsChip = (ws) => ws && (WS[ws] || COMMS.find((c) => c.id === ws)) ? `<a class="chip ws" href="#/w/${ws}">${WS[ws] ? WS[ws].name : COMMS.find((c) => c.id === ws).name}</a>` : ''
+const tierDots = (id) => `<span class="tiers">${P[id].badges.slice(0, 4).map((b) => `<i style="background:var(--tier-${b.split(':')[0]})"></i>`).join('')}</span>`
+
+function relButtons(id, mode = 'full') {
+  const r = P[id].rel, big = mode === 'full'
+  const b = (cls, act, label, icon, dis = '') => `<button class="btn ${cls} ${big ? '' : 'sm'}" data-act="${act}" data-id="${id}" ${dis}>${icon ? ic(icon) : ''}${label}</button>`
+  if (r === 'me') return b('secondary', 'todo', 'Editar perfil', 'sliders')
+  if (r === 'connected') return b(big ? 'primary' : 'secondary', 'dm', 'Mensagem', 'message') + b('secondary done', 'none', 'Conectado', 'check') + (big ? b('ghost', 'pair', 'Chamar para parear', 'headphones') : '')
+  if (r === 'incoming') return b(big ? 'primary' : 'secondary', 'accept', 'Aceitar conexão', 'user-plus') + b('secondary', 'follow', 'Seguir', '')
+  const follow = r === 'none' ? b(big ? 'primary' : 'secondary', 'follow', 'Seguir', 'plus') : b('secondary done', 'unfollow', 'Seguindo', 'check')
+  const conn = r === 'pending' ? b('secondary', 'none', 'Pedido enviado', 'clock', 'disabled') : b('secondary', 'connect', 'Conectar', 'user-plus')
+  return follow + conn + (big ? b('ghost', 'pair', 'Chamar para parear', 'headphones') : '')
+}
+
+// insígnias: mesma geometria de landing-page/src/components/Badge.tsx (como na prévia do ADR 002)
+const GLYPHS = {
+  merge: 'M7 4.5a2 2 0 1 0 0 .01M7 19.5a2 2 0 1 0 0 .01M17 12a2 2 0 1 0 0 .01M7 6.5v11M7 8c0 3.5 3 4 8 4',
+  eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6',
+  flame: 'M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-6.5.3 2 1.2 3 2.3 3.2C11 8 10.5 5.5 12 3z',
+  pair: 'M9 5.5a3 3 0 1 0 0 6 3 3 0 1 0 0-6M16.5 6.5a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 1 0 0-5.2M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5M14 15c.8-.4 1.6-.6 2.5-.6 2.6 0 4.5 1.8 4.5 4.6',
+  shield: 'M12 3l7.5 3v5.5c0 5-3.3 8.3-7.5 9.5-4.2-1.2-7.5-4.5-7.5-9.5V6zM9 12l2 2 4-4.5',
+  rocket: 'M13.5 15.5l-5-5C10 6 14 3.5 20.5 3.5 20.5 10 18 14 13.5 15.5zM8.5 10.5L5 11l-2 3 4 .5M13.5 15.5L13 19l-3 2-.5-4M7 17l-2.5 2.5',
+  book: 'M4.5 5.5c2.5-1 5-1 7.5.5 2.5-1.5 5-1.5 7.5-.5v13c-2.5-1-5-1-7.5.5-2.5-1.5-5-1.5-7.5-.5zM12 6v13',
+}
+const BADGE_NAMES = { merge: 'Merge Machine', eye: 'Revisão de Elite', flame: 'Sequência', pair: 'Par Constante', shield: 'Guardião do CI', rocket: 'Deploy Sem Medo', book: 'Documentou' }
+const RANKN = { bronze: 1, silver: 2, gold: 3, diamond: 4 }
+const TIERN = { bronze: 'bronze', silver: 'prata', gold: 'ouro', diamond: 'diamante' }
+let bid = 0
+function badgeSvg(spec, size = 56) {
+  const [tier, glyph] = spec.split(':'), id = 'b' + bid++, c = `var(--tier-${tier})`
+  const hex = (r, cx = 50, cy = 48) => Array.from({ length: 6 }, (_, i) => { const a = (Math.PI / 3) * i - Math.PI / 2; return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}` }).join(' ')
+  const pips = Array.from({ length: 4 }, (_, i) => `<circle cx="${38 + i * 8}" cy="99" r="2.6" style="fill:${i < RANKN[tier] ? c : 'var(--border)'}"/>`).join('')
+  return `<svg viewBox="0 0 100 104" width="${size}" height="${size * 1.04}" aria-hidden="true"><defs><linearGradient id="r${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:${c}"/><stop offset=".55" style="stop-color:${c};stop-opacity:.72"/><stop offset="1" style="stop-color:${c}"/></linearGradient><radialGradient id="f${id}" cx=".35" cy=".25" r=".9"><stop offset="0" style="stop-color:var(--badge-face-hi)"/><stop offset="1" style="stop-color:var(--badge-face)"/></radialGradient></defs><polygon points="${hex(42)}" fill="url(#r${id})" stroke="url(#r${id})" stroke-width="9" stroke-linejoin="round"/><polygon points="${hex(33)}" fill="url(#f${id})" style="stroke:var(--badge-face)" stroke-width="5" stroke-linejoin="round"/><g transform="translate(32 30) scale(1.5)" fill="none" style="stroke:${c}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${GLYPHS[glyph]}"/></g><path d="M22 22 L40 10" style="stroke:var(--catchlight)" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>${pips}</svg>`
+}
+const badgeFig = (spec, size) => { const [t, g] = spec.split(':'); return `<figure>${badgeSvg(spec, size)}<figcaption>${BADGE_NAMES[g]}<br>${TIERN[t]}</figcaption></figure>` }
+
+// calendário de contribuições: geometria de ContributionGraph.tsx, rampa laranja ilustrativa (ADR 002, ponto 14)
+function calendar(seedFrom) {
+  let seed = [...seedFrom].reduce((a, ch) => a + ch.charCodeAt(0), 7)
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  const ramp = ['var(--border)', 'var(--sq-o0)', 'var(--sq-o1)', 'var(--sq-o2)', 'var(--sq-o3)']
+  const W = 34, CELL = 12, STEP = 15, LEFT = 30, TOP = 20
+  let cells = ''
+  for (let c = 0; c < W; c++) for (let d = 0; d < 7; d++) {
+    const r = rnd() * (d === 0 || d === 6 ? 0.55 : 1) * (0.55 + 0.45 * Math.sin(c / 5) ** 2)
+    const lv = r < 0.2 ? 0 : r < 0.42 ? 1 : r < 0.62 ? 2 : r < 0.8 ? 3 : 4
+    cells += `<rect x="${LEFT + c * STEP}" y="${TOP + d * STEP}" width="${CELL}" height="${CELL}" rx="2.5" style="fill:${ramp[lv]}"/>`
+  }
+  const months = ['abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov'].map((m, i) => `<text class="cg-label" x="${LEFT + Math.round(i * 4.35) * STEP}" y="11" font-size="10">${m}</text>`).join('')
+  const days = [[1, 'seg'], [3, 'qua'], [5, 'sex']].map(([r, t]) => `<text class="cg-label" x="0" y="${TOP + r * STEP + 10}" font-size="10">${t}</text>`).join('')
+  return `<div class="cg"><svg viewBox="0 0 ${LEFT + W * STEP} ${TOP + 7 * STEP}" role="img" aria-label="Calendário de contribuições">${months}${days}${cells}</svg><div class="cg-legend">Menos ${ramp.map((c) => `<i style="background:${c}"></i>`).join('')} Mais</div></div>`
+}
+
+// ═══ Rotas ═══
+function parse() {
+  const seg = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent)
+  const [a, b, c] = seg
+  if (a === 'u' && P[b]) return { name: 'perfil', id: b }
+  if (a === 'w' && (WS[b] || COMMS.find((x) => x.id === b))) return { name: 'ws', id: b, ch: c }
+  if (a === 'ranking') return { name: 'ranking', f: b || 'brasil' }
+  if (a === 'mapa') return { name: 'mapa' }
+  if (a === 'explorar') return { name: 'explorar', f: b || 'tudo' }
+  if (a === 'mensagens') return { name: 'mensagens', id: b || 'ana' }
+  return { name: 'feed', f: (a === 'feed' && b) || 'seguindo' }
+}
+
+// ═══ Barra de destinos ═══
+function renderRail(r) {
+  const on = (n) => (r.name === n ? 'on' : '')
+  const dest = [['feed', 'home', 'Feed', '#/feed', '<span class="badge dot"></span>'], ['explorar', 'compass', 'Explorar', '#/explorar', ''], ['ranking', 'trophy', 'Ranking BR', '#/ranking', ''], ['mapa', 'map', 'Mapa do Brasil', '#/mapa', ''], ['mensagens', 'message', 'Mensagens', '#/mensagens', P.leo.rel === 'incoming' ? '<span class="badge">1</span>' : '']]
+  const wss = Object.entries(WS).map(([id, w]) => `<a class="rail-btn ws ${r.name === 'ws' && r.id === id ? 'on' : ''}" href="#/w/${id}" data-tip="${w.name} · ${w.kind}">${w.mark === 'logo' ? `<img src="${LOGO}" alt="" />` : w.mark}${w.badge ? `<span class="badge">${w.badge}</span>` : ''}</a>`).join('')
+  $('#rail').innerHTML = `
+    <a class="rail-btn logo" href="#/feed" data-tip="Squeak"><img src="${LOGO}" alt="Squeak" /></a>
+    <span class="rail-label">rede</span>
+    ${dest.map(([n, i, l, h, b]) => `<a class="rail-btn ${on(n)}" href="${h}" data-tip="${l}" aria-label="${l}">${ic(i, '')}${b}</a>`).join('')}
+    <span class="rail-sep"></span>
+    <span class="rail-label">times</span>
+    ${wss}
+    <a class="rail-btn" href="#/explorar/comunidades" data-tip="Entrar em uma comunidade">${ic('plus', '')}</a>
+    <span class="grow"></span>
+    <a class="rail-btn ${r.name === 'perfil' && r.id === 'pedro' ? 'on' : ''}" href="#/u/pedro" data-tip="Seu perfil">${AV('pedro', 'm').replace('data-user="pedro"', '')}</a>`
+}
+
+// ═══ Barra lateral contextual ═══
+const navI = (href, icon, label, on, extra = '', cls = '') => `<a class="nav-i ${on ? 'on' : ''} ${cls}" href="${href}">${icon}${label}${extra}</a>`
+function renderSide(r) {
+  let h = ''
+  if (r.name === 'feed' || r.name === 'perfil') {
+    h = `<div class="side-head"><h2>Rede</h2></div><div class="side-body">
+      <div class="cat">Feed</div>
+      ${navI('#/feed/seguindo', ic('users'), 'Quem eu sigo', r.name === 'feed' && r.f === 'seguindo')}
+      ${navI('#/feed/workspaces', ic('hash'), 'Meus times e comunidades', r.name === 'feed' && r.f === 'workspaces')}
+      ${navI('#/feed/brasil', ic('globe'), 'Brasil', r.name === 'feed' && r.f === 'brasil')}
+      <div class="cat">Conexões em call</div>
+      ${['ana', 'lu'].map((id) => `<div class="nav-i">${AV(id, 's')}<span>${NAME(id)}</span><span class="r">${id === 'ana' ? 'daily' : 'pareando'}</span></div>`).join('')}
+      <div class="cat">Pessoas</div>
+      ${navI('#/u/pedro', AV('pedro', 's').replace('data-user="pedro"', ''), 'Seu perfil', r.name === 'perfil' && r.id === 'pedro')}
+      ${navI('#/mensagens/leo', ic('user-plus'), 'Pedidos de conexão', false, P.leo.rel === 'incoming' ? '<span class="r">1</span>' : '')}
+      ${navI('#/explorar/pessoas', ic('search'), 'Encontrar pessoas', false)}
+      <div class="side-note"><b>Só entregas.</b> O feed mostra PRs, reviews, insígnias e posts. Nunca tempo online.</div>
+    </div>`
+  } else if (r.name === 'explorar') {
+    h = `<div class="side-head"><h2>Explorar</h2></div><div class="side-body">
+      ${navI('#/explorar', ic('compass'), 'Tudo', r.f === 'tudo')}
+      ${navI('#/explorar/salas', ic('headphones'), 'Salas abertas agora', r.f === 'salas', `<span class="r">${ROOMS.length}</span>`)}
+      ${navI('#/explorar/comunidades', ic('users'), 'Comunidades', r.f === 'comunidades', `<span class="r">${COMMS.length}</span>`)}
+      ${navI('#/explorar/pessoas', ic('user-plus'), 'Pessoas', r.f === 'pessoas')}
+      <div class="cat">Stack</div>
+      <div class="chips">${['Rust', 'TypeScript', 'Python', 'Go', 'C#', 'SQL'].map((s, i) => `<button class="chip ${i === 0 ? 'on' : ''}" data-todo="Filtro por stack">${s}</button>`).join('')}</div>
+      <div class="cat">Estado</div>
+      <div class="chips">${['SP', 'PE', 'CE', 'MG', 'RS', 'DF'].map((s) => `<button class="chip" data-todo="Filtro por estado">${s}</button>`).join('')}</div>
+    </div>`
+  } else if (r.name === 'ranking') {
+    h = `<div class="side-head"><h2>Ranking</h2><span class="chip">temporada 3</span></div><div class="side-body">
+      <div class="cat">Escopo</div>
+      ${navI('#/ranking', ic('globe'), 'Brasil', r.f === 'brasil')}
+      ${navI('#/ranking/SP', ic('pin'), 'São Paulo · seu estado', r.f === 'SP')}
+      ${navI('#/ranking/seguindo', ic('users'), 'Quem eu sigo', r.f === 'seguindo')}
+      ${navI('#/ranking/patos-dev', `<img src="${LOGO}" alt="" style="width:18px">`, 'patos-dev', r.f === 'patos-dev')}
+      ${UF[r.f] && r.f !== 'SP' ? navI(`#/ranking/${r.f}`, ic('pin'), UF[r.f], true) : ''}
+      <div class="cat">Linguagem</div>
+      <div class="chips">${['Todas', 'TypeScript', 'Rust', 'Python', 'Go'].map((s, i) => `<button class="chip ${i === 0 ? 'on' : ''}" data-todo="Filtro por linguagem">${s}</button>`).join('')}</div>
+      <div class="cat">Temporadas</div>
+      ${navI('#/ranking', ic('calendar'), 'Temporada 3 · atual', true, '<span class="r">18 dias</span>')}
+      <a class="nav-i" data-todo="Temporadas anteriores">${ic('calendar')}Temporada 2</a>
+      <div class="side-note"><b>Você aparece no ranking público.</b> É opcional e se desliga em Privacidade. Um time também pode desligar o ranking no workspace.</div>
+    </div>`
+  } else if (r.name === 'mapa') {
+    const m = state.mapMetric
+    h = `<div class="side-head"><h2>Mapa do Brasil</h2></div><div class="side-body">
+      <div class="cat">Mostrar</div>
+      <button class="nav-i ${m === 'devs' ? 'on' : ''}" data-metric="devs">${ic('users')}Devs ativos na temporada</button>
+      <button class="nav-i ${m === 'comms' ? 'on' : ''}" data-metric="comms">${ic('hash')}Comunidades</button>
+      <div class="cat">Seu estado</div>
+      <button class="nav-i" data-uf="SP">${ic('pin')}São Paulo<span class="r">#38</span></button>
+      <div class="side-note"><b>Só números agregados por estado.</b> Ninguém aparece no mapa. A cidade no perfil é opcional, e o estado só entra na contagem de quem ativou o ranking.</div>
+    </div>`
+  } else if (r.name === 'mensagens') {
+    const dm = (id) => `<a class="nav-i ${r.id === id ? 'on' : ''}" href="#/mensagens/${id}">${AV(id, 's')}${P[id].name}<span class="r">${CHATS['dm_' + id] ? CHATS['dm_' + id].at(-1)[1] : ''}</span></a>`
+    const conns = Object.keys(P).filter((id) => P[id].rel === 'connected')
+    h = `<div class="side-head"><h2>Mensagens</h2></div><div class="side-body">
+      ${P.leo.rel === 'incoming' ? `<div class="cat">Pedidos de conexão · 1</div>${dm('leo')}` : ''}
+      <div class="cat">Conexões</div>
+      ${conns.map(dm).join('')}
+      <div class="side-note"><b>Mensagem direta é entre conexões.</b> Quem não é conexão manda um pedido primeiro.</div>
+    </div>`
+  } else if (r.name === 'ws') {
+    const w = WS[r.id] || { name: COMMS.find((c) => c.id === r.id).name, text: [['geral']], voice: [['sala-aberta', ['caio']]], kind: 'comunidade', members: COMMS.find((c) => c.id === r.id).members }
+    const ch = r.ch || w.text[0][0]
+    const inCall = (room) => state.call && state.call.ws === r.id && state.call.room === room
+    h = `<div class="side-head">${w.mark === 'logo' ? `<img src="${LOGO}" alt="" style="width:24px">` : ''}<h2>${w.name}</h2><span class="chip">${w.kind}</span></div><div class="side-body">
+      ${navI(`#/w/${r.id}`, ic('home'), 'Início do time', false, '', '')}
+      ${navI(`#/w/${r.id}`, ic('pr'), 'Pull requests', false, w.kind === 'time' ? '<span class="r">2</span>' : '')}
+      <div class="cat">Texto</div>
+      ${w.text.map(([c, u]) => navI(`#/w/${r.id}/${c}`, ic('hash'), c, c === ch, '', u && c !== ch ? 'unread' : '')).join('')}
+      <div class="cat">Voz</div>
+      ${w.voice.map(([c, ppl]) => `<button class="nav-i ${ppl.length ? 'live' : ''}" data-join="${r.id}|${c}">${ic('volume')}${c}<span class="r">${inCall(c) ? 'você está aqui' : ppl.length ? 'entrar' : ''}</span></button>${ppl.map((id) => `<div class="vmember">${AV(id, 's')}${P[id].name}</div>`).join('')}${inCall(c) ? `<div class="vmember">${AV('pedro', 's')}pedro</div>` : ''}`).join('')}
+      <div class="side-note"><b>${fmt(w.members)} membros.</b> ${w.kind === 'time' ? 'Workspace privado do time.' : 'Comunidade aberta: qualquer pessoa pode ouvir as salas.'}</div>
+    </div>`
+  }
+  $('#side').innerHTML = h
+}
+
+function renderDock() {
+  const c = state.call
+  $('#me-status').textContent = c ? (c.muted ? 'em call · mudo' : 'em call') : 'disponível'
+  if (!c) { $('#dock').innerHTML = ''; return }
+  const wsName = WS[c.ws] ? WS[c.ws].name : COMMS.find((x) => x.id === c.ws).name
+  $('#dock').innerHTML = `<div class="dock" role="region" aria-label="Call em andamento">
+    <div class="dock-top"><span class="live-dot"></span><a href="#/w/${c.ws}"><b>${c.room} · ${wsName}</b><small id="dock-time">00:00</small></a></div>
+    <div class="dock-bot"><span class="stack">${c.people.map((id) => AV(id, 's')).join('')}</span>
+      <button class="ibtn ${c.muted ? 'on' : ''}" data-act="mute" aria-label="${c.muted ? 'Ligar microfone' : 'Desligar microfone'}">${ic(c.muted ? 'mic-off' : 'mic')}</button>
+      <button class="ibtn leave" data-act="leave" aria-label="Sair da call">${ic('logout')}</button></div></div>`
+  tick()
+}
+function tick() { const el = $('#dock-time'); if (!el || !state.call) return; const s = Math.floor((Date.now() - state.call.start) / 1000); el.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')} · ${state.call.people.length + 1} pessoas` }
+setInterval(tick, 1000)
+
+function renderCrumbs(r) {
+  const rede = `<span class="scope">${ic('globe', 'xs')}rede</span>`
+  const sep = ic('chev-right', 'xs')
+  const map = {
+    feed: `${rede}${sep}<span class="cur">Feed</span>`,
+    explorar: `${rede}${sep}<span class="cur">Explorar</span>`,
+    ranking: `${rede}${sep}<a href="#/ranking">Ranking</a>${sep}<span class="cur">${r.f === 'brasil' ? 'Brasil' : UF[r.f] || (r.f === 'seguindo' ? 'Quem eu sigo' : r.f)}</span>`,
+    mapa: `${rede}${sep}<span class="cur">Mapa do Brasil</span>`,
+    perfil: () => `${rede}${sep}<span>Pessoas</span>${sep}<span class="cur">${P[r.id].name}</span>`,
+    mensagens: () => `${rede}${sep}<a href="#/mensagens">Mensagens</a>${sep}<span class="cur">${P[r.id].name}</span>`,
+    ws: () => { const w = WS[r.id] || COMMS.find((c) => c.id === r.id); return `<a class="scope ws" href="#/w/${r.id}">${w.name}</a>${sep}<span class="cur"># ${r.ch || (WS[r.id] ? WS[r.id].text[0][0] : 'geral')}</span>` },
+  }
+  const v = map[r.name]
+  $('#crumbs').innerHTML = typeof v === 'function' ? v() : v
+}
+
+// ═══ Telas ═══
+function postHtml(p) {
+  const verb = { merge: 'mergeou um pull request', badge: 'desbloqueou uma insígnia', post: 'publicou', level: 'subiu de nível', room: 'abriu uma sala', join: 'entrou numa comunidade', merge2: 'mergeou um pull request' }[p.kind]
+  let body = ''
+  if (p.kind === 'merge') body = `<div class="inset"><div class="row">${ic('merge')}<span class="pr-t">fix(chat): rolagem trava no fim <span class="num">#39</span></span></div><div class="row"><span class="branch">${ic('branch', 'xs')}fix/scroll</span><span class="muted">→</span><span class="branch is-main">${ic('branch', 'xs')}main</span><span class="muted small">patos-dev/app · 3 commits · revisado por ${NAME('ana')}</span><span class="xp" style="margin-left:auto">+120 XP</span></div></div>`
+  if (p.kind === 'merge2') body = `<div class="inset"><div class="row">${ic('merge')}<span class="pr-t">perf(db): índice parcial em eventos <span class="num">#1.204</span></span></div><div class="row"><span class="branch is-main">${ic('branch', 'xs')}main</span><span class="muted small">pgsquad/core · consulta do feed de 840 ms para 31 ms</span><span class="xp" style="margin-left:auto">+180 XP</span></div></div>`
+  if (p.kind === 'badge') body = `<div class="inset"><div class="badge-row">${badgeSvg('diamond:shield', 52)}<div><b>Guardião do CI · diamante</b><div class="muted small">100 PRs revisados sem quebrar a main nesta temporada. 31 pessoas no Brasil têm.</div></div></div></div>`
+  if (p.kind === 'post') body = `<p>Terminei a migração do login para OAuth com o GitHub. Dica que me salvou: renovem o token <b>antes</b> de expirar, e encerrem a sessão se a renovação falhar. O <span class="code-i">useSession</span> ficou com 40 linhas.</p><p class="muted small">Quinta, 19h, tem code review aberto disso na sala de voz do Front-end Nordeste.</p>`
+  if (p.kind === 'level') body = `<div class="inset"><div class="row"><span class="lvl-big">nível 8</span><span class="muted small">11.840 XP na temporada · 6 PRs e 14 reviews na semana</span></div><div class="track"><i style="width:100%"></i></div></div>`
+  if (p.kind === 'room') body = `<div class="inset"><div class="row"><span class="live-dot"></span><b>Live: parser em Rust do zero</b><span class="muted small">${ROOMS[0].n} ouvindo</span><button class="btn secondary sm" style="margin-left:auto" data-join="rust-br|live-pareamento">${ic('headphones')}Ouvir</button></div></div>`
+  if (p.kind === 'join') body = `<div class="inset"><div class="row"><span class="comm-mark">dm</span><div class="grow"><b>Dados & ML Minas</b><div class="muted small">410 membros · Python, SQL · MG</div></div><a class="btn secondary sm" href="#/explorar/comunidades">Ver comunidade</a></div></div>`
+  const k = kudosOn.has(p.id)
+  return `<article class="card post"><div class="post-head">${AV(p.who, 'l')}<div class="grow"><div>${NAME(p.who)} <span class="muted">${verb}</span></div><div class="post-meta">${wsChip(p.ws)}<span>${p.t}</span>${p.scope.includes('brasil') && P[p.who].rel === 'none' ? '<span class="chip">sugerido · em alta no Brasil</span>' : ''}</div></div></div>
+    <div class="post-body">${body}</div>
+    <div class="post-actions"><button class="act ${k ? 'on' : ''}" data-kudos="${p.id}">${ic('star')}${k ? 'Parabéns dado' : 'Dar parabéns'}<span class="n">${p.kudos + (k ? 1 : 0)}</span></button><button class="act" data-todo="Comentários">${ic('message')}Comentar<span class="n">${p.comments}</span></button><button class="act" data-todo="Compartilhar">${ic('external')}Compartilhar</button></div></article>`
+}
+const seasonCard = () => `<div class="card"><div class="card-head"><h3>Sua temporada</h3><span class="label r">temporada 3 · 18 dias</span></div>
+  <div class="xpbar"><div class="xpbar-top"><span><b>Nível 7</b></span><span class="xp">2.340 / 3.000 XP</span></div><div class="track"><i style="width:78%"></i></div></div>
+  <div class="row" style="margin-top:var(--sp-3)"><a class="link" href="#/ranking">#${PEDRO_BR} no Brasil</a><span class="up">▲ 37</span><span class="muted">·</span><a class="link" href="#/ranking/SP">#38 em SP</a></div></div>`
+const roomsCard = () => `<div class="card"><div class="card-head"><h3>Salas abertas agora</h3><a class="link small r" href="#/explorar/salas">ver todas</a></div>${ROOMS.map((r) => `<div class="room"><div class="row"><span class="live-dot"></span><b class="grow">${r.title}</b></div><div class="row small muted">${AV(r.host, 's')}${r.comm} · ${r.n} ouvindo<button class="btn secondary sm" style="margin-left:auto" data-join="${r.ws}|${r.room}">${ic('headphones')}Ouvir</button></div></div>`).join('')}</div>`
+const suggCard = () => `<div class="card"><div class="card-head"><h3>Pessoas para seguir</h3></div>${['mari', 'duda', 'thai'].map((id) => `<div class="sugg">${AV(id, 'm')}<span>${NAME(id)}<small>${P[id].stack.slice(0, 2).join(' · ')} · ${P[id].uf} · nv ${P[id].lvl}</small></span>${P[id].rel === 'none' ? `<button class="btn secondary sm" data-act="follow" data-id="${id}">${ic('plus')}Seguir</button>` : `<button class="btn secondary sm done" data-act="unfollow" data-id="${id}">${ic('check')}Seguindo</button>`}</div>`).join('')}</div>`
+
+const SCREENS = {
+  feed(r) {
+    const posts = POSTS.filter((p) => p.scope.includes(r.f))
+    const title = { seguindo: 'Quem eu sigo', workspaces: 'Meus times e comunidades', brasil: 'Brasil' }[r.f]
+    return `<div class="area-head"><h1>Feed</h1><span class="label">${title}</span></div>
+      <div class="pad two-col"><div class="list">
+        <div class="card compose">${AV('pedro', 'l').replace('data-user="pedro"', '')}<button class="compose-in" data-todo="Novo post">Compartilhe uma entrega, um aprendizado ou uma dúvida…</button></div>
+        ${posts.map(postHtml).join('')}
+      </div><div class="list">${seasonCard()}${roomsCard()}${suggCard()}</div></div>`
+  },
+  explorar(r) {
+    const comms = COMMS.map((c) => `<div class="comm"><div class="comm-top"><span class="comm-mark">${c.mark}</span><div><b>${c.name}</b><div class="stat">${ic('pin', 'xs')}${c.ufs}</div></div></div><p>${c.desc}</p>
+      <div class="foot">${c.stack.map((s) => `<span class="chip">${s}</span>`).join('')}</div>
+      <div class="foot"><span class="stat">${ic('users', 'xs')}${fmt(c.members)}</span><span class="stat"><span class="live-dot"></span>${c.active} ativos agora</span>${c.joined ? `<a class="btn secondary sm" href="#/w/${c.id}">Abrir</a>` : c.access === 'open' ? `<button class="btn secondary sm" data-joincomm="${c.id}">${ic('plus')}Entrar</button>` : `<button class="btn secondary sm" data-joincomm="${c.id}">${ic('lock')}Pedir para entrar</button>`}</div></div>`).join('')
+    const rooms = ROOMS.map((x) => `<div class="room-card"><span class="live">${ic('volume', 'xs')}AO VIVO · ${x.n} ouvindo</span><b>${x.title}</b><div class="row small muted">${AV(x.host, 's')}${NAME(x.host)} · ${x.comm}</div><button class="btn secondary sm" data-join="${x.ws}|${x.room}">${ic('headphones')}Ouvir</button></div>`).join('')
+    const people = Object.keys(P).filter((id) => id !== 'pedro').slice(0, 9).map((id) => `<div class="comm"><div class="comm-top">${AV(id, 'l')}<div><b>${NAME(id)}</b><div class="stat">${ic('pin', 'xs')}${P[id].city} · ${P[id].uf} · nv ${P[id].lvl}</div></div></div><div class="foot">${P[id].stack.map((s) => `<span class="chip">${s}</span>`).join('')}</div><div class="foot" style="justify-content:flex-end">${relButtons(id, 'small')}</div></div>`).join('')
+    const show = (k) => r.f === 'tudo' || r.f === k
+    return `<div class="area-head"><h1>Explorar</h1><span class="label">comunidades, salas e pessoas do Brasil</span></div>
+      <div class="pad"><label class="x-search">${ic('search')}<input placeholder="Buscar por stack, cidade, comunidade ou pessoa" /></label>
+      ${show('salas') ? `<h2 class="h2">Salas abertas agora <small>calls públicas de comunidades. Dá para entrar só para ouvir.</small></h2><div class="rooms">${rooms}</div>` : ''}
+      ${show('comunidades') ? `<h2 class="h2">Comunidades <small>networking por stack e por região</small></h2><div class="comms">${comms}</div>` : ''}
+      ${show('pessoas') ? `<h2 class="h2">Pessoas <small>seguir mostra as entregas no seu feed; conectar libera mensagem direta</small></h2><div class="comms">${people}</div>` : ''}</div>`
+  },
+  ranking(r) {
+    let ids = Object.keys(P)
+    let scopeTxt = 'Brasil'
+    if (UF[r.f]) { ids = ids.filter((id) => P[id].uf === r.f); scopeTxt = UF[r.f] }
+    if (r.f === 'seguindo') { ids = ids.filter((id) => ['following', 'connected', 'me'].includes(P[id].rel)); scopeTxt = 'quem você segue' }
+    if (r.f === 'patos-dev') { ids = ['pedro', 'ana', 'caio', 'lu', 'bia', 'leo', 'mari']; scopeTxt = 'patos-dev' }
+    const sorted = ids.sort((a, b) => P[b].sxp - P[a].sxp)
+    const brPos = Object.keys(P).sort((a, b) => P[b].sxp - P[a].sxp)
+    const isBR = r.f === 'brasil'
+    const rows = sorted.filter((id) => !(isBR && id === 'pedro')).map((id, i) => {
+      const d = RANK_DELTA[id] || 0
+      const pos = i + 1
+      return `<tr class="${id === 'pedro' ? 'is-me' : ''}"><td class="pos ${pos <= 3 ? 't' + pos : ''}">#${pos}</td><td><div class="dev">${AV(id, 'm')}<div>${NAME(id)}<br><small>${P[id].city} · ${P[id].uf}</small></div></div></td><td>${P[id].stack.slice(0, 2).map((s) => `<span class="chip">${s}</span>`).join(' ')}</td><td class="num">nv ${P[id].lvl}</td><td class="num">${fmt(P[id].sxp)}</td><td>${tierDots(id)}</td><td>${d > 0 ? `<span class="up">▲ ${d}</span>` : d < 0 ? `<span class="down">▼ ${-d}</span>` : '<span class="same">–</span>'}</td><td class="num">${isBR ? '' : '#' + (id === 'pedro' ? PEDRO_BR : brPos.indexOf(id) + 1)}</td></tr>`
+    }).join('')
+    const meRow = isBR ? `<tr class="gap-row"><td colspan="8">· · · 398 posições · · ·</td></tr><tr class="is-me"><td class="pos">#${PEDRO_BR}</td><td><div class="dev">${AV('pedro', 'm')}<div>${NAME('pedro')} <span class="chip">você</span><br><small>Campinas · SP</small></div></div></td><td><span class="chip">TypeScript</span> <span class="chip">Rust</span></td><td class="num">nv 7</td><td class="num">${fmt(P.pedro.sxp)}</td><td>${tierDots('pedro')}</td><td><span class="up">▲ 37</span></td><td></td></tr>` : ''
+    const myPos = isBR ? PEDRO_BR : sorted.indexOf('pedro') + 1
+    return `<div class="area-head"><h1>Ranking</h1><span class="label">${scopeTxt} · temporada 3</span><span class="grow"></span><span class="muted small">A temporada termina em 18 dias. O XP da temporada zera; o nível fica.</span></div>
+      <div class="pad">
+        ${myPos > 0 ? `<div class="you"><span class="pos-big">#${myPos}</span><div><b>Sua posição</b><div class="muted small">${scopeTxt}${isBR ? ' · ▲ 37 esta semana' : ''}</div></div><div class="xpbar"><div class="xpbar-top"><span>${isBR ? 'faltam <b>380 XP</b> para o #400' : 'no topo deste escopo: ' + P[sorted[0]].name}</span><span class="xp">${fmt(P.pedro.sxp)} XP</span></div><div class="track"><i style="width:${isBR ? 94 : 62}%"></i></div></div><a class="btn secondary sm" href="#/mapa">${ic('map')}Ver no mapa</a></div>` : ''}
+        <div class="rank-wrap"><table class="rank"><thead><tr><th>pos.</th><th>dev</th><th>stack</th><th class="num">nível</th><th class="num">XP da temporada</th><th>insígnias</th><th>semana</th><th class="num">${isBR ? '' : 'no Brasil'}</th></tr></thead><tbody>${rows}${meRow}</tbody></table></div>
+        <p class="muted small" style="margin-top:var(--sp-3)">XP vem só de entregas: PR mergeado, review, issue resolvida, ajuda que destravou alguém. Tempo online e mensagens não contam.</p>
+      </div>`
+  },
+  mapa() {
+    const m = state.mapMetric
+    const val = (uf) => (m === 'devs' ? MAPDATA[uf] : Math.max(1, Math.round(MAPDATA[uf] / 120)))
+    const lv = (uf) => { const v = MAPDATA[uf]; return v >= 1400 ? 4 : v >= 700 ? 3 : v >= 250 ? 2 : v >= 100 ? 1 : 0 }
+    const tiles = Object.entries(TILE).map(([uf, [r, c]]) => `<button class="tile l${lv(uf)} ${state.mapUf === uf ? 'sel' : ''}" style="grid-row:${r + 1};grid-column:${c + 1}" data-uf="${uf}" data-tipuf="${UF[uf]} · ${fmt(val(uf))} ${m === 'devs' ? 'devs' : 'comunidades'}" aria-label="${UF[uf]}">${uf}</button>`).join('')
+    const uf = state.mapUf
+    const top = Object.keys(P).filter((id) => P[id].uf === uf).sort((a, b) => P[b].sxp - P[a].sxp).slice(0, 3)
+    const comms = COMMS.filter((c) => c.ufs.includes(uf))
+    const total = Object.values(MAPDATA).reduce((a, b) => a + b, 0)
+    return `<div class="area-head"><h1>Mapa do Brasil</h1><span class="label">temporada 3 · ${fmt(total)} devs ativos</span></div>
+      <div class="pad map-wrap">
+        <div class="scene"><span class="scene-title">${m === 'devs' ? 'DEVS ATIVOS POR ESTADO' : 'COMUNIDADES POR ESTADO'}</span><div class="tiles">${tiles}</div>
+          <div class="px-legend">menos <i style="background:var(--px-wall)"></i><i style="background:var(--sq-o0)"></i><i style="background:var(--sq-o1)"></i><i style="background:var(--sq-o2)"></i><i style="background:var(--sq-o3)"></i> mais</div></div>
+        <div class="card uf-panel"><span class="label">${uf}${uf === 'SP' ? ' · seu estado' : ''}</span><h2>${UF[uf]}</h2>
+          <div class="kpis"><div class="kpi"><b>${fmt(MAPDATA[uf])}</b><span>devs ativos</span></div><div class="kpi"><b>${Math.max(1, Math.round(MAPDATA[uf] / 120))}</b><span>comunidades</span></div><div class="kpi"><b>#${Object.keys(MAPDATA).sort((a, b) => MAPDATA[b] - MAPDATA[a]).indexOf(uf) + 1}</b><span>no Brasil</span></div></div>
+          <div><div class="cat" style="padding-left:0">Topo da temporada</div>${top.length ? top.map((id, i) => `<div class="sugg"><span class="pos-big" style="font-size:var(--t-lg);width:28px">${i + 1}</span>${AV(id, 'm')}<span>${NAME(id)}<small>nv ${P[id].lvl} · ${fmt(P[id].sxp)} XP</small></span></div>`).join('') : '<p class="muted small">Ninguém deste estado ativou o ranking público ainda.</p>'}</div>
+          <div><div class="cat" style="padding-left:0">Comunidades</div>${comms.length ? comms.map((c) => `<div class="sugg"><span class="comm-mark">${c.mark}</span><span>${c.name}<small>${fmt(c.members)} membros · ${c.active} ativos</small></span></div>`).join('') : '<p class="muted small">Nenhuma comunidade com sede aqui. Que tal criar a primeira?</p>'}</div>
+          <div class="row"><a class="btn primary" href="#/ranking/${uf}">${ic('trophy')}Ranking de ${uf}</a><a class="btn secondary" href="#/explorar/comunidades">Comunidades</a></div>
+        </div>
+      </div>`
+  },
+  perfil(r) {
+    const p = P[r.id], id = r.id
+    const pos = Object.keys(P).sort((a, b) => P[b].sxp - P[a].sxp).indexOf(id) + 1
+    const posBR = id === 'pedro' ? PEDRO_BR : pos
+    const ws = Object.entries(WS).filter(([k]) => id === 'pedro' || k !== 'patos-dev' || ['ana', 'caio', 'lu', 'bia'].includes(id))
+    return `<div class="screen">
+      <div class="prof-head">${AV(id, 'xl').replace(`data-user="${id}"`, '')}
+        <div><h1>${p.name}<small>@${id}</small></h1><p class="bio">${p.bio}</p>
+          <div class="facts"><span>${ic('pin', 'xs')}${p.city} · ${p.uf}</span><span>${ic('users', 'xs')}${fmt(p.followers)} seguidores</span><span>${ic('user-plus', 'xs')}${p.conns} conexões</span>${p.stack.map((s) => `<span class="chip">${s}</span>`).join('')}</div></div>
+        <div class="prof-actions">${relButtons(id)}</div></div>
+      <div class="stats"><div><b>nv ${p.lvl}</b><span>nível</span></div><div><b class="o">${fmt(p.sxp)}</b><span>XP na temporada</span></div><div><b>#${posBR}</b><span>no Brasil</span></div><div><b>${id === 'pedro' ? '#38' : '#' + Math.max(1, Math.round(pos / 2))}</b><span>em ${p.uf}</span></div><div><b>${p.badges.length}</b><span>insígnias</span></div><div><b>${8 + p.lvl * 3}</b><span>PRs na temporada</span></div></div>
+      <div class="tabs"><button class="tab on">Visão geral</button><button class="tab" data-todo="Aba Entregas">Entregas</button><button class="tab" data-todo="Aba Insígnias">Insígnias</button><button class="tab" data-todo="Aba Comunidades">Comunidades</button></div>
+      <div class="pad two-col"><div class="list">
+        <div class="card"><div class="card-head"><h3>Contribuições</h3><span class="label r">últimos 8 meses · rampa laranja ilustrativa</span></div>${calendar(id)}</div>
+        <div class="card"><div class="card-head"><h3>Entregas recentes</h3></div>
+          <div class="deliv">${ic('merge')}<span class="grow">mergeou <b>#39 fix(chat): rolagem trava no fim</b> em patos-dev/app</span><span class="xp">+120 XP</span><span class="label">há 1 h</span></div>
+          <div class="deliv">${ic('check-circle')}<span class="grow">aprovou <b>#42 feat(auth): login com GitHub</b> depois de 2 rodadas</span><span class="xp">+40 XP</span><span class="label">ontem</span></div>
+          <div class="deliv">${ic('issue')}<span class="grow">resolveu <b>#57 Notificação duplicada no desktop</b></span><span class="xp">+60 XP</span><span class="label">seg</span></div>
+          <div class="deliv">${ic('headphones')}<span class="grow">pareou 40 min com ${NAME('caio')} e destravou o #51</span><span class="xp">+50 XP</span><span class="label">sex</span></div></div>
+      </div><div class="list">
+        <div class="card"><div class="card-head"><h3>Insígnias</h3></div><div class="badges">${p.badges.map((b) => badgeFig(b, 52)).join('')}</div></div>
+        <div class="card"><div class="card-head"><h3>Times e comunidades</h3></div>${ws.map(([k, w]) => `<div class="sugg"><span class="comm-mark">${w.mark === 'logo' ? `<img src="${LOGO}" alt="" style="width:26px">` : w.mark}</span><span><a class="link" href="#/w/${k}">${w.name}</a><small>${w.kind}${w.kind === 'time' ? ' · privado' : ''}</small></span></div>`).join('')}</div>
+      </div></div></div>`
+  },
+  mensagens(r) {
+    const id = r.id
+    if (P[id].rel === 'incoming') return `<div class="area-head">${AV(id, 'm')}<h1 style="font-size:var(--t-lg)">${P[id].name}</h1><span class="label">pedido de conexão</span></div>
+      <div class="req"><div class="row">${AV(id, 'l')}<div class="grow">${NAME(id)} quer se conectar com você<div class="muted small">${P[id].city} · ${P[id].uf} · nv ${P[id].lvl} · ${P[id].stack.join(', ')}</div></div></div>
+        <blockquote>Oi, Pedro! Vi seu PR de OAuth no feed do Rust BR. Estou fazendo login com GitHub num jogo em Godot e queria trocar uma ideia sobre renovação de token.</blockquote>
+        <div class="row"><button class="btn primary" data-act="accept" data-id="${id}">${ic('user-plus')}Aceitar e responder</button><button class="btn ghost" data-act="decline" data-id="${id}">Recusar</button></div>
+        <p class="muted small">Enquanto o pedido não é aceito, o leo não vê se você leu e não pode mandar outra mensagem.</p></div>`
+    const msgs = CHATS['dm_' + id] || [[id, 'agora', 'Conexão aceita! Bora conversar.']]
+    return `<div class="area-head">${AV(id, 'm')}<h1 style="font-size:var(--t-lg)">${NAME(id)}</h1><span class="label">${P[id].city} · ${P[id].uf}</span><span class="grow"></span><button class="btn secondary sm" data-act="pair" data-id="${id}">${ic('headphones')}Chamar para parear</button></div>
+      <div class="chat"><div class="day">conversa</div>${msgs.map(([w, t, m], i) => `<div class="msg ${i && msgs[i - 1][0] === w ? 'grouped' : ''}">${i && msgs[i - 1][0] === w ? '<span class="gut"></span>' : AV(w, 'm')}<div class="msg-body">${i && msgs[i - 1][0] === w ? '' : `<div class="msg-meta">${NAME(w)}<time>${t}</time></div>`}<p>${m}</p></div></div>`).join('')}</div>
+      <div class="composer">${ic('plus')}<span>Mensagem para ${P[id].name}</span>${ic('message')}</div>`
+  },
+  ws(r) {
+    const w = WS[r.id] || { text: [['geral']], name: COMMS.find((c) => c.id === r.id).name }
+    const ch = r.ch || w.text[0][0]
+    const msgs = CHATS[`${r.id}/${ch}`] || DEFAULT_CHAT(WS[r.id] ? r.id : 'rust-br').map((m) => m)
+    return `<div class="area-head"><h1 style="font-size:var(--t-lg);font-family:var(--font-body);font-weight:650">${ic('hash')} ${ch}</h1><span class="muted small">${ch === 'auth' ? 'login com GitHub, sessão e tokens' : 'conversa do canal'}</span><span class="grow"></span><span class="stack">${['ana', 'caio', 'lu', 'bia'].map((id) => AV(id, 's')).join('')}</span></div>
+      <div class="chat"><div class="day">hoje</div>${msgs.map(([who, t, m], i) => { const g = i && msgs[i - 1][0] === who; return `<div class="msg ${g ? 'grouped' : ''}">${g ? '<span class="gut"></span>' : AV(who, 'm')}<div class="msg-body">${g ? '' : `<div class="msg-meta">${NAME(who)}<time>${t}</time></div>`}<p>${m}</p></div></div>` }).join('')}</div>
+      <div class="composer">${ic('plus')}<span>Mensagem em #${ch}</span>${ic('message')}</div>`
+  },
+}
+
+// ═══ Render ═══
+let lastKey = ''
+function render() {
+  const r = parse()
+  const key = location.hash
+  renderRail(r); renderSide(r); renderCrumbs(r); renderDock()
+  $('#sheet').innerHTML = `<div class="screen">${SCREENS[r.name](r)}</div>`
+  if (key !== lastKey) $('#sheet').scrollTop = 0
+  lastKey = key
+  renderPeek()
+  hideHC()
+}
+window.addEventListener('hashchange', () => { closePeek(false); render() })
+
+// ═══ Peek: perfil ao lado ═══
+function renderPeek() {
+  const slot = $('#peek-slot')
+  if (!state.peek) { slot.innerHTML = ''; return }
+  const id = state.peek, p = P[id]
+  slot.innerHTML = `<aside class="peek" aria-label="Perfil de ${p.name}"><div class="peek-head"><span class="label">perfil</span><button class="ibtn" data-act="closepeek" aria-label="Fechar">${ic('x')}</button></div>
+    <div class="peek-body"><div class="peek-id">${AV(id, 'xl').replace(`data-user="${id}"`, '')}<h2>${p.name}</h2><span class="muted small">@${id} · ${p.city} · ${p.uf}</span><p class="small">${p.bio}</p></div>
+      <div class="row" style="flex-wrap:wrap">${relButtons(id, 'small')}</div>
+      <div class="stats"><div><b>nv ${p.lvl}</b><span>nível</span></div><div><b class="o">${fmt(p.sxp)}</b><span>XP temporada</span></div><div><b>${p.badges.length}</b><span>insígnias</span></div></div>
+      <div class="badges">${p.badges.slice(0, 3).map((b) => badgeFig(b, 40)).join('')}</div>
+      <a class="btn secondary" href="#/u/${id}">${ic('external')}Abrir perfil completo</a></div></aside>`
+}
+const openPeek = (id) => { state.peek = id; renderPeek() }
+const closePeek = (re = true) => { state.peek = null; if (re) renderPeek() }
+
+// ═══ Cartão ao passar o mouse ═══
+const hc = $('#hc')
+let hcTimer, hcHide, hcFor
+function showHC(el) {
+  const id = el.dataset.user, p = P[id]
+  if (!p || id === 'pedro') return
+  hcFor = id
+  hc.innerHTML = `<div class="hc-top">${AV(id, 'l').replace(`data-user="${id}"`, '')}<span><b>${p.name}</b><small>@${id} · ${p.uf} · nv ${p.lvl}</small></span></div>
+    <div class="hc-mid">${tierDots(id)}<span>${p.stack.slice(0, 2).join(' · ')}</span><span class="xp" style="margin-left:auto">${fmt(p.sxp)} XP</span></div>
+    <div class="hc-acts">${relButtons(id, 'small')}</div>`
+  const rc = el.getBoundingClientRect(), wr = $('.window').getBoundingClientRect()
+  let x = rc.left - wr.left, y = rc.bottom - wr.top + 6
+  if (x + 300 > wr.width) x = wr.width - 300
+  if (y + 170 > wr.height) y = rc.top - wr.top - 170
+  hc.style.left = x + wr.left + 'px'; hc.style.top = y + wr.top + 'px'
+  hc.hidden = false
+}
+function hideHC() { clearTimeout(hcTimer); hc.hidden = true; hcFor = null }
+document.addEventListener('mouseover', (e) => {
+  const el = e.target.closest('[data-user]')
+  if (el && !hc.contains(el)) { clearTimeout(hcHide); clearTimeout(hcTimer); if (hcFor !== el.dataset.user) hcTimer = setTimeout(() => showHC(el), 380) }
+  else if (hc.contains(e.target)) clearTimeout(hcHide)
+})
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest('[data-user]') || hc.contains(e.target)) { clearTimeout(hcTimer); clearTimeout(hcHide); hcHide = setTimeout(hideHC, 220) }
+})
+
+// ═══ Ações ═══
+const toast = (msg) => { const t = $('#toast'); t.innerHTML = `${ic('check-circle')}${msg}`; t.hidden = false; clearTimeout(t._t); t._t = setTimeout(() => (t.hidden = true), 2600) }
+function act(a, id) {
+  const p = P[id]
+  if (a === 'follow') { if (p.rel === 'none') p.rel = 'following'; toast(`Agora você segue ${p.name}. As entregas dele aparecem no seu feed.`) }
+  if (a === 'unfollow') { p.rel = 'none'; toast(`Você deixou de seguir ${p.name}.`) }
+  if (a === 'connect') { p.rel = 'pending'; toast(`Pedido de conexão enviado para ${p.name}.`) }
+  if (a === 'accept') { p.rel = 'connected'; CHATS['dm_' + id] = [[id, '10:58', 'Oi, Pedro! Vi seu PR de OAuth no feed do Rust BR e queria trocar uma ideia sobre renovação de token.']]; toast(`Você e ${p.name} agora são conexões.`); location.hash = `#/mensagens/${id}`; return render() }
+  if (a === 'decline') { p.rel = 'none'; toast('Pedido recusado. O leo não é avisado.'); location.hash = '#/mensagens/ana'; return }
+  if (a === 'dm') { location.hash = `#/mensagens/${id}`; return }
+  if (a === 'pair') toast(`Convite para parear enviado para ${p.name}.`)
+  if (a === 'todo') toast('Fora deste protótipo.')
+  if (a === 'mute') state.call.muted = !state.call.muted
+  if (a === 'leave') { toast(`Você saiu de ${state.call.room}.`); state.call = null }
+  if (a === 'closepeek') return closePeek()
+  render()
+  if (hcFor === id && !hc.hidden) { const el = document.querySelector(`[data-user="${id}"]`); if (el) showHC(el) }
+}
+document.addEventListener('click', (e) => {
+  const t = e.target
+  const btn = t.closest('[data-act]')
+  if (btn) { e.preventDefault(); if (!btn.disabled) act(btn.dataset.act, btn.dataset.id); return }
+  const todo = t.closest('[data-todo]')
+  if (todo) { e.preventDefault(); toast(`${todo.dataset.todo}: fora deste protótipo.`); return }
+  const join = t.closest('[data-join]')
+  if (join) {
+    e.preventDefault()
+    const [ws, room] = join.dataset.join.split('|')
+    if (state.call && state.call.ws === ws && state.call.room === room) return
+    const people = ws === 'patos-dev' ? (room === 'daily' ? ['ana', 'caio', 'lu'] : []) : [ROOMS.find((x) => x.ws === ws)?.host || 'mari']
+    state.call = { ws, room, people, start: Date.now(), muted: ws !== 'patos-dev' }
+    toast(ws === 'patos-dev' ? `Você entrou em ${room}.` : `Você está ouvindo ${room}. Microfone desligado.`)
+    render(); return
+  }
+  const jc = t.closest('[data-joincomm]')
+  if (jc) { const c = COMMS.find((x) => x.id === jc.dataset.joincomm); if (c.access === 'open') { c.joined = true; toast(`Você entrou em ${c.name}.`) } else { jc.disabled = true; jc.textContent = 'Pedido enviado'; return toast(`Pedido enviado para ${c.name}.`) } render(); return }
+  const k = t.closest('[data-kudos]')
+  if (k) { const id = +k.dataset.kudos; kudosOn.has(id) ? kudosOn.delete(id) : kudosOn.add(id); render(); return }
+  const uf = t.closest('[data-uf]')
+  if (uf) { state.mapUf = uf.dataset.uf; if (parse().name !== 'mapa') location.hash = '#/mapa'; else render(); return }
+  const mt = t.closest('[data-metric]')
+  if (mt) { state.mapMetric = mt.dataset.metric; render(); return }
+  const u = t.closest('[data-user]')
+  if (u && !hc.contains(u) && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault(); hideHC()
+    if (u.dataset.user === 'pedro') { location.hash = '#/u/pedro'; return }
+    if (parse().name === 'perfil' && parse().id === u.dataset.user) return
+    openPeek(u.dataset.user); return
+  }
+  if (!t.closest('.bell-wrap')) closeNotifs()
+})
+
+// tooltip dos estados no mapa
+const pxTip = $('#px-tip')
+document.addEventListener('mousemove', (e) => {
+  const t = e.target.closest('[data-tipuf]')
+  if (!t) { pxTip.hidden = true; return }
+  pxTip.textContent = t.dataset.tipuf; pxTip.hidden = false
+  pxTip.style.left = e.clientX + 14 + 'px'; pxTip.style.top = e.clientY + 14 + 'px'
+})
+
+// ═══ Notificações ═══
+const NOTIFS = [
+  ['ana', 'deu parabéns no seu <b>#42</b>', 'há 8 min', '#/feed'],
+  ['leo', 'quer se conectar com você', 'há 20 min', '#/mensagens/leo'],
+  ['pedro', 'Você subiu <b>37 posições</b> no ranking do Brasil: agora é #412', 'hoje', '#/ranking'],
+  ['mari', 'abriu a sala <b>Live: parser em Rust do zero</b>', 'agora', '#/explorar/salas'],
+]
+function openNotifs() {
+  const n = $('#notifs')
+  n.innerHTML = `<h4>Notificações</h4>${NOTIFS.map(([w, t, when, href]) => `<a class="notif" href="${href}">${w === 'pedro' ? `<span class="ava m" style="background:var(--surface)">${ic('trophy')}</span>` : AV(w, 'm')}<span>${w === 'pedro' ? '' : `<b>${P[w].name}</b> `}${t}<small>${when}</small></span></a>`).join('')}`
+  n.hidden = false; $('#bell').setAttribute('aria-expanded', 'true'); $('#bell-dot').hidden = true
+}
+function closeNotifs() { $('#notifs').hidden = true; $('#bell').setAttribute('aria-expanded', 'false') }
+$('#bell').addEventListener('click', (e) => { e.stopPropagation(); $('#notifs').hidden ? openNotifs() : closeNotifs() })
+$('#notifs').addEventListener('click', () => closeNotifs())
+
+// ═══ Ctrl K ═══
+const pal = $('#pal'), palQ = $('#pal-q'), palList = $('#pal-list')
+let palItems = [], palSel = 0
+function palIndex() {
+  const items = []
+  Object.keys(P).filter((id) => id !== 'pedro').forEach((id) => items.push({ g: 'Pessoas', k: '@', label: P[id].name, sub: `${P[id].uf} · nv ${P[id].lvl}`, av: id, href: `#/u/${id}` }))
+  Object.entries(WS).forEach(([id, w]) => w.text.forEach(([c]) => items.push({ g: 'Canais', k: '#', label: `${c}`, sub: w.name, icon: 'hash', href: `#/w/${id}/${c}` })))
+  Object.entries(WS).forEach(([id, w]) => items.push({ g: 'Workspaces e comunidades', k: '>', label: w.name, sub: w.kind, icon: 'users', href: `#/w/${id}` }))
+  COMMS.filter((c) => !WS[c.id]).forEach((c) => items.push({ g: 'Workspaces e comunidades', k: '>', label: c.name, sub: 'comunidade', icon: 'compass', href: '#/explorar/comunidades' }))
+  ;[['Feed', 'home', '#/feed'], ['Explorar', 'compass', '#/explorar'], ['Ranking BR', 'trophy', '#/ranking'], ['Mapa do Brasil', 'map', '#/mapa'], ['Mensagens', 'message', '#/mensagens']].forEach(([l, i, h]) => items.push({ g: 'Telas', k: '', label: l, icon: i, href: h }))
+  ;[['/status focado', 'Pausa notificações por 1 h'], ['/sair da call', 'Sai da call atual'], ['/convidar', 'Convida alguém para o workspace'], ['/parear', 'Chama uma conexão para parear']].forEach(([l, s]) => items.push({ g: 'Comandos', k: '/', label: l, sub: s, icon: 'command', cmd: l }))
+  return items
+}
+function palRender() {
+  const raw = palQ.value.trim()
+  const k = ['@', '#', '>', '/'].includes(raw[0]) ? raw[0] : ''
+  const q = (k ? raw.slice(1) : raw).toLowerCase()
+  palItems = palIndex().filter((it) => (!k || it.k === k) && (!q || (it.label + ' ' + (it.sub || '')).toLowerCase().includes(q)))
+  if (!raw) palItems = palItems.filter((it) => it.g === 'Telas' || (it.g === 'Pessoas' && ['ana', 'mari', 'lu'].includes(it.av)) || it.label === 'auth')
+  palSel = Math.min(palSel, Math.max(0, palItems.length - 1))
+  let g = ''
+  palList.innerHTML = palItems.length ? palItems.map((it, i) => (it.g !== g ? `<div class="pal-group">${(g = it.g)}</div>` : '') + `<button class="pal-item ${i === palSel ? 'on' : ''}" data-i="${i}">${it.av ? AV(it.av, 's').replace(/data-user="[^"]+"/, '') : ic(it.icon)}${it.label}${it.sub ? `<small>${it.sub}</small>` : ''}</button>`).join('') : '<div class="pal-empty">Nada encontrado. Tente @ para pessoas ou &gt; para comunidades.</div>'
+}
+function palGo(i) {
+  const it = palItems[i]; if (!it) return
+  closePal()
+  if (it.cmd === '/sair da call' && state.call) return act('leave')
+  if (it.cmd) return toast(`${it.cmd}: fora deste protótipo.`)
+  location.hash = it.href
+}
+const openPal = () => { pal.hidden = false; palQ.value = ''; palSel = 0; palRender(); palQ.focus() }
+const closePal = () => { pal.hidden = true }
+$('#search-open').addEventListener('click', openPal)
+palQ.addEventListener('input', () => { palSel = 0; palRender() })
+palList.addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (b) palGo(+b.dataset.i) })
+pal.addEventListener('click', (e) => { if (e.target === pal) closePal() })
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal.hidden ? openPal() : closePal(); return }
+  if (!pal.hidden) {
+    if (e.key === 'Escape') closePal()
+    if (e.key === 'ArrowDown') { e.preventDefault(); palSel = Math.min(palSel + 1, palItems.length - 1); palRender() }
+    if (e.key === 'ArrowUp') { e.preventDefault(); palSel = Math.max(palSel - 1, 0); palRender() }
+    if (e.key === 'Enter') { e.preventDefault(); palGo(palSel) }
+    return
+  }
+  if (e.key === 'Escape') { closeNotifs(); closePeek(); hideHC() }
+  if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); history.back() }
+  if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); history.forward() }
+})
+
+// ═══ Roteiro ═══
+const tour = $('#tour')
+const tourSeen = () => { try { return localStorage.getItem('squeak-proto-tour') === '1' } catch { return false } }
+$('#tour-close').addEventListener('click', () => { tour.hidden = true; try { localStorage.setItem('squeak-proto-tour', '1') } catch {} })
+$('#tour-open').addEventListener('click', () => { tour.hidden = !tour.hidden })
+if (!tourSeen() && !new URLSearchParams(location.search).has('semroteiro')) tour.hidden = false
+
+if (!location.hash) history.replaceState(null, '', '#/feed')
+render()
+</script>
+</body>
+</html>
