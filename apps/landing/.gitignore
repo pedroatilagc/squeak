@@ -1,0 +1,9 @@
+node_modules
+dist
+*.tsbuildinfo
+# Fontes do logo e dos avatares (PNGs grandes): ficam no Drive compartilhado, não no Git.
+tools/brand/
+# Imagens geradas para estudo de identidade: nenhum arquivo do código as referencia.
+assets/generated/
+# Cópia idêntica de .claude/ criada pelo `npx skills`; só .claude/ é versionada.
+.agents/

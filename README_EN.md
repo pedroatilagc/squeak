@@ -44,7 +44,7 @@ Sign up, log in and log out with revocable sessions.
 - Who is in a room is shown to other members over WebSocket (`voice.member_joined`, `voice.member_left`, `voice.state_changed`).
 
 ### 6. 🖥️ Screen sharing (integration pending)
-The `COMPARTILHARTELAV2` project already has native Rust capture (Windows Graphics Capture, H.264 and WASAPI audio). The audit and integration plan are in [docs/SCREEN_SHARE_INTEGRATION.md](docs/SCREEN_SHARE_INTEGRATION.md) (Portuguese only). **Not ported yet.**
+The `COMPARTILHARTELAV2` project already has native Rust capture (Windows Graphics Capture, H.264 and WASAPI audio). The audit and integration plan are in [docs/arquitetura/SCREEN_SHARE_INTEGRATION.md](docs/arquitetura/SCREEN_SHARE_INTEGRATION.md) (Portuguese only). **Not ported yet.**
 
 ---
 
@@ -76,11 +76,11 @@ Real screenshots of the interface running against the local API and LiveKit.
 
 <div align="center">
 
-<img src="img/chat.jpg" alt="Channel #geral with a Markdown message, a Python block and a C# block with syntax highlighting" width="800">
+<img src="docs/assets/chat.jpg" alt="Channel #geral with a Markdown message, a Python block and a C# block with syntax highlighting" width="800">
 
 <p><em>Rendered Markdown, a Python block with an explicit language and a C# block detected automatically. The typed <code>&lt;script&gt;</code> shows as text.</em></p>
 
-<img src="img/voz.jpg" alt="Voice room connected to LiveKit with the local participant and the control bar" width="800">
+<img src="docs/assets/voz.jpg" alt="Voice room connected to LiveKit with the local participant and the control bar" width="800">
 
 <p><em>Voice room connected to LiveKit. The test browser blocked the microphone, and the app showed "you joined muted" without disconnecting.</em></p>
 
@@ -105,7 +105,7 @@ Requirements: **Rust** (tested with 1.99), **Node.js** (tested with 24), **podma
 ```powershell
 Copy-Item .env.example .env
 ```
-Edit `.env` and replace `LIVEKIT_API_SECRET` with a long random value. The GitHub integration starts in mock mode (`GITHUB_MOCK=1`); real credentials are described in [docs/GITHUB_INTEGRATION.md](docs/GITHUB_INTEGRATION.md). `.env` is not versioned.
+Edit `.env` and replace `LIVEKIT_API_SECRET` with a long random value. The GitHub integration starts in mock mode (`GITHUB_MOCK=1`); real credentials are described in [docs/arquitetura/GITHUB_INTEGRATION.md](docs/arquitetura/GITHUB_INTEGRATION.md). `.env` is not versioned.
 
 ### 2. Start LiveKit with podman
 ```powershell
@@ -197,22 +197,29 @@ The API tests cover authentication and brute-force lockout, data isolation betwe
 ## 🗂️ Repository Structure
 
 ```text
-services/api/        Axum + SQLx API (auth, servers, messages, realtime, voice)
-  migrations/        SQLite schema
-  tests/             integration tests
+.github/             CI, issue and PR templates, CODEOWNERS
 apps/desktop/        Tauri 2 + React app
   src/               UI (chat, voice, Markdown, WebSocket)
   src-tauri/         Rust core (credentials, open links)
+apps/landing/        landing page (Vite + React), with its own package-lock.json
+services/api/        Axum + SQLx API (auth, servers, messages, realtime, voice)
+  migrations/        SQLite schema
+  tests/             integration tests
+docs/arquitetura/    integrations, redesign and architecture diagrams
+docs/decisoes/       ADRs and prototypes
+docs/produto/        visual identity and landing alignment
+docs/assets/         screenshots used in this README
 scripts/             livekit-up.ps1 (LiveKit via podman)
-docs/                SCREEN_SHARE_INTEGRATION.md
-img/                 screenshots used in this README
+CONTRIBUTING.md      how to run, branches, commits and PRs (Portuguese)
 ```
 
 ---
 
 ## 📚 Documentation
 
-- [Screen sharing audit](docs/SCREEN_SHARE_INTEGRATION.md) (Portuguese only)
+- [Screen sharing audit](docs/arquitetura/SCREEN_SHARE_INTEGRATION.md) (Portuguese only)
+- [How to contribute](CONTRIBUTING.md) (Portuguese only)
+- [Architecture decision records](docs/decisoes/) (Portuguese only)
 - [`.env.example`](.env.example): environment variables
 
 ---

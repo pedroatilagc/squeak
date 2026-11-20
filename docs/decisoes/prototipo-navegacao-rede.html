@@ -10,13 +10,13 @@
 
   Tokens: os mesmos da prévia do ADR 002.
   · apps/desktop/src/design/tokens.css entra primeiro, só pela escala --t-*, a grade --sp-*, --r-1, --r-pill e as medidas de layout.
-  · landing-page/src/styles/tokens.css entra depois e vence nos nomes repetidos.
+  · apps/landing/src/styles/tokens.css entra depois e vence nos nomes repetidos.
   · O bloco tokens-da-revisao repete os tokens novos do ADR 002 que ainda não estão em tokens.css.
   Os três tokens de superfície interativa ainda não têm valor: aqui, hover e selecionado usam superfícies existentes (ver --ui-hover e --ui-selected).
   Todos os dados são fictícios.
 -->
 <link rel="stylesheet" href="../../apps/desktop/src/design/tokens.css" />
-<link rel="stylesheet" href="../../landing-page/src/styles/tokens.css" />
+<link rel="stylesheet" href="../../apps/landing/src/styles/tokens.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
@@ -466,7 +466,7 @@
         <div class="side-body-wrap" style="display:flex;flex-direction:column;flex:1;min-height:0" id="side"></div>
         <div id="dock"></div>
         <div class="userbar">
-          <a class="me" href="#/u/pedro" data-tipless><span class="ava m"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small id="me-status">em call</small></span><span class="xp">nv 7</span></a>
+          <a class="me" href="#/u/pedro" data-tipless><span class="ava m"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small id="me-status">em call</small></span><span class="xp">nv 7</span></a>
           <button class="ibtn" aria-label="Configurações" data-todo="Configurações"><svg class="ic s"><use href="#i-sliders"/></svg></button>
         </div>
       </aside>
@@ -501,7 +501,7 @@
   <div class="hovercard" id="hc" hidden></div>
   <div class="toast" id="toast" hidden></div>
   <aside class="tour" id="tour" hidden>
-    <div class="tour-head"><img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" /><b>O que testar</b><button class="ibtn" id="tour-close" aria-label="Fechar roteiro"><svg class="ic s"><use href="#i-x"/></svg></button></div>
+    <div class="tour-head"><img src="../../apps/landing/public/brand/squeak-logo-256.webp" alt="" /><b>O que testar</b><button class="ibtn" id="tour-close" aria-label="Fechar roteiro"><svg class="ic s"><use href="#i-x"/></svg></button></div>
     <ol>
       <li><b>Passe o mouse</b> no nome ou no avatar de alguém.</li>
       <li><b>Clique numa pessoa:</b> o perfil abre ao lado, sem sair da tela.</li>
@@ -516,8 +516,8 @@
 <div class="px-tip" id="px-tip" hidden></div>
 
 <script>
-const AVA = '../../landing-page/public/avatars/'
-const LOGO = '../../landing-page/public/brand/squeak-logo-256.webp'
+const AVA = '../../apps/landing/public/avatars/'
+const LOGO = '../../apps/landing/public/brand/squeak-logo-256.webp'
 const $ = (s, r = document) => r.querySelector(s)
 const ic = (n, c = 's') => `<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`
 const fmt = (n) => n.toLocaleString('pt-BR')
@@ -602,7 +602,7 @@ function relButtons(id, mode = 'full') {
   return follow + conn + (big ? b('ghost', 'pair', 'Chamar para parear', 'headphones') : '')
 }
 
-// insígnias: mesma geometria de landing-page/src/components/Badge.tsx (como na prévia do ADR 002)
+// insígnias: mesma geometria de apps/landing/src/components/Badge.tsx (como na prévia do ADR 002)
 const GLYPHS = {
   merge: 'M7 4.5a2 2 0 1 0 0 .01M7 19.5a2 2 0 1 0 0 .01M17 12a2 2 0 1 0 0 .01M7 6.5v11M7 8c0 3.5 3 4 8 4',
   eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6',

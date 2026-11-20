@@ -48,17 +48,17 @@ O módulo nativo do `COMPARTILHARTELAV2` foi portado para `apps/desktop/src-taur
 - O app entra na sala como segundo participante `<id>-share`. A API emite para ele um token que só publica `screen_share` e `screen_share_audio`, e só para quem já está na sala.
 - O seletor mostra telas e janelas com miniatura, com qualidade 720p30, 1080p30 ou 1080p60 e modo "movimento" ou "texto".
 - No navegador (dev) o botão cai para `getDisplayMedia`.
-- A auditoria está em [docs/SCREEN_SHARE_INTEGRATION.md](docs/SCREEN_SHARE_INTEGRATION.md). **Compila e a API é testada, mas a transmissão em si ainda não foi testada de ponta a ponta.**
+- A auditoria está em [docs/arquitetura/SCREEN_SHARE_INTEGRATION.md](docs/arquitetura/SCREEN_SHARE_INTEGRATION.md). **Compila e a API é testada, mas a transmissão em si ainda não foi testada de ponta a ponta.**
 
 ### 7. 🧭 Workspace de desenvolvimento (nova navegação)
-Seletor de workspaces com busca e favoritos, barra lateral contextual, paleta de comandos (`Ctrl+K`), painel opcional de membros (`Ctrl+\`) e áreas próprias: **Início**, **Mensagens**, **Chamadas**, **Atividade**, **Pull requests**, **GitHub** e **Integrações**. A chamada continua ligada ao navegar. Auditoria e decisões em [docs/REDESIGN.md](docs/REDESIGN.md).
+Seletor de workspaces com busca e favoritos, barra lateral contextual, paleta de comandos (`Ctrl+K`), painel opcional de membros (`Ctrl+\`) e áreas próprias: **Início**, **Mensagens**, **Chamadas**, **Atividade**, **Pull requests**, **GitHub** e **Integrações**. A chamada continua ligada ao navegar. Auditoria e decisões em [docs/arquitetura/REDESIGN.md](docs/arquitetura/REDESIGN.md).
 
 ### 8. 🐙 Integração com GitHub
 Conexão por **GitHub App + Device Flow** (independente do login do Squak), perfil de desenvolvedor, **calendário de contribuições** com as cores e níveis reais da API GraphQL, timeline de atividade, PRs com revisão e CI separados e feed da equipe alimentado por **webhooks assinados** e idempotentes. Tokens ficam cifrados (AES-256-GCM) no servidor e nunca chegam ao app.
-**Sem credenciais da GitHub App a integração real fica pendente**: veja [docs/GITHUB_INTEGRATION.md](docs/GITHUB_INTEGRATION.md). Com `GITHUB_MOCK=1` o app usa dados simulados, sempre sinalizados na tela.
+**Sem credenciais da GitHub App a integração real fica pendente**: veja [docs/arquitetura/GITHUB_INTEGRATION.md](docs/arquitetura/GITHUB_INTEGRATION.md). Com `GITHUB_MOCK=1` o app usa dados simulados, sempre sinalizados na tela.
 
 ### 9. 🔌 Integrações extensíveis
-Registro de provedores com contrato comum; o Jira está declarado como "planejado" (OAuth 2.0, projetos, issues, responsáveis, status e webhooks) em [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md), sem chamadas reais ainda.
+Registro de provedores com contrato comum; o Jira está declarado como "planejado" (OAuth 2.0, projetos, issues, responsáveis, status e webhooks) em [docs/arquitetura/INTEGRATIONS.md](docs/arquitetura/INTEGRATIONS.md), sem chamadas reais ainda.
 
 ---
 
@@ -90,11 +90,11 @@ Capturas reais da interface rodando contra a API e o LiveKit locais.
 
 <div align="center">
 
-<img src="img/chat.jpg" alt="Canal #geral com mensagem em Markdown, bloco Python e bloco C# com destaque de sintaxe" width="800">
+<img src="docs/assets/chat.jpg" alt="Canal #geral com mensagem em Markdown, bloco Python e bloco C# com destaque de sintaxe" width="800">
 
 <p><em>Markdown renderizado, bloco Python com linguagem explícita e bloco C# detectado automaticamente. O <code>&lt;script&gt;</code> digitado aparece como texto.</em></p>
 
-<img src="img/voz.jpg" alt="Sala de voz conectada ao LiveKit com o participante local e a barra de controles" width="800">
+<img src="docs/assets/voz.jpg" alt="Sala de voz conectada ao LiveKit com o participante local e a barra de controles" width="800">
 
 <p><em>Sala de voz conectada ao LiveKit. O navegador do teste bloqueou o microfone, e o app avisou "Você entrou mudo" sem desconectar.</em></p>
 
@@ -119,7 +119,7 @@ Requisitos: **Rust** (testado com 1.99), **Node.js** (testado com 24), **podman*
 ```powershell
 Copy-Item .env.example .env
 ```
-Edite o `.env` e troque `LIVEKIT_API_SECRET` por um valor longo e aleatório. A integração GitHub vem em modo simulado (`GITHUB_MOCK=1`); as credenciais reais estão descritas em [docs/GITHUB_INTEGRATION.md](docs/GITHUB_INTEGRATION.md). O `.env` não é versionado.
+Edite o `.env` e troque `LIVEKIT_API_SECRET` por um valor longo e aleatório. A integração GitHub vem em modo simulado (`GITHUB_MOCK=1`); as credenciais reais estão descritas em [docs/arquitetura/GITHUB_INTEGRATION.md](docs/arquitetura/GITHUB_INTEGRATION.md). O `.env` não é versionado.
 
 ### 2. Subir o LiveKit com podman
 ```powershell
@@ -211,22 +211,29 @@ Os testes da API cobrem autenticação e bloqueio por força bruta, isolamento d
 ## 🗂️ Estrutura do Repositório
 
 ```text
-services/api/        API Axum + SQLx (auth, servers, messages, realtime, voice)
-  migrations/        esquema SQLite
-  tests/             testes de integração
+.github/             CI, modelos de issue e de PR, CODEOWNERS
 apps/desktop/        app Tauri 2 + React
   src/               interface (chat, voz, Markdown, WebSocket)
   src-tauri/         núcleo Rust (credenciais, abrir links)
+apps/landing/        landing page (Vite + React), com package-lock.json próprio
+services/api/        API Axum + SQLx (auth, servers, messages, realtime, voice)
+  migrations/        esquema SQLite
+  tests/             testes de integração
+docs/arquitetura/    integrações, redesign e diagramas de arquitetura
+docs/decisoes/       ADRs e protótipos
+docs/produto/        identidade visual e alinhamento da landing
+docs/assets/         capturas usadas neste README
 scripts/             livekit-up.ps1 (LiveKit via podman)
-docs/                SCREEN_SHARE_INTEGRATION.md
-img/                 capturas usadas neste README
+CONTRIBUTING.md      como rodar, branches, commits e PRs
 ```
 
 ---
 
 ## 📚 Documentação
 
-- [Auditoria do compartilhamento de tela](docs/SCREEN_SHARE_INTEGRATION.md)
+- [Auditoria do compartilhamento de tela](docs/arquitetura/SCREEN_SHARE_INTEGRATION.md)
+- [Como contribuir](CONTRIBUTING.md)
+- [Decisões de arquitetura (ADRs)](docs/decisoes/)
 - [`.env.example`](.env.example): variáveis de ambiente
 
 ---

@@ -7,12 +7,12 @@
 | **Autores** | Pedro, Samuel |
 | **Revisão** | Samuel, no PR da issue #3 (seção 7) |
 | **Fecha** | issue #3 |
-| **Depende de** | issue #7 (reorganização do repositório), para o pacote `packages/design-tokens` |
+| **Depende de** | Sprint 1, na issue "Aplicar o design system unificado no app", para o pacote `packages/design-tokens` |
 | **Validar na Sprint 1** | pontos 1, 2, 3, 8, 10, 11 e 14, ao aplicar o design system no app (seção 7.3) |
 
 ## Sumário
 
-- **Decisão:** o design system do produto inteiro (app desktop e landing) passa a ser o da landing page (`landing-page/src/styles/tokens.css`).
+- **Decisão:** o design system do produto inteiro (app desktop e landing) passa a ser o da landing page (`apps/landing/src/styles/tokens.css`).
 - **Tema do app:** por enquanto o app desktop usa **só o tema escuro**. O tema claro existe na landing e fica **planejado** para o app, sem data.
 - **O que muda no app:**
   - o acento laranja "brasa" dá lugar ao amarelo do pato;
@@ -24,16 +24,16 @@
   - a escala tipográfica fixa e densa (corpo de 13,5 px);
   - as medidas de layout, os ícones e os componentes de estado.
 - **Revisão:** os 16 pontos em aberto foram decididos pelo Samuel (seção 7). Entram tokens novos: `--text-tertiary`, `--border-control`, três superfícies interativas, `--code-function` e `--code-constant`, e `--gutter` do app vira `--app-gutter`. Sete pontos ficam para validação visual na Sprint 1.
-- **Próximo passo:** aplicar na Sprint 1, na issue "Aplicar o design system unificado no app". Hoje a fonte única é o `tokens.css` da landing. Depois da issue #7, ela vira `packages/design-tokens`.
+- **Próximo passo:** aplicar na Sprint 1, na issue "Aplicar o design system unificado no app". Hoje a fonte única é o `tokens.css` da landing. Na Sprint 1, ela vira `packages/design-tokens`.
 
 **Fontes desta especificação:**
 
 | Arquivo | Uso neste ADR |
 |---|---|
-| `landing-page/src/styles/tokens.css` | Valores de todos os tokens que já existem |
-| `landing-page/docs/brand.md` | Regras de uso |
-| `landing-page/docs/alinhamento.md` | Decisões pendentes |
-| `apps/desktop/src/design/tokens.css` e `docs/REDESIGN.md` | Sistema atual do app, só para comparar e migrar |
+| `apps/landing/src/styles/tokens.css` | Valores de todos os tokens que já existem |
+| `docs/produto/brand.md` | Regras de uso |
+| `docs/produto/alinhamento.md` | Decisões pendentes |
+| `apps/desktop/src/design/tokens.css` e `docs/arquitetura/REDESIGN.md` | Sistema atual do app, só para comparar e migrar |
 | Revisão do Samuel no PR da issue #3 | Decisões e valores dos tokens novos (seção 7) |
 
 Nenhum valor foi inventado. Os tokens novos usam só os valores que a revisão definiu. O que a revisão não definiu aparece como **a definir**.
@@ -46,7 +46,7 @@ Nenhum valor foi inventado. Os tokens novos usam só os valores que a revisão d
 
 Como a prévia foi montada:
 
-- Ela importa por caminho relativo `landing-page/src/styles/tokens.css` e `apps/desktop/src/design/tokens.css`. Do arquivo do app, usa só a escala `--t-*`, a grade `--sp-*`, `--r-1`, as medidas de layout e os tokens antigos do "antes".
+- Ela importa por caminho relativo `apps/landing/src/styles/tokens.css` e `apps/desktop/src/design/tokens.css`. Do arquivo do app, usa só a escala `--t-*`, a grade `--sp-*`, `--r-1`, as medidas de layout e os tokens antigos do "antes".
 - Os tokens novos da revisão ainda não existem em `tokens.css`. Eles ficam num único bloco, `<style id="tokens-da-revisao">`, no topo do HTML: `--text-tertiary`, `--border-control` e `--shadow-pop`. Esse bloco sai do HTML quando os tokens entrarem em `tokens.css`, na Sprint 1.
 - Fora esse bloco, o HTML não tem valor de cor, fonte ou espaço escrito à mão. A única outra cor literal são os dados fictícios do calendário de contribuições, que imitam o que a API do GitHub devolve (seção 7.3, ponto 14). Os hex e as razões de contraste exibidos são lidos do CSS quando a página abre.
 - Ela mostra só o tema escuro.
@@ -108,7 +108,7 @@ A mesma marcação e o mesmo CSS, mudando só o mapa de tokens.
 
 **Hoje existem dois design systems que não conversam.** O app desktop e a landing nasceram em momentos diferentes e tomaram decisões opostas em quase todos os eixos.
 
-| Eixo | App desktop (`apps/desktop/src/design/tokens.css`) | Landing (`landing-page/src/styles/tokens.css`) |
+| Eixo | App desktop (`apps/desktop/src/design/tokens.css`) | Landing (`apps/landing/src/styles/tokens.css`) |
 |---|---|---|
 | Acento | Laranja "brasa" `#ff8a3d`, único | Amarelo do pato `#FFC83D` (primária). O laranja `#FF8A3D` é só progressão. |
 | Fundo e superfícies | Cinza neutro quase preto, de `#0b0d0f` a `#262c33` (5 níveis) | Azul-noite, de `#0F1420` a `#212839` (3 níveis), com borda `#2C3448` |
@@ -135,7 +135,7 @@ A mesma marcação e o mesmo CSS, mudando só o mapa de tokens.
 ## 2. Decisão
 
 1. **O design system do produto inteiro, app desktop e landing, passa a ser o que está hoje na landing page.**
-   - Tokens, regras de uso, tipografia e mascote seguem `landing-page/src/styles/tokens.css` e `landing-page/docs/brand.md`.
+   - Tokens, regras de uso, tipografia e mascote seguem `apps/landing/src/styles/tokens.css` e `docs/produto/brand.md`.
    - O sistema atual do app é substituído. Dele ficam só as ideias que não conflitam com esta decisão (seção 5.4).
    - Os tokens novos que a revisão criou (seção 7) entram primeiro no `tokens.css` da landing, como qualquer cor nova (regra 7 da seção 4).
 2. **Por enquanto, o app desktop terá somente o MODO ESCURO dessa paleta.**
@@ -143,13 +143,13 @@ A mesma marcação e o mesmo CSS, mudando só o mapa de tokens.
    - O tema claro continua na landing e fica documentado como **planejado para o app, sem data** (seção 3.3).
    - O app não implementa troca de tema nesta etapa.
 
-Até existir `packages/design-tokens` (issue #7), **a fonte de verdade é `landing-page/src/styles/tokens.css`**. O app copia os tokens dali e não cria cor própria.
+Até existir `packages/design-tokens` (Sprint 1), **a fonte de verdade é `apps/landing/src/styles/tokens.css`**. O app copia os tokens dali e não cria cor própria.
 
 ---
 
 ## 3. Especificação do design system
 
-Os valores abaixo vêm de `landing-page/src/styles/tokens.css`, exceto os marcados como **novo**, que vêm da revisão (seção 7). As razões de contraste foram **calculadas** a partir dos hex, pela fórmula de luminância relativa da WCAG 2.
+Os valores abaixo vêm de `apps/landing/src/styles/tokens.css`, exceto os marcados como **novo**, que vêm da revisão (seção 7). As razões de contraste foram **calculadas** a partir dos hex, pela fórmula de luminância relativa da WCAG 2.
 
 ### 3.1 Cores de marca
 
@@ -386,7 +386,7 @@ O Squeak é o pato de borracha do time.
 
 ### 3.9 Paleta pixel art do escritório virtual
 
-A paleta existe e fica em `landing-page/src/styles/tokens.css`, nos tokens com prefixo `--px-*`:
+A paleta existe e fica em `apps/landing/src/styles/tokens.css`, nos tokens com prefixo `--px-*`:
 
 - tem 34 cores, de `--px-ink` a `--px-pot`;
 - é derivada da marca;
@@ -595,15 +595,15 @@ O app mantém a ideia de `REDESIGN.md`: **hierarquia por luminosidade, não por 
    - `#0a0d12` e `#11151b` no bloco de código, e `#6e7681` nos números de linha, em `messaging.css`.
 8. **Montar o tema do Shiki** com os tokens `--code-*` (ponto 16).
 9. **Validar em tela os pontos 1, 2, 3, 8, 10, 11 e 14** (seção 7.3), com capturas antes e depois. Conferir também contraste e estados (hover, foco, desabilitado, selecionado) em todas as telas.
-10. **Atualizar `docs/REDESIGN.md`:**
+10. **Atualizar `docs/arquitetura/REDESIGN.md`:**
     - seção 4 "Sistema visual", para apontar para este ADR;
     - o calendário de contribuições, que deixa de usar "as cores/níveis reais da API" e passa à rampa laranja (ponto 14).
 
 ### 6.4 Fonte única futura: `packages/design-tokens`
 
-Este passo depende da reorganização do repositório (issue #7). Até lá, o app copia os tokens da landing à mão, e qualquer mudança precisa ser feita nos dois lugares.
+Este passo fica para a Sprint 1, na issue "Aplicar o design system unificado no app". A reorganização do repositório (issue #7) não cria o pacote. Até lá, o app copia os tokens da landing à mão, e qualquer mudança precisa ser feita nos dois lugares.
 
-Estrutura proposta, quando a issue #7 permitir:
+Estrutura proposta para a Sprint 1:
 
 | Arquivo | Conteúdo | Quem usa |
 |---|---|---|
@@ -638,7 +638,7 @@ O Samuel revisou o ADR no PR da issue #3. Os 16 pontos que estavam em aberto for
 | 11 | Contraste das bordas | Novo `--border-control` `#6B7693`, só em input, select e textarea. | validar na Sprint 1 |
 | 12 | Sombra de popover e modal | Sombra do app com o blur atual (40 px) e anel de 1 px em `--border`. | decidido |
 | 13 | Grão e glow no app | Sem textura de grão. Glow só em recompensa. | decidido |
-| 14 | Calendário de contribuições | Rampa laranja por nível no gráfico de contribuições. Isso altera o `docs/REDESIGN.md`. | validar na Sprint 1 |
+| 14 | Calendário de contribuições | Rampa laranja por nível no gráfico de contribuições. Isso altera o `docs/arquitetura/REDESIGN.md`. | validar na Sprint 1 |
 | 15 | Colisão de nome `--gutter` | A variável do app vira `--app-gutter`. A classe `.gutter` do chat não muda. | decidido |
 | 16 | Tema de sintaxe do código | Tema do Shiki montado com os tokens. Criar ao menos `--code-function` e `--code-constant`. Sem laranja na sintaxe. | decidido |
 
