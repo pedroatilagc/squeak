@@ -12,12 +12,12 @@
   e que ainda não existem em tokens.css. Eles entram lá na Sprint 1, e o bloco sai daqui.
   · apps/desktop/src/design/tokens.css entra PRIMEIRO, só pelo que o ADR mantém do app
     (escala --t-*, grade --sp-*, --r-pill e medidas de layout) e pelos tokens antigos usados no "antes".
-  · landing-page/src/styles/tokens.css entra DEPOIS e vence nos nomes repetidos (--font-display, --gutter).
+  · apps/landing/src/styles/tokens.css entra DEPOIS e vence nos nomes repetidos (--font-display, --gutter).
   Hex e contrastes exibidos na página são lidos do CSS em tempo de execução.
 -->
 <link rel="stylesheet" href="../../apps/desktop/src/design/tokens.css" />
-<link rel="stylesheet" href="../../landing-page/src/styles/tokens.css" />
-<!-- Os mesmos arquivos de fonte que a landing carrega (landing-page/index.html) -->
+<link rel="stylesheet" href="../../apps/landing/src/styles/tokens.css" />
+<!-- Os mesmos arquivos de fonte que a landing carrega (apps/landing/index.html) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
@@ -504,7 +504,7 @@
 
 <main class="page">
   <header class="doc-head">
-    <img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" />
+    <img src="../../apps/landing/public/brand/squeak-logo-256.webp" alt="" />
     <span class="wm"><span class="br">&lt;</span>squeak<span class="br">/&gt;</span></span>
     <div class="doc-title">
       <b>ADR 002 · Design system unificado</b>
@@ -512,7 +512,7 @@
     </div>
     <div class="doc-meta">
       <span class="pill">tema escuro · oficial do app</span>
-      <span class="label">tokens: landing-page/src/styles/tokens.css</span>
+      <span class="label">tokens: apps/landing/src/styles/tokens.css</span>
     </div>
   </header>
 
@@ -721,7 +721,7 @@
   <!-- ═══ d. Mock da tela principal ═══ -->
   <section class="sec" id="app" data-shot="04-app">
     <div class="sec-head">
-      <span class="sec-ref">ADR §5.2 · navegação de docs/REDESIGN.md</span>
+      <span class="sec-ref">ADR §5.2 · navegação de docs/arquitetura/REDESIGN.md</span>
       <h2>Tela principal do app</h2>
       <p>A casca atual do app (barra lateral contextual, topbar com localização e paleta de comandos, folha de conteúdo) com os tokens novos. Dados fictícios.</p>
     </div>
@@ -730,7 +730,7 @@
       <div class="app">
         <aside class="sidebar">
           <div class="sb-top">
-            <div class="switcher"><span class="ws-mark"><img src="../../landing-page/public/brand/squeak-logo-256.webp" alt="" /></span><b>patos-dev</b><svg class="ic s"><use href="#i-chev-down"/></svg></div>
+            <div class="switcher"><span class="ws-mark"><img src="../../apps/landing/public/brand/squeak-logo-256.webp" alt="" /></span><b>patos-dev</b><svg class="ic s"><use href="#i-chev-down"/></svg></div>
             <span class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></span>
           </div>
           <nav class="nav">
@@ -748,9 +748,9 @@
             <div class="chan"><svg class="ic s"><use href="#i-hash"/></svg>code-review</div>
             <div class="cat"><svg class="ic xs"><use href="#i-chev-down"/></svg>Voz</div>
             <div class="chan live"><svg class="ic s"><use href="#i-volume"/></svg>daily</div>
-            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>ana</div>
-            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>caio</div>
-            <div class="vmember"><span class="ava s"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span>lu</div>
+            <div class="vmember"><span class="ava s"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span>ana</div>
+            <div class="vmember"><span class="ava s"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span>caio</div>
+            <div class="vmember"><span class="ava s"><img src="../../apps/landing/public/avatars/lu.webp" alt="" /></span>lu</div>
             <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
           </div>
           <div class="sb-personal nav">
@@ -758,7 +758,7 @@
             <div class="nav-item"><svg class="ic"><use href="#i-plug"/></svg>Integrações</div>
           </div>
           <div class="userbar">
-            <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+            <div class="me"><span class="ava l"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
             <span class="icon-btn"><svg class="ic"><use href="#i-sliders"/></svg></span>
             <span class="icon-btn"><svg class="ic"><use href="#i-logout"/></svg></span>
           </div>
@@ -782,21 +782,21 @@
                     <div class="panel-head"><h3>Atividade da equipe</h3><a class="link" href="#app">Ver tudo</a></div>
                     <ol class="feed">
                       <li class="feed-day">Hoje</li>
-                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-check"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>
+                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-check"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span>
                         <div class="ev-text"><b>ana</b> aprovou <a class="link" href="#app">#42</a> feat(auth): login com GitHub<div class="ev-sub"><span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span></div></div><span class="ev-time">há 2 min</span></li>
-                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-commit"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-commit"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span>
                         <div class="ev-text"><b>pedro</b> enviou 3 commits para <span class="branch">feat/login</span><div class="ev-sub"><span class="hash">a1f3c9e</span> fix(auth): renova o token antes de expirar</div></div><span class="ev-time">há 9 min</span></li>
-                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-activity"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-activity"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span>
                         <div class="ev-text"><b>caio</b> moveu <a class="link" href="#app">#51</a> para <b>Em andamento</b><div class="ev-sub">kanban · sprint 4 · ligado a <a class="link" href="#app">#auth</a></div></div><span class="ev-time">há 14 min</span></li>
-                      <li class="ev"><span class="node pr"><svg class="ic xs"><use href="#i-pr"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>
+                      <li class="ev"><span class="node pr"><svg class="ic xs"><use href="#i-pr"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span>
                         <div class="ev-text"><b>ana</b> pediu 2 mudanças em <a class="link" href="#app">#42</a><div class="ev-sub">“a sessão precisa expirar junto com o token do GitHub”</div></div><span class="ev-time">há 26 min</span></li>
-                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-volume"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span>
+                      <li class="ev"><span class="node ok"><svg class="ic xs"><use href="#i-volume"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/lu.webp" alt="" /></span>
                         <div class="ev-text"><b>lu</b> iniciou uma call em <b>daily</b><div class="ev-sub">3 pessoas · 12 min</div></div><span class="ev-time">há 41 min</span></li>
-                      <li class="ev"><span class="node xp"><svg class="ic xs"><use href="#i-merge"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/bia.webp" alt="" /></span>
+                      <li class="ev"><span class="node xp"><svg class="ic xs"><use href="#i-merge"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/bia.webp" alt="" /></span>
                         <div class="ev-text"><b>bia</b> mergeou <a class="link" href="#app">#39</a> fix(chat): rolagem trava no fim<div class="ev-sub"><span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span class="xp">+120 XP</span></div></div><span class="ev-time">há 1 h</span></li>
-                      <li class="ev"><span class="node gold"><svg class="ic xs"><use href="#i-star"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/bia.webp" alt="" /></span>
+                      <li class="ev"><span class="node gold"><svg class="ic xs"><use href="#i-star"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/bia.webp" alt="" /></span>
                         <div class="ev-text"><b>bia</b> desbloqueou <b>Merge Machine II</b><div class="ev-sub">insígnia ouro · 10 merges revisados</div></div><span class="ev-time">há 1 h</span></li>
-                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-issue"/></svg></span><span class="ava"><img src="../../landing-page/public/avatars/mari.webp" alt="" /></span>
+                      <li class="ev"><span class="node"><svg class="ic xs"><use href="#i-issue"/></svg></span><span class="ava"><img src="../../apps/landing/public/avatars/mari.webp" alt="" /></span>
                         <div class="ev-text"><b>mari</b> abriu a issue <a class="link" href="#app">#57</a> Notificação duplicada no desktop</div><span class="ev-time">há 2 h</span></li>
                     </ol>
                   </div>
@@ -806,15 +806,15 @@
                   <div class="panel">
                     <div class="panel-head"><span class="status"><svg class="ic xs"><use href="#i-pr"/></svg>Aberto</span><span class="label">patos-dev/app</span></div>
                     <div class="pr-title"><h4>feat(auth): login com GitHub <span class="num">#42</span></h4></div>
-                    <div class="pr-refs"><span class="ava s"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span>pedro · 7 commits<span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span>←</span><span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span></div>
+                    <div class="pr-refs"><span class="ava s"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span>pedro · 7 commits<span class="branch is-main"><svg class="ic xs"><use href="#i-branch"/></svg>main</span><span>←</span><span class="branch"><svg class="ic xs"><use href="#i-branch"/></svg>feat/login</span></div>
                     <div class="rows">
                       <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>build<span class="r hash">1m 12s</span></div>
                       <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>testes<span class="r hash">128 passaram</span></div>
                       <div class="rowi"><svg class="ic s"><use href="#i-check-circle"/></svg>lint<span class="r hash">0 avisos</span></div>
                     </div>
                     <div class="rows">
-                      <div class="rowi"><span class="ava s"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span>ana<span class="r" style="color:var(--ui-success)">aprovou</span></div>
-                      <div class="rowi"><span class="ava s"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span>caio<span class="r pending">revisão pendente</span></div>
+                      <div class="rowi"><span class="ava s"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span>ana<span class="r" style="color:var(--ui-success)">aprovou</span></div>
+                      <div class="rowi"><span class="ava s"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span>caio<span class="r pending">revisão pendente</span></div>
                       <div class="rowi"><span class="k">9 arquivos</span><span class="r"><span class="add">+248</span> <span class="del">−31</span></span></div>
                     </div>
                     <div class="pr-actions">
@@ -831,7 +831,7 @@
 
                   <div class="panel">
                     <div class="call"><span class="live-dot"></span><div class="call-txt"><b>daily · em call</b><small>ana, caio e lu · 12 min</small></div>
-                      <span class="stack"><span class="ava"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><span class="ava"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><span class="ava"><img src="../../landing-page/public/avatars/lu.webp" alt="" /></span></span>
+                      <span class="stack"><span class="ava"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span><span class="ava"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span><span class="ava"><img src="../../apps/landing/public/avatars/lu.webp" alt="" /></span></span>
                       <button class="btn secondary">Entrar</button></div>
                   </div>
                 </div>
@@ -891,25 +891,25 @@
         <figure class="vs-col"><figcaption><b>Atual</b><code>--font · Segoe UI Variable Text</code></figcaption>
         <div class="frame theme-new f-segoe"><div class="chat-demo">
           <div class="day">hoje</div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
             <p>Revisei o #42. A sessão precisa expirar junto com o token do GitHub, senão a pessoa continua logada com um token que já morreu.</p></div></div>
           <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Deixei dois comentários no <span class="code-i">useSession.ts</span>, nas linhas 31 e 58.</p></div></div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
             <p>Boa. Vou renovar o token 5 minutos antes de expirar e encerrar a sessão se a renovação falhar.</p></div></div>
           <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Subo em 3 commits ainda hoje. Dá para revisar depois da daily?</p></div></div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
             <p>Eu reviso. Se quiser parear, fico na sala pareamento até as 16h.</p></div></div>
         </div></div></figure>
         <figure class="vs-col"><figcaption><b>Decidido</b><code>--font-body · Geist</code></figcaption>
         <div class="frame theme-new f-geist"><div class="chat-demo">
           <div class="day">hoje</div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/ana.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>ana</b><time>10:42</time></div>
             <p>Revisei o #42. A sessão precisa expirar junto com o token do GitHub, senão a pessoa continua logada com um token que já morreu.</p></div></div>
           <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Deixei dois comentários no <span class="code-i">useSession.ts</span>, nas linhas 31 e 58.</p></div></div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>pedro</b><time>10:47</time></div>
             <p>Boa. Vou renovar o token 5 minutos antes de expirar e encerrar a sessão se a renovação falhar.</p></div></div>
           <div class="msg grouped"><span class="gut"></span><div class="msg-body"><p>Subo em 3 commits ainda hoje. Dá para revisar depois da daily?</p></div></div>
-          <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
+          <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div>
             <p>Eu reviso. Se quiser parear, fico na sala pareamento até as 16h.</p></div></div>
         </div></div></figure>
       </div>
@@ -958,12 +958,12 @@
                 <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
               </div>
               <div class="userbar">
-                <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+                <div class="me"><span class="ava l"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
               </div>
             </aside>
             <div class="main"><div class="sheet-row"><div class="sheet">
               <div class="chat-demo">
-                <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
+                <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
               </div>
               <div class="composer-demo on-elevated">Mensagem em #auth</div>
             </div></div></div>
@@ -979,12 +979,12 @@
                 <div class="chan"><svg class="ic s"><use href="#i-volume"/></svg>pareamento</div>
               </div>
               <div class="userbar">
-                <div class="me"><span class="ava l"><img src="../../landing-page/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
+                <div class="me"><span class="ava l"><img src="../../apps/landing/public/avatars/pedro.webp" alt="" /></span><span><b>pedro</b><small>online</small></span><span class="xp">nv 7</span></div>
               </div>
             </aside>
             <div class="main"><div class="sheet-row"><div class="sheet">
               <div class="chat-demo">
-                <div class="msg"><span class="ava l"><img src="../../landing-page/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
+                <div class="msg"><span class="ava l"><img src="../../apps/landing/public/avatars/caio.webp" alt="" /></span><div class="msg-body"><div class="msg-meta"><b>caio</b><time>10:51</time></div><p>Eu reviso depois da daily.</p></div></div>
               </div>
               <div class="composer-demo on-elevated">Mensagem em #auth</div>
             </div></div></div>
@@ -1071,7 +1071,7 @@
         <div class="frame theme-new"><div class="panel cg-demo"><div class="panel-head"><h3>Contribuições</h3><span class="label">últimos 7 meses · 612</span></div>
           <div data-cg="orange"></div></div></div></figure>
       </div>
-      <div class="vnote"><span>A API devolve a rampa do tema claro do GitHub: no fundo escuro, o nível mais baixo é o mais claro. As cores da esquerda são as do mock do app (<code>services/api/src/github/client/mock.rs:16</code>).</span><span><b>Ilustrativo:</b> a rampa da direita usa <code>--sq-o0…o3</code>, que já existem; os valores finais saem na Sprint 1. A célula vazia usa <code>--border</code> até existir o token de fundo interativo. O contorno da célula selecionada é amarelo, como toda seleção. A troca muda o <code>docs/REDESIGN.md</code>.</span></div>
+      <div class="vnote"><span>A API devolve a rampa do tema claro do GitHub: no fundo escuro, o nível mais baixo é o mais claro. As cores da esquerda são as do mock do app (<code>services/api/src/github/client/mock.rs:16</code>).</span><span><b>Ilustrativo:</b> a rampa da direita usa <code>--sq-o0…o3</code>, que já existem; os valores finais saem na Sprint 1. A célula vazia usa <code>--border</code> até existir o token de fundo interativo. O contorno da célula selecionada é amarelo, como toda seleção. A troca muda o <code>docs/arquitetura/REDESIGN.md</code>.</span></div>
     </article>
   </section>
 </main>
@@ -1155,7 +1155,7 @@
     }
   }
 
-  // insígnias: mesma geometria de landing-page/src/components/Badge.tsx
+  // insígnias: mesma geometria de apps/landing/src/components/Badge.tsx
   const GLYPHS = {
     merge: 'M7 4.5a2 2 0 1 0 0 .01M7 19.5a2 2 0 1 0 0 .01M17 12a2 2 0 1 0 0 .01M7 6.5v11M7 8c0 3.5 3 4 8 4',
     eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6',

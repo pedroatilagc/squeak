@@ -1,0 +1,8 @@
+# Donos de cada parte do repositório. O GitHub pede revisão deles automaticamente nos PRs.
+# Vale a última regra que casar com o caminho.
+
+/apps/landing/            @pedroatilagc
+/docs/                    @pedroatilagc
+
+/services/                @samuelmel
+/apps/desktop/src-tauri/  @samuelmel
